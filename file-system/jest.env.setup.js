@@ -1,0 +1,43 @@
+// jest.env.setup.js
+// Charge automatiquement le fichier .env.test pour les tests
+
+const path = require('path');
+const fs = require('fs');
+
+// Fonction pour charger les variables d'environnement depuis .env.test
+function loadTestEnv() {
+  const envTestPath = path.join(__dirname, '.env.test');
+  
+  if (fs.existsSync(envTestPath)) {
+    const envContent = fs.readFileSync(envTestPath, 'utf8');
+    
+    // Parser le fichier .env.test
+    envContent.split('\n').forEach(line => {
+      const trimmedLine = line.trim();
+      
+      // Ignorer les commentaires et lignes vides
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const [key, ...valueParts] = trimmedLine.split('=');
+        if (key && valueParts.length > 0) {
+          const value = valueParts.join('=').trim();
+          process.env[key.trim()] = value;
+        }
+      }
+    });
+    
+    console.log('✅ Loaded test environment variables from .env.test');
+  } else {
+    console.warn('⚠️ .env.test file not found, using default test environment');
+  }
+}
+
+// Charger les variables d'environnement de test
+loadTestEnv();
+
+// S'assurer que NODE_ENV est défini
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'test';
+}
+
+// Configuration timezone pour tests déterministes
+process.env.TZ = 'UTC';

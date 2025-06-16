@@ -565,6 +565,9 @@ export interface DownloadResult {
  * Options pour la génération d'URLs pré-signées
  */
 export interface PresignedUrlOptions {
+  /** Clé du fichier à cibler */
+  key: string;
+
   /** Type d'opération autorisée */
   operation: 'GET' | 'PUT' | 'DELETE';
   
@@ -623,6 +626,135 @@ export interface DistributionResult {
   
   /** Identifiant de la distribution */
   distributionId: string;
+}
+
+/**
+ * Métadonnées d'un objet pour les opérations de storage bas niveau
+ */
+export interface ObjectMetadata {
+  /** Type MIME du fichier */
+  contentType: string;
+  
+  /** Identifiant du propriétaire */
+  userId: string;
+  
+  /** Identifiant du projet associé (optionnel) */
+  projectId?: string;
+  
+  /** Métadonnées personnalisées arbitraires */
+  customMetadata?: Record<string, string>;
+}
+
+/**
+ * Informations sur un objet stocké (métadonnées sans le contenu)
+ */
+export interface ObjectInfo {
+  /** Clé de l'objet dans le storage */
+  key: string;
+  
+  /** Taille en octets */
+  size: number;
+  
+  /** Type MIME */
+  contentType: string;
+  
+  /** ETag pour l'intégrité */
+  etag: string;
+  
+  /** Date de dernière modification */
+  lastModified: Date;
+  
+  /** Métadonnées personnalisées */
+  customMetadata: Record<string, string>;
+}
+
+/**
+ * Liste d'objets avec pagination (pour listObjects)
+ */
+export interface ObjectList {
+  /** Objets de la page courante */
+  objects: Array<{
+    key: string;
+    size: number;
+    lastModified: Date;
+    etag: string;
+  }>;
+  
+  /** Indique s'il y a plus d'objets */
+  truncated: boolean;
+  
+  /** Token pour la page suivante */
+  nextToken?: string;
+  
+  /** Nombre total d'objets dans cette page */
+  totalCount: number;
+}
+
+/**
+ * Session d'upload multipart pour gros fichiers
+ */
+export interface MultipartUpload {
+  /** Identifiant unique de la session */
+  uploadId: string;
+  
+  /** Clé de l'objet final */
+  key: string;
+  
+  /** Nom du bucket */
+  bucket: string;
+}
+
+/**
+ * Résultat d'upload d'une partie multipart
+ */
+export interface PartUploadResult {
+  /** Numéro de la partie */
+  partNumber: number;
+  
+  /** ETag de la partie */
+  etag: string;
+  
+  /** Taille de la partie */
+  size: number;
+}
+
+/**
+ * Partie complétée pour finaliser un multipart upload
+ */
+export interface CompletedPart {
+  /** Numéro de la partie */
+  partNumber: number;
+  
+  /** ETag de la partie */
+  etag: string;
+  
+  /** Taille de la partie (optionnel) */
+  size?: number;
+}
+
+/**
+ * Résultat d'une opération de copie d'objet
+ */
+export interface CopyResult {
+  /** Clé source */
+  sourceKey: string;
+  
+  /** Clé de destination */
+  destinationKey: string;
+  
+  /** ETag du fichier copié */
+  etag: string;
+  
+  /** Date de dernière modification */
+  lastModified: Date;
+}
+
+/**
+ * Alias pour la compatibilité avec PresignedUrl existant
+ */
+export interface PresignedUrlResult extends PresignedUrl {
+  /** Operation pour compatibilité */
+  operation: string;
 }
 
 // ============================================================================

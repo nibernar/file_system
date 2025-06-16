@@ -13,18 +13,26 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    
     "test:file-system": "jest --config jest.config.file-system.ts",
     "test:file-system:watch": "jest --config jest.config.file-system.ts --watch", 
     "test:file-system:coverage": "jest --config jest.config.file-system.ts --coverage",
-    "test:file-system:config": "jest --config jest.config.file-system.ts --testPathPattern=config",
-    "test:file-system:types": "jest --config jest.config.file-system.ts --testPathPattern=types",
-    "test:file-system:constants": "jest --config jest.config.file-system.ts --testPathPattern=constants",
+    
     "test:file-system:step-1-1": "jest --config jest.config.file-system.ts --testPathPattern='(config|types|constants).*spec.ts$'",
-    "test:watch": "jest --watch",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:file-system:step-1-2": "docker compose -f docker-compose.garage-dev.yml up -d && sleep 15 && jest --config jest.config.file-system.ts --testPathPattern='garage.*spec.ts$'",
+    
+    "garage:setup": "npm run garage:start && sleep 10 && npm run garage:init",
+    "garage:start": "docker compose -f docker-compose.garage-dev.yml up -d",
+    "garage:init": "./init-garage.sh",
+    "garage:stop": "docker compose -f docker-compose.garage-dev.yml down", 
+    "garage:clean": "docker compose -f docker-compose.garage-dev.yml down -v",
+    "garage:logs": "docker compose -f docker-compose.garage-dev.yml logs -f"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

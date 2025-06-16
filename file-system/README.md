@@ -30,20 +30,11 @@ $ npm run test:e2e
 # tests de l'étape 1.1 complète
 npm run test:file-system:step-1-1
 
-# Tests configuration seulement
-npm run test:file-system:config
+# tests de l'étape 1.2 complète
+npm run test:file-system:step-1-2:unit
 
-# Tests types seulement  
-npm run test:file-system:types
-
-# Tests constantes seulement
-npm run test:file-system:constants
-
-# tests avec coverage
-npm run test:file-system:coverage
-
-# tests en mode watch (développement)
-npm run test:file-system:watch
+# pour lancer garage (obligatoir pour tests de l'étape 1.2)
+npm run garage:setup
 ```
 
 ## Deployment
