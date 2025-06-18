@@ -21,6 +21,7 @@ model files {
   checksum_sha256   String    @db.VarChar(255)
   virus_scan_status String?   @default("pending") @db.VarChar(50)
   processing_status String?   @default("pending") @db.VarChar(50)
+  document_type     String?   @default("DOCUMENT") @db.VarChar(50)
   version_count     Int?      @default(1)
   metadata          Json?
   tags              String[]

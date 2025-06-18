@@ -13,6 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
@@ -23,18 +24,23 @@
     "test:file-system:coverage": "jest --config jest.config.file-system.ts --coverage",
     "test:file-system:step-1-1": "jest --config jest.config.file-system.ts --testPathPattern='(config|types|constants).*spec.ts$'",
     "test:file-system:step-1-2": "jest --config jest.config.file-system.ts --testPathPattern='garage.*spec.ts$'",
+
     "dev:setup": "./setup-all.sh",
     "dev:start": "docker compose up -d",
     "dev:stop": "docker compose down",
     "dev:clean": "docker compose down -v",
     "dev:logs": "docker compose logs -f",
     "dev:status": "docker compose ps",
-    "db:migrate": "npx prisma migrate dev",
-    "db:studio": "npx prisma studio",
-    "db:seed": "npx prisma db seed",
+    "dev": "npm run dev:start && npm run start:dev",
+
+    "db:migrate": "prisma migrate dev --schema=src/infrastructure/prisma/schema.prisma",
+    "db:generate": "prisma generate --schema=src/infrastructure/prisma/schema.prisma",
+    "db:push": "prisma db push --schema=src/infrastructure/prisma/schema.prisma",
+    "db:studio": "prisma studio --schema=src/infrastructure/prisma/schema.prisma",
+    "db:reset": "prisma migrate reset --schema=src/infrastructure/prisma/schema.prisma",
+
     "garage:logs": "docker compose logs -f garage",
-    "garage:shell": "docker exec -it garage-dev /bin/sh",
-    "dev": "npm run dev:start && npm run start:dev"
+    "garage:shell": "docker exec -it garage-dev /bin/sh"
   },
   "dependencies": {
     "@nestjs/bull": "^11.0.2",

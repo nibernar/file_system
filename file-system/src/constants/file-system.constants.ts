@@ -378,7 +378,8 @@ export const CACHE_TTL = {
   VERY_LONG: 7 * 24 * 3600,
   
   /** Cache permanent pour contenus immutables (1 an) */
-  PERMANENT: 365 * 24 * 3600
+  PERMANENT: 365 * 24 * 3600,
+  METADATA: 300
 } as const;
 
 /**

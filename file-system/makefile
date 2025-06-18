@@ -5,6 +5,7 @@
 help:
 	@echo "Available commands:"
 	@echo "  make all         - Setup file_system environment"
+	@echo "  make run         - run file_system app..."
 	@echo "  make test        - Run file system tests"
 	@echo "  make clean       - Clean all Docker volumes"
 	@echo "  make fresh-test  - Clean, setup and test"
@@ -12,6 +13,12 @@ help:
 all:
 	@echo "🔧 Setting up file_system environment..."
 	npm run dev:setup
+
+
+run:
+	@echo "🔧 run file_system app..."
+	npm run start:dev 
+
 
 # Lance les tests
 test:

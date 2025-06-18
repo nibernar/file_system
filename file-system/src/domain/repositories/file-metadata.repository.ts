@@ -1,4 +1,5 @@
-import { FileMetadata } from '../../types/file-system.types';
+// src/domain/repositories/file-metadata.repository.ts
+import { FileMetadata, DocumentType } from '../../types/file-system.types';
 
 /**
  * Options de recherche pour les requêtes de métadonnées de fichiers
@@ -19,6 +20,10 @@ export interface FindOptions {
   contentType?: string;
   /** Filtrer par statut de traitement */
   processingStatus?: string;
+  /** Filtrer par type de document */
+  documentType?: DocumentType;
+  /** Filtrer par tags */
+  tags?: string[];
 }
 
 /**
@@ -46,10 +51,12 @@ export interface CreateFileMetadataDto {
   checksumMd5: string;
   /** Checksum SHA256 du fichier */
   checksumSha256: string;
-  /** Métadonnées additionnelles */
-  metadata?: Record<string, any>;
+  /** Type de document */
+  documentType?: DocumentType;
   /** Tags pour l'organisation */
   tags?: string[];
+  /** Métadonnées additionnelles */
+  metadata?: Record<string, any>;
 }
 
 /**
@@ -65,10 +72,12 @@ export interface UpdateFileMetadataDto {
   virusScanStatus?: string;
   /** Statut de traitement */
   processingStatus?: string;
-  /** Métadonnées additionnelles à mettre à jour */
-  metadata?: Record<string, any>;
+  /** Type de document mis à jour */
+  documentType?: DocumentType;
   /** Tags mis à jour */
   tags?: string[];
+  /** Métadonnées additionnelles à mettre à jour */
+  metadata?: Record<string, any>;
   /** Date de suppression (soft delete) */
   deletedAt?: Date;
   /** Compteur de versions */
@@ -90,9 +99,20 @@ export interface StorageUsage {
     size: number;
     count: number;
   }>;
+  /** Répartition par type de document */
+  byDocumentType: Array<{
+    documentType: string;
+    size: number;
+    count: number;
+  }>;
   /** Répartition par statut de traitement */
   byProcessingStatus: Array<{
     status: string;
+    count: number;
+  }>;
+  /** Tags les plus utilisés */
+  topTags: Array<{
+    tag: string;
     count: number;
   }>;
   /** Date du calcul */
@@ -127,7 +147,9 @@ export interface IFileMetadataRepository {
    *   size: 1048576,
    *   storageKey: 'files/user-123/document.pdf',
    *   checksumMd5: 'abc123...',
-   *   checksumSha256: 'def456...'
+   *   checksumSha256: 'def456...',
+   *   documentType: DocumentType.PROJECT_DOCUMENT,
+   *   tags: ['important', 'project-alpha']
    * });
    * ```
    */
@@ -145,6 +167,8 @@ export interface IFileMetadataRepository {
    * const file = await repository.findById('file-123');
    * if (file) {
    *   console.log(`Fichier trouvé: ${file.filename}`);
+   *   console.log(`Type: ${file.documentType}`);
+   *   console.log(`Tags: ${file.tags.join(', ')}`);
    * }
    * ```
    */
@@ -164,7 +188,9 @@ export interface IFileMetadataRepository {
    *   limit: 20,
    *   offset: 0,
    *   sortBy: 'createdAt',
-   *   sortOrder: 'desc'
+   *   sortOrder: 'desc',
+   *   documentType: DocumentType.PROJECT_DOCUMENT,
+   *   tags: ['urgent']
    * });
    * ```
    */
@@ -182,7 +208,8 @@ export interface IFileMetadataRepository {
    * ```typescript
    * const projectFiles = await repository.findByProjectId('project-456', {
    *   contentType: 'application/pdf',
-   *   includeDeleted: false
+   *   includeDeleted: false,
+   *   tags: ['deliverable']
    * });
    * ```
    */
@@ -203,6 +230,8 @@ export interface IFileMetadataRepository {
    * const updated = await repository.update('file-123', {
    *   processingStatus: 'completed',
    *   cdnUrl: 'https://cdn.example.com/file-123',
+   *   documentType: DocumentType.TEMPLATE,
+   *   tags: ['processed', 'ready'],
    *   metadata: { optimized: true }
    * });
    * ```
@@ -265,6 +294,22 @@ export interface IFileMetadataRepository {
   findByChecksum(checksum: string): Promise<FileMetadata[]>;
 
   /**
+   * Recherche des fichiers par tags
+   * 
+   * @param tags - Liste des tags à rechercher
+   * @param matchAll - Si true, tous les tags doivent être présents
+   * @returns Une promesse contenant la liste des fichiers correspondants
+   * @throws {DatabaseError} Si la requête échoue
+   * 
+   * @example
+   * ```typescript
+   * const urgentFiles = await repository.findByTags(['urgent', 'project-alpha'], false);
+   * const criticalFiles = await repository.findByTags(['urgent', 'critical'], true);
+   * ```
+   */
+  findByTags(tags: string[], matchAll?: boolean): Promise<FileMetadata[]>;
+
+  /**
    * Recherche les fichiers en attente de traitement
    * 
    * Utilisé par les workers de traitement pour récupérer
@@ -316,6 +361,7 @@ export interface IFileMetadataRepository {
    * const usage = await repository.getUserStorageUsage('user-123');
    * console.log(`Utilisation totale: ${usage.totalSize} octets`);
    * console.log(`Nombre de fichiers: ${usage.fileCount}`);
+   * console.log(`Tags populaires: ${usage.topTags.map(t => t.tag).join(', ')}`);
    * ```
    */
   getUserStorageUsage(userId: string): Promise<StorageUsage>;
@@ -335,6 +381,9 @@ export interface IFileMetadataRepository {
    * const usage = await repository.getProjectStorageUsage('project-456');
    * for (const typeUsage of usage.byContentType) {
    *   console.log(`${typeUsage.contentType}: ${typeUsage.count} fichiers`);
+   * }
+   * for (const docType of usage.byDocumentType) {
+   *   console.log(`${docType.documentType}: ${docType.count} documents`);
    * }
    * ```
    */
