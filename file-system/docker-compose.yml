@@ -1,0 +1,79 @@
+services:
+  # PostgreSQL pour les métadonnées
+  postgres:
+    image: postgres:15-alpine
+    container_name: coders-files-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: coders_files
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - coders-network
+
+  # Redis pour le cache
+  redis:
+    image: redis:7-alpine
+    container_name: coders-files-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - coders-network
+
+  # Garage S3 pour le stockage
+  garage:
+    image: dxflrs/garage:v1.0.0
+    container_name: garage-dev
+    restart: unless-stopped
+    ports:
+      - "3900:3900"  # Admin API
+      - "3901:3901"  # RPC
+      - "3902:3902"  # S3 API
+    environment:
+      GARAGE_RPC_SECRET: "1799bccfd7411eddcf9ebd316bc1f5287ad12a68094e30c0de809b03923bff9b"
+      GARAGE_RPC_BIND_ADDR: "0.0.0.0:3901"
+      GARAGE_RPC_PUBLIC_ADDR: "garage-dev:3901"  # Utiliser le nom du conteneur
+      GARAGE_ADMIN_TOKEN: "test_admin_token_for_integration_tests_secure"
+    volumes:
+      - garage_data:/var/lib/garage/data
+      - garage_meta:/var/lib/garage/meta
+      - ./garage.toml:/etc/garage.toml:ro
+    healthcheck:
+      test: ["CMD", "/garage", "status"]  # Utiliser la commande garage au lieu de curl
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s  # Donner plus de temps au démarrage
+    networks:
+      - coders-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  garage_data:
+    driver: local
+  garage_meta:
+    driver: local
+
+networks:
+  coders-network:
+    driver: bridge

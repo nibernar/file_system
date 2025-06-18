@@ -1,19 +1,31 @@
+# garage.toml - Configuration Garage pour développement
+
 metadata_dir = "/var/lib/garage/meta"
 data_dir = "/var/lib/garage/data"
 
-replication_mode = "1"  # Single node pour développement
-compression_level = 1
+replication_mode = "none"
 
+# Configuration RPC
 rpc_bind_addr = "0.0.0.0:3901"
-rpc_public_addr = "127.0.0.1:3901"
+rpc_public_addr = "garage-dev:3901"  # Utiliser le nom du conteneur pour la communication interne
 rpc_secret = "1799bccfd7411eddcf9ebd316bc1f5287ad12a68094e30c0de809b03923bff9b"
 
+# Configuration S3 API
 [s3_api]
-s3_region = "garage"
+s3_region = "eu-west-1"
 api_bind_addr = "0.0.0.0:3902"
-root_domain = ".s3.localhost"
 
+# Configuration Admin API
 [admin]
 api_bind_addr = "0.0.0.0:3900"
 admin_token = "test_admin_token_for_integration_tests_secure"
 metrics_token = "test_metrics_token"
+
+# Configuration K2V (optionnel)
+[k2v_api]
+api_bind_addr = "0.0.0.0:3904"
+
+# Configuration web (optionnel)
+[s3_web]
+bind_addr = "0.0.0.0:3903"
+root_domain = ".s3.localhost"

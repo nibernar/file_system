@@ -16,6 +16,21 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
+
+# Premier setup (création des buckets, migrations, etc.)
+npm run dev:setup
+
+# Démarrer les services (si déjà configurés)
+npm run dev:start
+
+# Voir les logs
+npm run dev:logs
+
+# Arrêter tout
+npm run dev:stop
+
+# Nettoyer tout (attention, supprime les données)
+npm run dev:clean
 ```
 
 ## Run tests
@@ -31,10 +46,8 @@ $ npm run test:e2e
 npm run test:file-system:step-1-1
 
 # tests de l'étape 1.2 complète
-npm run test:file-system:step-1-2:unit
+npm run test:file-system:step-1-2
 
-# pour lancer garage (obligatoir pour tests de l'étape 1.2)
-npm run garage:setup
 ```
 
 ## Deployment
@@ -43,36 +56,3 @@ npm run garage:setup
 $ npm install -g @nestjs/mau
 $ mau deploy
 ```
-
-
-
-
-
-
-
-
-## Stratégie de test complète pour la sécurité
-
-# Niveau 1 : Validation basique (✅ Fait actuellement)
-    Extensions de fichiers
-    Types MIME
-    Taille des fichiers
-    Patterns de noms dangereux
-
-# Niveau 2 : Analyse de contenu (❌ Manquant)
-    Signatures de fichiers réelles
-    Détection de contenu caché
-    Analyse des métadonnées
-    Validation de structure
-
-# Niveau 3 : Scan antivirus (❌ Manquant)
-    Intégration ClamAV/Windows Defender
-    Test avec EICAR
-    Gestion des timeouts
-    Fallback si service indisponible
-
-# Niveau 4 : Analyse comportementale (❌ Manquant)
-    Détection d'obfuscation
-    Analyse des scripts embarqués
-    Détection de polyglots
-    Tests de sandboxing

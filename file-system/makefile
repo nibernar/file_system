@@ -1,0 +1,44 @@
+# Makefile pour simplifier les opérations Garage
+
+.PHONY: help test setup clean fresh-test
+
+help:
+	@echo "Available commands:"
+	@echo "  make all         - Setup file_system environment"
+	@echo "  make test        - Run file system tests"
+	@echo "  make clean       - Clean all Docker volumes"
+	@echo "  make fresh-test  - Clean, setup and test"
+
+all:
+	@echo "🔧 Setting up file_system environment..."
+	npm run dev:setup
+
+# Lance les tests
+test:
+	@echo "🧪 Running file system tests..."
+	@chmod +x ./setup-test-garage.sh
+	@./setup-test-garage.sh
+	npm run test:file-system:step-1-1
+	npm run test:file-system:step-1-2
+
+# Nettoie tout
+clean:
+	@echo "🧹 Cleaning Docker environment..."
+	npm run dev:clean
+	
+# Réinitialise tout et lance les tests
+fresh-test: clean
+	@echo "🔄 Starting fresh test environment..."
+	docker compose up -d
+	@sleep 10
+	@$(MAKE) test
+
+
+# Affiche les infos Garage
+garage-info:
+	@echo "📊 Garage Status:"
+	@docker exec garage-dev /garage status
+	@echo "\n📦 Buckets:"
+	@docker exec garage-dev /garage bucket list
+	@echo "\n🔑 Keys:"
+	@docker exec garage-dev /garage key list
