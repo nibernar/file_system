@@ -27,6 +27,7 @@ test:
 	@./setup-test-garage.sh
 	npm run test:file-system:step-1-1
 	npm run test:file-system:step-1-2
+	npm run test:file-system:step-1-3
 
 # Nettoie tout
 clean:

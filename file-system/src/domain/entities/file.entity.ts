@@ -264,17 +264,12 @@ export class File {
    * ```
    */
   canBeAccessedBy(userId: string, operation: FileOperation): boolean {
-    // Le propriétaire a tous les droits
-    if (userId === this.userId) {
-      return true;
-    }
-
     // Fichier supprimé : aucun accès sauf pour le propriétaire
     if (this.metadata.deletedAt) {
-      return false;
+      return userId === this.userId && operation === FileOperation.READ;
     }
 
-    // Fichier infecté : lecture seule pour investigation
+    // Fichier infecté : lecture seule même pour le propriétaire
     if (this.metadata.virusScanStatus === VirusScanStatus.INFECTED) {
       return operation === FileOperation.READ;
     }
@@ -284,8 +279,12 @@ export class File {
       return operation === FileOperation.READ;
     }
 
+    // Le propriétaire a tous les autres droits
+    if (userId === this.userId) {
+      return true;
+    }
+
     // TODO: Implémenter les permissions partagées (RBAC)
-    // Pour l'instant, seul le propriétaire a accès
     return false;
   }
 
