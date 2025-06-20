@@ -24,6 +24,7 @@
     "test:file-system:step-1-1": "jest --config jest.config.file-system.ts --testPathPattern='(config|types|constants).*spec.ts$'",
     "test:file-system:step-1-2": "jest --config jest.config.file-system.ts --testPathPattern='garage.*spec.ts$'",
     "test:file-system:step-1-3": "jest --config jest.config.file-system.ts --testPathPattern='(file\\.entity|file-metadata\\.repository).*spec.ts$'",
+    "test:file-system:step-2-1": "jest --config jest.config.file-system.ts --testPathPattern='(file-security\\.service|virus-scanner\\.service)\\.spec\\.ts$'",
     "dev:setup": "./setup-all.sh",
     "dev:start": "docker compose up -d",
     "dev:stop": "docker compose down",

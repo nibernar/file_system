@@ -1088,3 +1088,92 @@ export const DURATIONS = {
   HOUR: 60 * 60 * 1000,
   DAY: 24 * 60 * 60 * 1000,
 } as const;
+
+// ============================================================================
+// AJOUTS POUR SERVICES SÉCURITÉ - Types manquants seulement
+// ============================================================================
+
+/**
+ * Validation du format de fichier
+ */
+export interface FormatValidation {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  detectedMimeType: string;
+  actualMimeType: string | null;
+  fileSignature: string | null;
+}
+
+/**
+ * Validation du type MIME
+ */
+export interface MimeTypeValidation {
+  valid: boolean;
+  declaredType: string;
+  detectedType: string | null;
+  mismatch: boolean;
+  supportedType: boolean;
+}
+
+/**
+ * Validation du contenu de fichier
+ */
+export interface ContentValidation {
+  safe: boolean;
+  threats: string[];
+  warnings: string[];
+  metadata: Record<string, any>;
+  analysis: Record<string, any>;
+}
+
+/**
+ * Résultat scan antivirus détaillé pour le service
+ */
+export interface VirusScanResult {
+  clean: boolean;
+  threats?: string[];
+  scanId: string;
+  fileHash: string;
+  scanDate: Date;
+  scanDuration: number;
+  scannerVersion: string;
+  attempt?: number;
+  details?: Record<string, any>;
+}
+
+/**
+ * Résultat rate limiting
+ */
+export interface RateLimitResult {
+  allowed: boolean;
+  limit: number;
+  remaining: number;
+  resetTime: Date;
+  retryAfter?: number;
+}
+
+/**
+ * URL pré-signée sécurisée étendue
+ */
+export interface SecurePresignedUrl extends PresignedUrl {
+  restrictions: {
+    ipAddress?: string[];
+    userAgent?: string;
+    operations: string[];
+  };
+  securityToken: string;
+  auditId: string;
+}
+
+/**
+ * Résultat quarantaine fichier
+ */
+export interface QuarantineResult {
+  quarantineId: string;
+  fileId: string;
+  reason: string;
+  threats: string[];
+  quarantineDate: Date;
+  automaticAction: boolean;
+}
