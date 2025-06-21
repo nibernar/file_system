@@ -1,4 +1,4 @@
-import { FileMetadata, ProcessingStatus, VirusScanStatus } from '../../types/file-system.types';
+import { FileMetadata, ProcessingStatus, VirusScanStatus, FileOperation } from '../../types/file-system.types';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -75,28 +75,6 @@ export interface FileAccess {
   result: 'SUCCESS' | 'FAILURE';
   /** Message d'erreur si échec */
   errorMessage?: string;
-}
-
-/**
- * Types d'opérations possibles sur un fichier
- * 
- * @enum FileOperation
- */
-export enum FileOperation {
-  /** Lecture/téléchargement du fichier */
-  READ = 'READ',
-  /** Écriture/modification du fichier */
-  WRITE = 'WRITE',
-  /** Suppression du fichier */
-  DELETE = 'DELETE',
-  /** Partage du fichier */
-  SHARE = 'SHARE',
-  /** Génération d'URL présignée */
-  GENERATE_URL = 'GENERATE_URL',
-  /** Création de version */
-  CREATE_VERSION = 'CREATE_VERSION',
-  /** Restauration de version */
-  RESTORE_VERSION = 'RESTORE_VERSION'
 }
 
 /**
@@ -589,3 +567,6 @@ export class File {
     this._domainEvents.push(event);
   }
 }
+
+export { FileOperation, VirusScanStatus, ProcessingStatus } from '../../types/file-system.types';
+export type { FileMetadata } from '../../types/file-system.types';

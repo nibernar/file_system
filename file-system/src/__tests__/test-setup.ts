@@ -794,5 +794,3 @@ export const testConfig = {
   garageEndpoint: process.env.GARAGE_ENDPOINT || 'https://s3.test.coders.com',
   cdnBaseUrl: process.env.CDN_BASE_URL || 'https://cdn.test.coders.com'
 };
-
-console.log('📋 Test setup completed - C-06 File System ready for Step 1.1 + 1.2 testing');

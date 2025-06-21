@@ -1150,6 +1150,7 @@ export interface RateLimitResult {
   limit: number;
   remaining: number;
   resetTime: Date;
+  resetAt: Date;
   retryAfter?: number;
 }
 
@@ -1176,4 +1177,58 @@ export interface QuarantineResult {
   threats: string[];
   quarantineDate: Date;
   automaticAction: boolean;
+}
+
+/**
+ * Interface pour les informations d'intelligence IP
+ * Utilisée par le middleware de sécurité pour analyser les adresses IP
+ */
+export interface IpIntelligence {
+  /** Adresse IP analysée */
+  ip: string;
+  
+  /** Niveau de menace évalué */
+  threatLevel: 'low' | 'medium' | 'high';
+  
+  /** Détection VPN */
+  isVpn: boolean;
+  
+  /** Détection réseau Tor */
+  isTor: boolean;
+  
+  /** Détection proxy */
+  isProxy: boolean;
+  
+  /** Détection hébergement (datacenter) */
+  isHosting: boolean;
+  
+  /** Code pays ISO 2 lettres */
+  countryCode: string;
+  
+  /** Nom du pays complet */
+  country: string;
+  
+  /** Numéro de système autonome (optionnel) */
+  asn?: string;
+  
+  /** Fournisseur d'accès Internet (optionnel) */
+  isp?: string;
+  
+  /** Date de dernière observation (optionnel) */
+  lastSeen?: Date;
+  
+  /** Score de risque de 0 à 100 (optionnel) */
+  riskScore?: number;
+  
+  /** Détails supplémentaires sur la géolocalisation */
+  geolocation?: {
+    city?: string;
+    region?: string;
+    timezone?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  
+  /** Métadonnées additionnelles */
+  metadata?: Record<string, any>;
 }

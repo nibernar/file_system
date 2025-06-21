@@ -25,6 +25,7 @@
     "test:file-system:step-1-2": "jest --config jest.config.file-system.ts --testPathPattern='garage.*spec.ts$'",
     "test:file-system:step-1-3": "jest --config jest.config.file-system.ts --testPathPattern='(file\\.entity|file-metadata\\.repository).*spec.ts$'",
     "test:file-system:step-2-1": "jest --config jest.config.file-system.ts --testPathPattern='(file-security\\.service|virus-scanner\\.service)\\.spec\\.ts$'",
+    "test:file-system:step-2-2": "jest --config jest.config.file-system.ts --testPathPattern='(file-security\\.middleware|file-access\\.guard|file-audit\\.interceptor)\\.spec\\.ts$'",
     "dev:setup": "./setup-all.sh",
     "dev:start": "docker compose up -d",
     "dev:stop": "docker compose down",
@@ -41,12 +42,14 @@
     "garage:shell": "docker exec -it garage-dev /bin/sh"
   },
   "dependencies": {
+    "@nestjs/axios": "^4.0.0",
     "@nestjs/bull": "^11.0.2",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "axios": "^1.10.0",
     "bull": "^4.16.5",
     "cache-manager": "^7.0.0",
     "cache-manager-redis-store": "^3.0.1",

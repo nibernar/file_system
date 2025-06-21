@@ -229,6 +229,8 @@ export const SECURITY_LIMITS = {
   /** Longueur maximum d'un nom de fichier */
   MAX_FILENAME_LENGTH: 255,
   
+  MAX_REQUEST_SIZE: 10 * 1024 * 1024, // 10MB par défaut
+  
   /** Profondeur maximum pour l'arborescence de stockage */
   MAX_STORAGE_PATH_DEPTH: 10
 } as const;

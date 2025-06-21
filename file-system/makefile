@@ -29,6 +29,7 @@ test:
 	npm run test:file-system:step-1-2
 	npm run test:file-system:step-1-3
 	npm run test:file-system:step-2-1
+	npm run test:file-system:step-2-2
 
 # Nettoie tout
 clean:
