@@ -1,0 +1,819 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Copy/Paste Detector Report</title><link href="styles/tailwind.css" rel="stylesheet"><link href="styles/prism.css" rel="stylesheet"></head><body class="bg-gray-100"><header class="bg-white shadow py-4"><div class="container mx-auto px-4"><h1 class="text-3xl font-semibold text-gray-800">jscpd - copy/paste report</h1></div></header><main class="container mx-auto my-8 p-4 bg-white shadow rounded"><section class="mb-8" id="dashboard"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Dashboard</h2><div class="grid grid-cols-4 gap-4"><div class="bg-blue-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-blue-800 mb-2">Total Files</h3><span class="text-4xl font-bold text-blue-800">56</span></div><div class="bg-green-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-green-800 mb-2">Total Lines of Code</h3><span class="text-4xl font-bold text-green-800">16409</span></div><div class="bg-yellow-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-yellow-800 mb-2">Number of Clones</h3><span class="text-4xl font-bold text-yellow-800">56</span></div><div class="bg-red-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-red-800 mb-2">Duplicated Lines</h3><span class="text-4xl font-bold text-red-800">810 (4.94%)</span></div></div></section><section class="mb-8" id="formats"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Formats with Duplications</h2><table class="w-full table-auto"><thead><tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"><th class="py-3 px-6 text-left">Format</th><th class="py-3 px-6 text-left">Files</th><th class="py-3 px-6 text-left">Lines</th><th class="py-3 px-6 text-left">Clones</th><th class="py-3 px-6 text-left">Duplicated Lines</th><th class="py-3 px-6 text-left">Duplicated Tokens</th></tr></thead><tbody><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#sql-clones">sql</a></td><td class="py-3 px-6">1</td><td class="py-3 px-6">51</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#typescript-clones">typescript</a></td><td class="py-3 px-6">43</td><td class="py-3 px-6">15562</td><td class="py-3 px-6">56</td><td class="py-3 px-6">810</td><td class="py-3 px-6">6272</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#css-clones">css</a></td><td class="py-3 px-6">1</td><td class="py-3 px-6">7</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#javascript-clones">javascript</a></td><td class="py-3 px-6">3</td><td class="py-3 px-6">90</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#json-clones">json</a></td><td class="py-3 px-6">4</td><td class="py-3 px-6">148</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#bash-clones">bash</a></td><td class="py-3 px-6">2</td><td class="py-3 px-6">419</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#yaml-clones">yaml</a></td><td class="py-3 px-6">1</td><td class="py-3 px-6">78</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#markdown-clones">markdown</a></td><td class="py-3 px-6">1</td><td class="py-3 px-6">54</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr></tbody></table></section><section class="mb-8" id="txt-clones"><a name="sql-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">sql</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="typescript-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">typescript</h2><div class="divide-y divide-gray-200 border-b-2"><div class="py-4"><p class="text-gray-600">src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 293:58 - Line 307:6), src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 147:66 - Line 161:5)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn0" onclick="toggleCodeBlock('cloneGroup0', 'expandBtn0', 'collapseBtn0')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn0" onclick="toggleCodeBlock('cloneGroup0', 'expandBtn0', 'collapseBtn0')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup0"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      // Arrange
+      const mockIpIntelligence: IpIntelligence = {
+        ip: '192.168.1.100',
+        threatLevel: 'low',
+        isVpn: false,
+        isTor: false,
+        isProxy: false,
+        isHosting: false,
+        countryCode: 'FR',
+        country: 'France',
+      };
+
+      const mockRateLimitResult: RateLimitResult = {
+        allowed: false</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 309:2 - Line 318:16), src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 163:3 - Line 171:21)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn1" onclick="toggleCodeBlock('cloneGroup1', 'expandBtn1', 'collapseBtn1')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn1" onclick="toggleCodeBlock('cloneGroup1', 'expandBtn1', 'collapseBtn1')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup1"><code class="language-typescript text-sm text-gray-800">,
+        resetTime: new Date(Date.now() + 3600000),
+        resetAt: new Date(Date.now() + 3600000),
+      };
+
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);
+      mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
+
+      // Act &amp; Assert</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 335:59 - Line 369:21), src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 147:66 - Line 181:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn2" onclick="toggleCodeBlock('cloneGroup2', 'expandBtn2', 'collapseBtn2')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn2" onclick="toggleCodeBlock('cloneGroup2', 'expandBtn2', 'collapseBtn2')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup2"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      // Arrange
+      const mockIpIntelligence: IpIntelligence = {
+        ip: '192.168.1.100',
+        threatLevel: 'low',
+        isVpn: false,
+        isTor: false,
+        isProxy: false,
+        isHosting: false,
+        countryCode: 'FR',
+        country: 'France',
+      };
+
+      const mockRateLimitResult: RateLimitResult = {
+        allowed: true,
+        limit: 100,
+        remaining: 95,
+        resetTime: new Date(Date.now() + 3600000),
+        resetAt: new Date(Date.now() + 3600000),
+      };
+
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);
+      mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
+      mockRateLimitService.incrementCounter.mockResolvedValue();
+
+      // Act
+      await middleware.use(
+        mockRequest as any,
+        mockResponse as Response,
+        mockNext
+      );
+
+      // Assert
+      expect(mockRateLimitService</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 403:11 - Line 417:2), src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 383:10 - Line 400:8)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn3" onclick="toggleCodeBlock('cloneGroup3', 'expandBtn3', 'collapseBtn3')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn3" onclick="toggleCodeBlock('cloneGroup3', 'expandBtn3', 'collapseBtn3')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup3"><code class="language-typescript text-sm text-gray-800">;
+
+      // Act
+      await middleware.use(
+        mockRequest as any,
+        mockResponse as Response,
+        mockNext
+      );
+
+      // Assert
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockIpIntelligenceService.getIpIntelligence).not.toHaveBeenCalled();
+      expect(mockRateLimitService.checkLimit).not.toHaveBeenCalled();
+    });
+  }</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 63:3 - Line 76:2), src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 36:3 - Line 49:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn4" onclick="toggleCodeBlock('cloneGroup4', 'expandBtn4', 'collapseBtn4')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn4" onclick="toggleCodeBlock('cloneGroup4', 'expandBtn4', 'collapseBtn4')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup4"><code class="language-typescript text-sm text-gray-800">user?: {
+    id: string;
+    email?: string;
+    roles?: string[];
+    isAdmin?: boolean;
+  };
+  security?: {
+    clientIp: string;
+    threatLevel: 'low' | 'medium' | 'high';
+    isVpn: boolean;
+    isTor: boolean;
+    country: string;
+  };
+}</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 293:2 - Line 308:7), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 267:9 - Line 283:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn5" onclick="toggleCodeBlock('cloneGroup5', 'expandBtn5', 'collapseBtn5')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn5" onclick="toggleCodeBlock('cloneGroup5', 'expandBtn5', 'collapseBtn5')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup5"><code class="language-typescript text-sm text-gray-800">}));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      expect</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 338:10 - Line 349:8), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 215:17 - Line 226:3)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn6" onclick="toggleCodeBlock('cloneGroup6', 'expandBtn6', 'collapseBtn6')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn6" onclick="toggleCodeBlock('cloneGroup6', 'expandBtn6', 'collapseBtn6')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup6"><code class="language-typescript text-sm text-gray-800">);
+            resolve();
+          },
+        });
+      });
+
+      // Assert
+      expect(mockAuditService.logFileOperation).toHaveBeenCalledTimes(1);
+      
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent).toMatchObject({
+        success</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 393:18 - Line 407:92), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 362:15 - Line 376:10)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn7" onclick="toggleCodeBlock('cloneGroup7', 'expandBtn7', 'collapseBtn7')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn7" onclick="toggleCodeBlock('cloneGroup7', 'expandBtn7', 'collapseBtn7')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup7"><code class="language-typescript text-sm text-gray-800">));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          error: () =&gt; resolve(),
+        });
+      });
+
+      // Assert - Vérifier que logSecurityEvent a été appelé ou au moins vérifier le comportement</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 423:10 - Line 438:7), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 362:15 - Line 377:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn8" onclick="toggleCodeBlock('cloneGroup8', 'expandBtn8', 'collapseBtn8')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn8" onclick="toggleCodeBlock('cloneGroup8', 'expandBtn8', 'collapseBtn8')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup8"><code class="language-typescript text-sm text-gray-800">));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          error: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      expect</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 453:7 - Line 469:7), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 293:7 - Line 284:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn9" onclick="toggleCodeBlock('cloneGroup9', 'expandBtn9', 'collapseBtn9')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn9" onclick="toggleCodeBlock('cloneGroup9', 'expandBtn9', 'collapseBtn9')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup9"><code class="language-typescript text-sm text-gray-800">mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.fileId</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 478:2 - Line 495:17), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 452:2 - Line 469:17)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn10" onclick="toggleCodeBlock('cloneGroup10', 'expandBtn10', 'collapseBtn10')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn10" onclick="toggleCodeBlock('cloneGroup10', 'expandBtn10', 'collapseBtn10')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup10"><code class="language-typescript text-sm text-gray-800">};
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.fileId).toBe('query-file-456'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 508:7 - Line 525:18), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 452:2 - Line 469:17)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn11" onclick="toggleCodeBlock('cloneGroup11', 'expandBtn11', 'collapseBtn11')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn11" onclick="toggleCodeBlock('cloneGroup11', 'expandBtn11', 'collapseBtn11')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup11"><code class="language-typescript text-sm text-gray-800">};
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.fileId).toBe('header-file-789'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 535:2 - Line 552:14), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 452:2 - Line 469:5)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn12" onclick="toggleCodeBlock('cloneGroup12', 'expandBtn12', 'collapseBtn12')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn12" onclick="toggleCodeBlock('cloneGroup12', 'expandBtn12', 'collapseBtn12')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup12"><code class="language-typescript text-sm text-gray-800">};
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.fileId).toBeUndefined</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 578:2 - Line 595:7), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 452:2 - Line 284:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn13" onclick="toggleCodeBlock('cloneGroup13', 'expandBtn13', 'collapseBtn13')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn13" onclick="toggleCodeBlock('cloneGroup13', 'expandBtn13', 'collapseBtn13')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup13"><code class="language-typescript text-sm text-gray-800">;
+        mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+        // Act
+        const result$ = interceptor.intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler
+        );
+
+        await new Promise&lt;void&gt;((resolve) =&gt; {
+          result$.subscribe({
+            complete: () =&gt; resolve(),
+          });
+        });
+
+        // Assert
+        const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+        expect(auditEvent.action</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 608:2 - Line 625:32), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 578:2 - Line 595:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn14" onclick="toggleCodeBlock('cloneGroup14', 'expandBtn14', 'collapseBtn14')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn14" onclick="toggleCodeBlock('cloneGroup14', 'expandBtn14', 'collapseBtn14')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup14"><code class="language-typescript text-sm text-gray-800">});
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.action).toBe('CUSTOMCONTROLLER_CUSTOMMETHOD'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 640:5 - Line 658:10), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 507:18 - Line 284:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn15" onclick="toggleCodeBlock('cloneGroup15', 'expandBtn15', 'collapseBtn15')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn15" onclick="toggleCodeBlock('cloneGroup15', 'expandBtn15', 'collapseBtn15')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup15"><code class="language-typescript text-sm text-gray-800">,
+      };
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.ipAddress</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 669:15 - Line 687:15), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 507:18 - Line 658:14)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn16" onclick="toggleCodeBlock('cloneGroup16', 'expandBtn16', 'collapseBtn16')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn16" onclick="toggleCodeBlock('cloneGroup16', 'expandBtn16', 'collapseBtn16')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup16"><code class="language-typescript text-sm text-gray-800">,
+      };
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.ipAddress).toBe('198.51.100.1'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 697:2 - Line 714:16), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 452:2 - Line 658:14)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn17" onclick="toggleCodeBlock('cloneGroup17', 'expandBtn17', 'collapseBtn17')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn17" onclick="toggleCodeBlock('cloneGroup17', 'expandBtn17', 'collapseBtn17')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup17"><code class="language-typescript text-sm text-gray-800">};
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.ipAddress).toBe('192.168.1.200'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 725:7 - Line 744:12), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 668:28 - Line 284:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn18" onclick="toggleCodeBlock('cloneGroup18', 'expandBtn18', 'collapseBtn18')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn18" onclick="toggleCodeBlock('cloneGroup18', 'expandBtn18', 'collapseBtn18')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup18"><code class="language-typescript text-sm text-gray-800">,
+        'user-agent': 'Test Browser',
+      };
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.requestSize</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 753:2 - Line 770:16), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 452:2 - Line 744:5)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn19" onclick="toggleCodeBlock('cloneGroup19', 'expandBtn19', 'collapseBtn19')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn19" onclick="toggleCodeBlock('cloneGroup19', 'expandBtn19', 'collapseBtn19')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup19"><code class="language-typescript text-sm text-gray-800">};
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.requestSize).toBeGreaterThan</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 782:13 - Line 798:13), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 267:2 - Line 284:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn20" onclick="toggleCodeBlock('cloneGroup20', 'expandBtn20', 'collapseBtn20')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn20" onclick="toggleCodeBlock('cloneGroup20', 'expandBtn20', 'collapseBtn20')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup20"><code class="language-typescript text-sm text-gray-800">));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      expect(auditEvent.responseSize</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 843:57 - Line 861:6), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 291:62 - Line 284:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn21" onclick="toggleCodeBlock('cloneGroup21', 'expandBtn21', 'collapseBtn21')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn21" onclick="toggleCodeBlock('cloneGroup21', 'expandBtn21', 'collapseBtn21')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup21"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      // Arrange
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert
+      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
+      const</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 909:7 - Line 924:75), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 578:2 - Line 282:10)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn22" onclick="toggleCodeBlock('cloneGroup22', 'expandBtn22', 'collapseBtn22')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn22" onclick="toggleCodeBlock('cloneGroup22', 'expandBtn22', 'collapseBtn22')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup22"><code class="language-typescript text-sm text-gray-800">);
+      mockCallHandler.handle.mockReturnValue(of({ success: true }));
+
+      // Act
+      const result$ = interceptor.intercept(
+        mockExecutionContext as ExecutionContext,
+        mockCallHandler
+      );
+
+      await new Promise&lt;void&gt;((resolve) =&gt; {
+        result$.subscribe({
+          complete: () =&gt; resolve(),
+        });
+      });
+
+      // Assert - Vérifier que logFileOperation a été tenté (même s'il a échoué)</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 28:1 - Line 42:7), src/presentation/middleware/__tests__/file-security.middleware.spec.ts (Line 35:1 - Line 49:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn23" onclick="toggleCodeBlock('cloneGroup23', 'expandBtn23', 'collapseBtn23')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn23" onclick="toggleCodeBlock('cloneGroup23', 'expandBtn23', 'collapseBtn23')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup23"><code class="language-typescript text-sm text-gray-800">interface TestAuthenticatedRequest {
+  user?: {
+    id: string;
+    email?: string;
+    roles?: string[];
+    isAdmin?: boolean;
+  };
+  security?: {
+    clientIp: string;
+    threatLevel: 'low' | 'medium' | 'high';
+    isVpn: boolean;
+    isTor: boolean;
+    country: string;
+  };
+  params</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 292:2 - Line 302:21), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn24" onclick="toggleCodeBlock('cloneGroup24', 'expandBtn24', 'collapseBtn24')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn24" onclick="toggleCodeBlock('cloneGroup24', 'expandBtn24', 'collapseBtn24')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup24"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        'extracted-file-123'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 313:2 - Line 323:17), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn25" onclick="toggleCodeBlock('cloneGroup25', 'expandBtn25', 'collapseBtn25')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn25" onclick="toggleCodeBlock('cloneGroup25', 'expandBtn25', 'collapseBtn25')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup25"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        'generic-id-456'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 334:2 - Line 344:17), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn26" onclick="toggleCodeBlock('cloneGroup26', 'expandBtn26', 'collapseBtn26')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn26" onclick="toggleCodeBlock('cloneGroup26', 'expandBtn26', 'collapseBtn26')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup26"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        'query-file-789'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 356:2 - Line 366:16), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 227:2 - Line 237:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn27" onclick="toggleCodeBlock('cloneGroup27', 'expandBtn27', 'collapseBtn27')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn27" onclick="toggleCodeBlock('cloneGroup27', 'expandBtn27', 'collapseBtn27')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup27"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.WRITE);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        'body-file-101'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 380:7 - Line 390:18), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn28" onclick="toggleCodeBlock('cloneGroup28', 'expandBtn28', 'collapseBtn28')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn28" onclick="toggleCodeBlock('cloneGroup28', 'expandBtn28', 'collapseBtn28')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup28"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        'header-file-202'</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 423:2 - Line 433:10), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn29" onclick="toggleCodeBlock('cloneGroup29', 'expandBtn29', 'collapseBtn29')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn29" onclick="toggleCodeBlock('cloneGroup29', 'expandBtn29', 'collapseBtn29')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup29"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        validUuid</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 445:2 - Line 455:9), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn30" onclick="toggleCodeBlock('cloneGroup30', 'expandBtn30', 'collapseBtn30')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn30" onclick="toggleCodeBlock('cloneGroup30', 'expandBtn30', 'collapseBtn30')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup30"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        customId</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 467:2 - Line 477:9), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn31" onclick="toggleCodeBlock('cloneGroup31', 'expandBtn31', 'collapseBtn31')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn31" onclick="toggleCodeBlock('cloneGroup31', 'expandBtn31', 'collapseBtn31')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup31"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        simpleId</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 516:2 - Line 527:2), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 496:2 - Line 510:8)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn32" onclick="toggleCodeBlock('cloneGroup32', 'expandBtn32', 'collapseBtn32')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn32" onclick="toggleCodeBlock('cloneGroup32', 'expandBtn32', 'collapseBtn32')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup32"><code class="language-typescript text-sm text-gray-800">};
+        mockReflector.get.mockReturnValue(FileOperation.READ);
+
+        // Act &amp; Assert
+        await expect(
+          guard.canActivate(mockExecutionContext as ExecutionContext)
+        ).rejects.toThrow(BadRequestException);
+      }
+      
+      expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();
+    });
+  }</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 535:2 - Line 545:22), src/presentation/guards/__tests__/file-access.guard.spec.ts (Line 206:2 - Line 216:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn33" onclick="toggleCodeBlock('cloneGroup33', 'expandBtn33', 'collapseBtn33')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn33" onclick="toggleCodeBlock('cloneGroup33', 'expandBtn33', 'collapseBtn33')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup33"><code class="language-typescript text-sm text-gray-800">};
+      mockReflector.get.mockReturnValue(FileOperation.READ);
+      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
+
+      // Act
+      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
+        'accessible-file-123'</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 125:39 - Line 133:16), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 110:28 - Line 118:12)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn34" onclick="toggleCodeBlock('cloneGroup34', 'expandBtn34', 'collapseBtn34')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn34" onclick="toggleCodeBlock('cloneGroup34', 'expandBtn34', 'collapseBtn34')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup34"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      // Arrange
+      configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true; // Activer le scan
+        return defaultValue;
+      });
+      // CORRECTION: Créer une nouvelle instance de service avec la config mise à jour
+      const localService = new VirusScannerService(configService);
+      const oversizedBuffer</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 196:7 - Line 205:45), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 87:7 - Line 95:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn35" onclick="toggleCodeBlock('cloneGroup35', 'expandBtn35', 'collapseBtn35')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn35" onclick="toggleCodeBlock('cloneGroup35', 'expandBtn35', 'collapseBtn35')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup35"><code class="language-typescript text-sm text-gray-800">configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true;
+        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;
+        if (key === 'VIRUS_SCAN_RETRIES') return 2;
+        return defaultValue;
+      });
+
+      const serviceWithEnabledScanning = new VirusScannerService(configService);
+      
+      // Simuler un header PE (Windows executable)</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 266:59 - Line 276:22), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 194:60 - Line 95:14)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn36" onclick="toggleCodeBlock('cloneGroup36', 'expandBtn36', 'collapseBtn36')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn36" onclick="toggleCodeBlock('cloneGroup36', 'expandBtn36', 'collapseBtn36')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup36"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      // Arrange - Activer le scan
+      configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true;
+        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;
+        if (key === 'VIRUS_SCAN_RETRIES') return 2;
+        return defaultValue;
+      });
+
+      const serviceWithEnabledScanning = new VirusScannerService(configService);
+      const maliciousScriptBuffer</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 290:7 - Line 297:19), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 87:7 - Line 94:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn37" onclick="toggleCodeBlock('cloneGroup37', 'expandBtn37', 'collapseBtn37')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn37" onclick="toggleCodeBlock('cloneGroup37', 'expandBtn37', 'collapseBtn37')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup37"><code class="language-typescript text-sm text-gray-800">configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true;
+        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;
+        if (key === 'VIRUS_SCAN_RETRIES') return 2;
+        return defaultValue;
+      });
+
+      const serviceWithRetries</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 318:7 - Line 327:7), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 87:7 - Line 95:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn38" onclick="toggleCodeBlock('cloneGroup38', 'expandBtn38', 'collapseBtn38')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn38" onclick="toggleCodeBlock('cloneGroup38', 'expandBtn38', 'collapseBtn38')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup38"><code class="language-typescript text-sm text-gray-800">configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true;
+        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;
+        if (key === 'VIRUS_SCAN_RETRIES') return 2;
+        return defaultValue;
+      });
+
+      const serviceWithEnabledScanning = new VirusScannerService(configService);
+
+      // Act</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 336:61 - Line 345:25), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 194:60 - Line 94:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn39" onclick="toggleCodeBlock('cloneGroup39', 'expandBtn39', 'collapseBtn39')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn39" onclick="toggleCodeBlock('cloneGroup39', 'expandBtn39', 'collapseBtn39')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup39"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      // Arrange - Activer le scan
+      configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true;
+        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;
+        if (key === 'VIRUS_SCAN_RETRIES') return 2;
+        return defaultValue;
+      });
+
+      const serviceWithBrokenScanner</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 369:7 - Line 376:24), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 87:7 - Line 94:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn40" onclick="toggleCodeBlock('cloneGroup40', 'expandBtn40', 'collapseBtn40')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn40" onclick="toggleCodeBlock('cloneGroup40', 'expandBtn40', 'collapseBtn40')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup40"><code class="language-typescript text-sm text-gray-800">configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true;
+        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;
+        if (key === 'VIRUS_SCAN_RETRIES') return 2;
+        return defaultValue;
+      });
+
+      const serviceWithErrorScanner</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 431:45 - Line 442:10), src/infrastructure/security/__tests__/virus-scanner.service.spec.ts (Line 194:60 - Line 95:14)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn41" onclick="toggleCodeBlock('cloneGroup41', 'expandBtn41', 'collapseBtn41')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn41" onclick="toggleCodeBlock('cloneGroup41', 'expandBtn41', 'collapseBtn41')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup41"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      // Arrange - Activer le scan
+      configService.get.mockImplementation((key: string, defaultValue?: any) =&gt; {
+        if (key === 'SCAN_VIRUS_ENABLED') return true;
+        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;
+        if (key === 'VIRUS_SCAN_RETRIES') return 2;
+        return defaultValue;
+      });
+
+      const serviceWithEnabledScanning = new VirusScannerService(configService);
+      
+      const testFiles</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 335:22 - Line 351:10), src/domain/services/__tests__/file-security.service.spec.ts (Line 158:18 - Line 173:46)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn42" onclick="toggleCodeBlock('cloneGroup42', 'expandBtn42', 'collapseBtn42')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn42" onclick="toggleCodeBlock('cloneGroup42', 'expandBtn42', 'collapseBtn42')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup42"><code class="language-typescript text-sm text-gray-800">,
+        actualMimeType: null,
+        fileSignature: null,
+      });
+
+      fileValidator.validateContent.mockResolvedValue({
+        safe: true,
+        threats: [],
+        warnings: [],
+        metadata: {},
+        analysis: {},
+      });
+
+      rateLimitService.checkLimit.mockResolvedValue({
+        allowed: true,
+        limit: 20,
+        remaining</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 372:15 - Line 391:11), src/domain/services/__tests__/file-security.service.spec.ts (Line 199:15 - Line 218:16)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn43" onclick="toggleCodeBlock('cloneGroup43', 'expandBtn43', 'collapseBtn43')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn43" onclick="toggleCodeBlock('cloneGroup43', 'expandBtn43', 'collapseBtn43')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup43"><code class="language-typescript text-sm text-gray-800">presignedUrlExpiry: 1800,
+              maxPresignedUrls: 5,
+              ipRestrictionEnabled: false,
+              rateLimitUploadsPerMinute: 20,
+              abuseBlockDuration: 60,
+              deviceFingerprintingEnabled: false,
+              securityTokenSecret: 'test_security_token_secret_with_minimum_32_characters_length',
+            },
+            processing: {
+              maxFileSize: 10485760,
+              allowedMimeTypes: ['image/jpeg', 'application/pdf', 'text/plain'],
+              virusScanTimeout: 5000,
+            },
+          };
+        }
+        return null;
+      });
+
+      const file: UploadFileDto = {
+        filename: 'test.pdf'</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 394:2 - Line 416:13), src/domain/services/__tests__/file-security.service.spec.ts (Line 149:10 - Line 171:17)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn44" onclick="toggleCodeBlock('cloneGroup44', 'expandBtn44', 'collapseBtn44')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn44" onclick="toggleCodeBlock('cloneGroup44', 'expandBtn44', 'collapseBtn44')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup44"><code class="language-typescript text-sm text-gray-800">,
+        documentType: DocumentType.DOCUMENT,
+      };
+      const userId = generateTestUUID(true);
+
+      fileValidator.validateFormat.mockResolvedValue({
+        valid: true,
+        errors: [],
+        warnings: [],
+        detectedMimeType: 'application/pdf',
+        actualMimeType: null,
+        fileSignature: null,
+      });
+
+      fileValidator.validateContent.mockResolvedValue({
+        safe: true,
+        threats: [],
+        warnings: [],
+        metadata: {},
+        analysis: {},
+      });
+
+      virusScanner</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 403:18 - Line 416:18), src/domain/services/__tests__/file-security.service.spec.ts (Line 230:27 - Line 243:18)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn45" onclick="toggleCodeBlock('cloneGroup45', 'expandBtn45', 'collapseBtn45')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn45" onclick="toggleCodeBlock('cloneGroup45', 'expandBtn45', 'collapseBtn45')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup45"><code class="language-typescript text-sm text-gray-800">,
+        actualMimeType: null,
+        fileSignature: null,
+      });
+
+      fileValidator.validateContent.mockResolvedValue({
+        safe: true,
+        threats: [],
+        warnings: [],
+        metadata: {},
+        analysis: {},
+      });
+
+      virusScanner.scanFile.mockRejectedValue</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 441:32 - Line 456:6), src/domain/services/__tests__/file-security.service.spec.ts (Line 282:7 - Line 297:5)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn46" onclick="toggleCodeBlock('cloneGroup46', 'expandBtn46', 'collapseBtn46')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn46" onclick="toggleCodeBlock('cloneGroup46', 'expandBtn46', 'collapseBtn46')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup46"><code class="language-typescript text-sm text-gray-800">),
+        documentType: DocumentType.DOCUMENT,
+      };
+      const userId = generateTestUUID(true);
+
+      fileValidator.validateFormat.mockResolvedValue({
+        valid: true,
+        errors: [],
+        warnings: [],
+        detectedMimeType: 'text/plain',
+        actualMimeType: null,
+        fileSignature: null,
+      });
+
+      fileValidator.validateContent.mockResolvedValue({
+        safe: false</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 466:3 - Line 475:19), src/domain/services/__tests__/file-security.service.spec.ts (Line 351:3 - Line 360:15)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn47" onclick="toggleCodeBlock('cloneGroup47', 'expandBtn47', 'collapseBtn47')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn47" onclick="toggleCodeBlock('cloneGroup47', 'expandBtn47', 'collapseBtn47')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup47"><code class="language-typescript text-sm text-gray-800">,
+        resetTime: new Date(Date.now() + 60000),
+      });
+
+      // Act
+      const result = await service.validateFileUpload(file, userId);
+
+      // Assert
+      expect(result.passed).toBe(false);
+      expect(result.threats).toContain(SecurityThreat.SUSPICIOUS_CONTENT</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 492:17 - Line 510:3), src/domain/services/__tests__/file-security.service.spec.ts (Line 156:2 - Line 351:3)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn48" onclick="toggleCodeBlock('cloneGroup48', 'expandBtn48', 'collapseBtn48')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn48" onclick="toggleCodeBlock('cloneGroup48', 'expandBtn48', 'collapseBtn48')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup48"><code class="language-typescript text-sm text-gray-800">],
+        warnings: [],
+        detectedMimeType: 'application/pdf',
+        actualMimeType: null,
+        fileSignature: null,
+      });
+
+      fileValidator.validateContent.mockResolvedValue({
+        safe: true,
+        threats: [],
+        warnings: [],
+        metadata: {},
+        analysis: {},
+      });
+
+      rateLimitService.checkLimit.mockResolvedValue({
+        allowed: true,
+        limit: 20,
+        remaining: 20</code></pre></div><div class="py-4"><p class="text-gray-600">src/domain/services/__tests__/file-security.service.spec.ts (Line 692:7 - Line 705:26), src/domain/services/__tests__/file-security.service.spec.ts (Line 621:7 - Line 635:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn49" onclick="toggleCodeBlock('cloneGroup49', 'expandBtn49', 'collapseBtn49')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn49" onclick="toggleCodeBlock('cloneGroup49', 'expandBtn49', 'collapseBtn49')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup49"><code class="language-typescript text-sm text-gray-800">};
+
+      fileMetadataService.getFileMetadata.mockResolvedValue({
+        id: fileId,
+        userId: userId,
+        filename: 'test.pdf',
+        contentType: 'application/pdf',
+        size: 1024,
+        storageKey: storageKey,
+      });
+
+      storageService.generatePresignedUrl.mockResolvedValue({
+        url: 'https://s3.test.coders.com/test-coders-documents/files/test.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Expires=1800',
+        expiresAt: new Date(Date.now() + 1800000), // Limité à 1800 secondes</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/file-audit.interceptor.ts (Line 18:1 - Line 38:4), src/presentation/middleware/file-security.middleware.ts (Line 27:1 - Line 47:4)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn50" onclick="toggleCodeBlock('cloneGroup50', 'expandBtn50', 'collapseBtn50')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn50" onclick="toggleCodeBlock('cloneGroup50', 'expandBtn50', 'collapseBtn50')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup50"><code class="language-typescript text-sm text-gray-800">interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email?: string;
+    roles?: string[];
+    isAdmin?: boolean;
+  };
+  
+  // Métadonnées de sécurité ajoutées par le middleware
+  security?: {
+    clientIp: string;
+    threatLevel: 'low' | 'medium' | 'high';
+    isVpn: boolean;
+    isTor: boolean;
+    country: string;
+  };
+}
+
+/**
+ * Interface pour les événements d'audit des fichiers
+ */</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/interceptors/file-audit.interceptor.ts (Line 39:1 - Line 66:4), src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts (Line 24:1 - Line 51:4)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn51" onclick="toggleCodeBlock('cloneGroup51', 'expandBtn51', 'collapseBtn51')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn51" onclick="toggleCodeBlock('cloneGroup51', 'expandBtn51', 'collapseBtn51')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup51"><code class="language-typescript text-sm text-gray-800">interface FileAuditEvent {
+  id: string;
+  fileId?: string;
+  userId?: string;
+  action: string;
+  method: string;
+  endpoint: string;
+  timestamp: Date;
+  ipAddress: string;
+  userAgent: string;
+  duration: number;
+  success: boolean;
+  statusCode: number;
+  errorMessage?: string;
+  requestSize?: number;
+  responseSize?: number;
+  securityContext?: {
+    threatLevel: string;
+    isVpn: boolean;
+    isTor: boolean;
+    country: string;
+  };
+  additionalMetadata?: Record&lt;string, any&gt;;
+}
+
+/**
+ * Interface pour le service d'audit (injecté via DI)
+ */</code></pre></div><div class="py-4"><p class="text-gray-600">src/presentation/guards/file-access.guard.ts (Line 17:1 - Line 40:4), src/presentation/middleware/file-security.middleware.ts (Line 24:1 - Line 47:4)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn52" onclick="toggleCodeBlock('cloneGroup52', 'expandBtn52', 'collapseBtn52')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn52" onclick="toggleCodeBlock('cloneGroup52', 'expandBtn52', 'collapseBtn52')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup52"><code class="language-typescript text-sm text-gray-800">/**
+ * Interface pour étendre Request avec les informations utilisateur
+ */
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email?: string;
+    roles?: string[];
+    isAdmin?: boolean;
+  };
+  
+  // Métadonnées de sécurité ajoutées par le middleware
+  security?: {
+    clientIp: string;
+    threatLevel: 'low' | 'medium' | 'high';
+    isVpn: boolean;
+    isTor: boolean;
+    country: string;
+  };
+}
+
+/**
+ * Interface pour le résultat de vérification d'accès
+ */</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/persistence/file-metadata.repository.impl.ts (Line 189:10 - Line 203:6), src/infrastructure/persistence/file-metadata.repository.impl.ts (Line 139:7 - Line 153:42)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn53" onclick="toggleCodeBlock('cloneGroup53', 'expandBtn53', 'collapseBtn53')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn53" onclick="toggleCodeBlock('cloneGroup53', 'expandBtn53', 'collapseBtn53')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup53"><code class="language-typescript text-sm text-gray-800">: string, options: FindOptions = {}): Promise&lt;FileMetadata[]&gt; {
+    const {
+      limit = 20,
+      offset = 0,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      includeDeleted = false,
+      contentType,
+      processingStatus,
+      documentType,
+      tags
+    } = options;
+    
+    try {
+      const</code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/persistence/file-metadata.repository.impl.ts (Line 214:11 - Line 228:35), src/infrastructure/persistence/file-metadata.repository.impl.ts (Line 167:11 - Line 181:32)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn54" onclick="toggleCodeBlock('cloneGroup54', 'expandBtn54', 'collapseBtn54')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn54" onclick="toggleCodeBlock('cloneGroup54', 'expandBtn54', 'collapseBtn54')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup54"><code class="language-typescript text-sm text-gray-800">}
+        })
+      };
+      
+      const files = await this.prisma.files.findMany({
+        where,
+        orderBy: { [sortField]: sortOrder },
+        take: limit,
+        skip: offset
+      });
+      
+      return files.map(file =&gt; this.mapToFileMetadata(file));
+      
+    } catch (error) {
+      this.logger.error(`Failed to find files for project </code></pre></div><div class="py-4"><p class="text-gray-600">src/infrastructure/persistence/file-metadata.repository.impl.ts (Line 563:9 - Line 587:6), src/infrastructure/persistence/file-metadata.repository.impl.ts (Line 472:9 - Line 496:24)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn55" onclick="toggleCodeBlock('cloneGroup55', 'expandBtn55', 'collapseBtn55')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn55" onclick="toggleCodeBlock('cloneGroup55', 'expandBtn55', 'collapseBtn55')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup55"><code class="language-typescript text-sm text-gray-800">fileCount: totalStats._count,
+        byContentType: byContentType.map(item =&gt; ({
+          contentType: item.content_type,
+          size: Number(item._sum.size || 0),
+          count: item._count
+        })),
+        // ✅ NOUVEAU: Ajout byDocumentType
+        byDocumentType: byDocType.map(item =&gt; ({
+          documentType: item.document_type || 'unknown',
+          size: Number(item._sum.size || 0),
+          count: item._count
+        })),
+        byProcessingStatus: byStatus.map(item =&gt; ({
+          status: item.processing_status || 'unknown',
+          count: item._count
+        })),
+        // ✅ NOUVEAU: Ajout topTags
+        topTags: tagStats.map(item =&gt; ({
+          tag: item.tag,
+          count: Number(item.count)
+        })),
+        calculatedAt: new Date()
+      };
+      
+      await</code></pre></div><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="css-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">css</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="javascript-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">javascript</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="json-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">json</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="bash-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">bash</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="yaml-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">yaml</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="markdown-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">markdown</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div></section><!-- Add more sections for other formats and clone groups as needed--></main><footer class="bg-white shadow mt-8 py-4"><div class="container mx-auto px-4 text-center"><p class="text-sm text-gray-600">This report is generated by jscpd, an open-source copy/paste detector.</p><p class="text-sm text-gray-600">jscpd is licensed under the MIT License.</p><a class="text-blue-500 text-sm" href="https://github.com/kucherenko/jscpd" target="_blank" rel="noopener noreferrer">View jscpd on GitHub</a></div></footer><script src="js/prism.js"></script><script>function toggleCodeBlock(codeBlockId, expandBtnId, collapseBtnId) {
+  const codeBlock = document.getElementById(codeBlockId);
+  const expandBtn = document.getElementById(expandBtnId);
+  const collapseBtn = document.getElementById(collapseBtnId);
+
+  codeBlock.classList.toggle('hidden');
+  expandBtn.classList.toggle('hidden');
+  collapseBtn.classList.toggle('hidden');
+}</script></body></html>

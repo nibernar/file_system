@@ -1232,3 +1232,124 @@ export interface IpIntelligence {
   /** Métadonnées additionnelles */
   metadata?: Record<string, any>;
 }
+
+/**
+ * Options avancées de versioning pour les fichiers
+ */
+export interface VersionOptions {
+  createVersion: boolean;
+  versionComment?: string;
+  keepOldVersions: boolean;
+  maxVersions?: number;
+  changeType: VersionChangeType;
+  namingStrategy?: 'sequential' | 'timestamp' | 'semantic';
+  // NOUVELLES PROPRIÉTÉS
+  description?: string;
+  userId?: string;
+}
+
+/**
+ * Résultat d'un job dans la queue de traitement
+ */
+export interface QueueJobResult {
+  jobId: string | number;
+  status: ProcessingJobStatus;
+  result?: ProcessingResult;
+  error?: string;
+  progress: number;
+  startedAt?: Date;
+  completedAt?: Date;
+  duration?: number;
+  metadata?: Record<string, any>;
+  // NOUVELLE PROPRIÉTÉ
+  estimatedDuration?: number;
+}
+
+/**
+ * Données spécifiques pour les jobs de traitement
+ */
+export interface ProcessingJobData extends ProcessingJob {
+  fileData?: {
+    buffer: Buffer;
+    metadata: FileMetadata;
+  };
+  runtimeConfig?: ServiceRuntimeConfig;
+  executionContext?: {
+    workerId: string;
+    nodeId: string;
+    environment: string;
+  };
+  progressCallback?: (progress: number) => void;
+  // NOUVELLES PROPRIÉTÉS
+  userId?: string;
+  reason?: string;
+}
+
+/**
+ * Options étendues de traitement avec configuration avancée
+ */
+export interface ExtendedProcessingOptions extends ProcessingOptions {
+  retryConfig?: {
+    maxAttempts: number;
+    backoffMs: number;
+    exponentialBackoff: boolean;
+  };
+  timeout?: number;
+  priority?: number;
+  debug?: boolean;
+  webhook?: {
+    url: string;
+    headers?: Record<string, string>;
+  };
+  typeSpecific?: {
+    image?: {
+      preserveExif?: boolean;
+      autoOrient?: boolean;
+      progressive?: boolean;
+    };
+    pdf?: {
+      linearize?: boolean;
+      removeMetadata?: boolean;
+      flattenForms?: boolean;
+    };
+    document?: {
+      detectEncoding?: boolean;
+      normalizeLineEndings?: boolean;
+    };
+  };
+  userId?: string;
+  reason?: string;
+}
+
+/**
+ * DTO pour mise à jour des métadonnées d'un fichier
+ */
+export interface UpdateFileMetadataDto {
+  filename?: string;
+  tags?: string[];
+  documentType?: DocumentType;
+  projectId?: string;
+  customMetadata?: Record<string, any>;
+  force?: boolean;
+  // NOUVELLE PROPRIÉTÉ
+  processingStatus?: ProcessingStatus;
+}
+
+/**
+ * Résultat de génération de miniature
+ */
+export interface ThumbnailResult {
+  url: string;
+  storageKey: string;
+  width: number;
+  height: number;
+  format: ImageFormat;
+  size: number;
+  generationTime: number;
+  quality: number;
+}
+
+/**
+ * Référence à la configuration du système (évite duplication)
+ */
+export type FileSystemConfig = import('../config/file-system.config').FileSystemConfig;

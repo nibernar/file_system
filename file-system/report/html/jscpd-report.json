@@ -1,0 +1,2838 @@
+{
+  "statistics": {
+    "detectionDate": "2025-06-21T10:19:26.167Z",
+    "formats": {
+      "sql": {
+        "sources": {
+          "src/infrastructure/prisma/migrations/0_init/migration.sql": {
+            "lines": 51,
+            "tokens": 431,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 51,
+          "tokens": 431,
+          "sources": 1,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "typescript": {
+        "sources": {
+          "src/presentation/middleware/__tests__/file-security.middleware.spec.ts": {
+            "lines": 491,
+            "tokens": 3213,
+            "sources": 1,
+            "clones": 10,
+            "duplicatedLines": 169,
+            "duplicatedTokens": 1250,
+            "percentage": 34.42,
+            "percentageTokens": 38.9,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts": {
+            "lines": 930,
+            "tokens": 6879,
+            "sources": 1,
+            "clones": 38,
+            "duplicatedLines": 628,
+            "duplicatedTokens": 4767,
+            "percentage": 67.53,
+            "percentageTokens": 69.3,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/guards/__tests__/file-access.guard.spec.ts": {
+            "lines": 648,
+            "tokens": 4225,
+            "sources": 1,
+            "clones": 21,
+            "duplicatedLines": 216,
+            "duplicatedTokens": 1695,
+            "percentage": 33.33,
+            "percentageTokens": 40.12,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts": {
+            "lines": 476,
+            "tokens": 4564,
+            "sources": 1,
+            "clones": 16,
+            "duplicatedLines": 140,
+            "duplicatedTokens": 1608,
+            "percentage": 29.41,
+            "percentageTokens": 35.23,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/persistence/__tests__/file-metadata.repository.spec.ts": {
+            "lines": 271,
+            "tokens": 2435,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/garage/__tests__/garage-storage.service.spec.ts": {
+            "lines": 689,
+            "tokens": 5648,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/garage/__tests__/garage-storage.integration.spec.ts": {
+            "lines": 664,
+            "tokens": 6499,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/domain/services/__tests__/file-security.service.spec.ts": {
+            "lines": 778,
+            "tokens": 5920,
+            "sources": 1,
+            "clones": 16,
+            "duplicatedLines": 250,
+            "duplicatedTokens": 1698,
+            "percentage": 32.13,
+            "percentageTokens": 28.68,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/domain/entities/__tests__/file.entity.spec.ts": {
+            "lines": 144,
+            "tokens": 1433,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/types/__tests__/file-system.types.spec.ts": {
+            "lines": 758,
+            "tokens": 5654,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/middleware/file-security.middleware.ts": {
+            "lines": 332,
+            "tokens": 2296,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 43,
+            "duplicatedTokens": 234,
+            "percentage": 12.95,
+            "percentageTokens": 10.19,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/interceptors/file-audit.interceptor.ts": {
+            "lines": 734,
+            "tokens": 3992,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 47,
+            "duplicatedTokens": 288,
+            "percentage": 6.4,
+            "percentageTokens": 7.21,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/guards/file-access.guard.ts": {
+            "lines": 409,
+            "tokens": 2304,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 23,
+            "duplicatedTokens": 118,
+            "percentage": 5.62,
+            "percentageTokens": 5.12,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/decorators/file-operation.decorator.ts": {
+            "lines": 27,
+            "tokens": 71,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/controllers/test-files.controller.ts": {
+            "lines": 123,
+            "tokens": 685,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/security/virus-scanner.service.ts": {
+            "lines": 370,
+            "tokens": 2877,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/security/rate-limit.service.ts": {
+            "lines": 238,
+            "tokens": 1675,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/security/ip-intelligence.service.ts": {
+            "lines": 412,
+            "tokens": 2701,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/security/file-validator.service.ts": {
+            "lines": 605,
+            "tokens": 4828,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/prisma/prisma.service.ts": {
+            "lines": 24,
+            "tokens": 202,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/prisma/prisma.module.ts": {
+            "lines": 9,
+            "tokens": 70,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/persistence/persistence.module.ts": {
+            "lines": 22,
+            "tokens": 154,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/persistence/file-metadata.repository.impl.ts": {
+            "lines": 657,
+            "tokens": 5258,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 104,
+            "duplicatedTokens": 886,
+            "percentage": 15.83,
+            "percentageTokens": 16.85,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/garage/garage.module.ts": {
+            "lines": 76,
+            "tokens": 299,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/infrastructure/garage/garage-storage.interface.ts": {
+            "lines": 136,
+            "tokens": 453,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/domain/services/file-security.service.ts": {
+            "lines": 512,
+            "tokens": 4226,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/domain/repositories/file-metadata.repository.ts": {
+            "lines": 390,
+            "tokens": 916,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/domain/entities/file.entity.ts": {
+            "lines": 571,
+            "tokens": 2815,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/constants/__tests__/file-system.constants.spec.ts": {
+            "lines": 642,
+            "tokens": 5168,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/config/__tests__/file-system.config.spec.ts": {
+            "lines": 502,
+            "tokens": 3827,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/presentation/presentation.module.ts": {
+            "lines": 80,
+            "tokens": 555,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/exceptions/file-system.exceptions.ts": {
+            "lines": 380,
+            "tokens": 2140,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/constants/file-system.constants.ts": {
+            "lines": 782,
+            "tokens": 3817,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/config/file-system.config.ts": {
+            "lines": 613,
+            "tokens": 4078,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/test-setup.ts": {
+            "lines": 795,
+            "tokens": 5442,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "test/app.e2e-spec.ts": {
+            "lines": 24,
+            "tokens": 225,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/test-file.service.ts": {
+            "lines": 26,
+            "tokens": 190,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main.ts": {
+            "lines": 7,
+            "tokens": 79,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app.service.ts": {
+            "lines": 7,
+            "tokens": 46,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app.module.ts": {
+            "lines": 28,
+            "tokens": 228,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app.controller.ts": {
+            "lines": 38,
+            "tokens": 286,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app.controller.spec.ts": {
+            "lines": 21,
+            "tokens": 199,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "jest.config.file-system.ts": {
+            "lines": 121,
+            "tokens": 555,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 15562,
+          "tokens": 109127,
+          "sources": 43,
+          "clones": 56,
+          "duplicatedLines": 810,
+          "duplicatedTokens": 6272,
+          "percentage": 5.2,
+          "percentageTokens": 5.75,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "css": {
+        "sources": {
+          "report/html/styles/prism.css": {
+            "lines": 7,
+            "tokens": 232,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 7,
+          "tokens": 232,
+          "sources": 1,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "javascript": {
+        "sources": {
+          "report/html/js/prism.js": {
+            "lines": 15,
+            "tokens": 4580,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "jest.env.setup.js": {
+            "lines": 42,
+            "tokens": 320,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "eslint.config.mjs": {
+            "lines": 33,
+            "tokens": 199,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 90,
+          "tokens": 5099,
+          "sources": 3,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "json": {
+        "sources": {
+          "test/jest-e2e.json": {
+            "lines": 8,
+            "tokens": 53,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tsconfig.json": {
+            "lines": 22,
+            "tokens": 143,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "package.json": {
+            "lines": 111,
+            "tokens": 724,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "nest-cli.json": {
+            "lines": 7,
+            "tokens": 38,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 148,
+          "tokens": 958,
+          "sources": 4,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "bash": {
+        "sources": {
+          "setup-test-garage.sh": {
+            "lines": 164,
+            "tokens": 1018,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "setup-all.sh": {
+            "lines": 255,
+            "tokens": 1932,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 419,
+          "tokens": 2950,
+          "sources": 2,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "yaml": {
+        "sources": {
+          "docker-compose.yml": {
+            "lines": 78,
+            "tokens": 464,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 78,
+          "tokens": 464,
+          "sources": 1,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "markdown": {
+        "sources": {
+          "README.md": {
+            "lines": 54,
+            "tokens": 150,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 54,
+          "tokens": 150,
+          "sources": 1,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 16409,
+      "tokens": 119411,
+      "sources": 56,
+      "clones": 56,
+      "duplicatedLines": 810,
+      "duplicatedTokens": 6272,
+      "percentage": 4.94,
+      "percentageTokens": 5.25,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ", async () => {\n      // Arrange\n      const mockIpIntelligence: IpIntelligence = {\n        ip: '192.168.1.100',\n        threatLevel: 'low',\n        isVpn: false,\n        isTor: false,\n        isProxy: false,\n        isHosting: false,\n        countryCode: 'FR',\n        country: 'France',\n      };\n\n      const mockRateLimitResult: RateLimitResult = {\n        allowed: false",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 293,
+        "end": 307,
+        "startLoc": {
+          "line": 293,
+          "column": 58,
+          "position": 1887
+        },
+        "endLoc": {
+          "line": 307,
+          "column": 6,
+          "position": 1990
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 147,
+        "end": 161,
+        "startLoc": {
+          "line": 147,
+          "column": 66,
+          "position": 924
+        },
+        "endLoc": {
+          "line": 161,
+          "column": 5,
+          "position": 1027
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ",\n        resetTime: new Date(Date.now() + 3600000),\n        resetAt: new Date(Date.now() + 3600000),\n      };\n\n      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);\n      mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);\n      mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);\n\n      // Act & Assert",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 309,
+        "end": 318,
+        "startLoc": {
+          "line": 309,
+          "column": 2,
+          "position": 2005
+        },
+        "endLoc": {
+          "line": 318,
+          "column": 16,
+          "position": 2087
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 163,
+        "end": 171,
+        "startLoc": {
+          "line": 163,
+          "column": 3,
+          "position": 1042
+        },
+        "endLoc": {
+          "line": 171,
+          "column": 21,
+          "position": 1123
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 35,
+      "fragment": ", async () => {\n      // Arrange\n      const mockIpIntelligence: IpIntelligence = {\n        ip: '192.168.1.100',\n        threatLevel: 'low',\n        isVpn: false,\n        isTor: false,\n        isProxy: false,\n        isHosting: false,\n        countryCode: 'FR',\n        country: 'France',\n      };\n\n      const mockRateLimitResult: RateLimitResult = {\n        allowed: true,\n        limit: 100,\n        remaining: 95,\n        resetTime: new Date(Date.now() + 3600000),\n        resetAt: new Date(Date.now() + 3600000),\n      };\n\n      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);\n      mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);\n      mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);\n      mockRateLimitService.incrementCounter.mockResolvedValue();\n\n      // Act\n      await middleware.use(\n        mockRequest as any,\n        mockResponse as Response,\n        mockNext\n      );\n\n      // Assert\n      expect(mockRateLimitService",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 335,
+        "end": 369,
+        "startLoc": {
+          "line": 335,
+          "column": 59,
+          "position": 2193
+        },
+        "endLoc": {
+          "line": 369,
+          "column": 21,
+          "position": 2443
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 147,
+        "end": 181,
+        "startLoc": {
+          "line": 147,
+          "column": 66,
+          "position": 924
+        },
+        "endLoc": {
+          "line": 181,
+          "column": 9,
+          "position": 1174
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ";\n\n      // Act\n      await middleware.use(\n        mockRequest as any,\n        mockResponse as Response,\n        mockNext\n      );\n\n      // Assert\n      expect(mockNext).toHaveBeenCalledTimes(1);\n      expect(mockIpIntelligenceService.getIpIntelligence).not.toHaveBeenCalled();\n      expect(mockRateLimitService.checkLimit).not.toHaveBeenCalled();\n    });\n  }",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 403,
+        "end": 417,
+        "startLoc": {
+          "line": 403,
+          "column": 11,
+          "position": 2644
+        },
+        "endLoc": {
+          "line": 417,
+          "column": 2,
+          "position": 2733
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 383,
+        "end": 400,
+        "startLoc": {
+          "line": 383,
+          "column": 10,
+          "position": 2526
+        },
+        "endLoc": {
+          "line": 400,
+          "column": 8,
+          "position": 2616
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": "user?: {\n    id: string;\n    email?: string;\n    roles?: string[];\n    isAdmin?: boolean;\n  };\n  security?: {\n    clientIp: string;\n    threatLevel: 'low' | 'medium' | 'high';\n    isVpn: boolean;\n    isTor: boolean;\n    country: string;\n  };\n}",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 63,
+        "end": 76,
+        "startLoc": {
+          "line": 63,
+          "column": 3,
+          "position": 381
+        },
+        "endLoc": {
+          "line": 76,
+          "column": 2,
+          "position": 478
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 36,
+        "end": 49,
+        "startLoc": {
+          "line": 36,
+          "column": 3,
+          "position": 170
+        },
+        "endLoc": {
+          "line": 49,
+          "column": 7,
+          "position": 268
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "}));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      expect",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 293,
+        "end": 308,
+        "startLoc": {
+          "line": 293,
+          "column": 2,
+          "position": 2021
+        },
+        "endLoc": {
+          "line": 308,
+          "column": 7,
+          "position": 2112
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 267,
+        "end": 283,
+        "startLoc": {
+          "line": 267,
+          "column": 9,
+          "position": 1824
+        },
+        "endLoc": {
+          "line": 283,
+          "column": 6,
+          "position": 1917
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ");\n            resolve();\n          },\n        });\n      });\n\n      // Assert\n      expect(mockAuditService.logFileOperation).toHaveBeenCalledTimes(1);\n      \n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent).toMatchObject({\n        success",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 338,
+        "end": 349,
+        "startLoc": {
+          "line": 338,
+          "column": 10,
+          "position": 2344
+        },
+        "endLoc": {
+          "line": 349,
+          "column": 8,
+          "position": 2420
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 215,
+        "end": 226,
+        "startLoc": {
+          "line": 215,
+          "column": 17,
+          "position": 1444
+        },
+        "endLoc": {
+          "line": 226,
+          "column": 3,
+          "position": 1520
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          error: () => resolve(),\n        });\n      });\n\n      // Assert - Vérifier que logSecurityEvent a été appelé ou au moins vérifier le comportement",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 393,
+        "end": 407,
+        "startLoc": {
+          "line": 393,
+          "column": 18,
+          "position": 2773
+        },
+        "endLoc": {
+          "line": 407,
+          "column": 92,
+          "position": 2860
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 362,
+        "end": 376,
+        "startLoc": {
+          "line": 362,
+          "column": 15,
+          "position": 2509
+        },
+        "endLoc": {
+          "line": 376,
+          "column": 10,
+          "position": 2596
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          error: () => resolve(),\n        });\n      });\n\n      // Assert\n      expect",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 423,
+        "end": 438,
+        "startLoc": {
+          "line": 423,
+          "column": 10,
+          "position": 2991
+        },
+        "endLoc": {
+          "line": 438,
+          "column": 7,
+          "position": 3081
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 362,
+        "end": 377,
+        "startLoc": {
+          "line": 362,
+          "column": 15,
+          "position": 2509
+        },
+        "endLoc": {
+          "line": 377,
+          "column": 6,
+          "position": 2599
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": "mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.fileId",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 453,
+        "end": 469,
+        "startLoc": {
+          "line": 453,
+          "column": 7,
+          "position": 3188
+        },
+        "endLoc": {
+          "line": 469,
+          "column": 7,
+          "position": 3320
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 293,
+        "end": 284,
+        "startLoc": {
+          "line": 293,
+          "column": 7,
+          "position": 2006
+        },
+        "endLoc": {
+          "line": 284,
+          "column": 9,
+          "position": 1943
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": "};\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.fileId).toBe('query-file-456'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 478,
+        "end": 495,
+        "startLoc": {
+          "line": 478,
+          "column": 2,
+          "position": 3381
+        },
+        "endLoc": {
+          "line": 495,
+          "column": 17,
+          "position": 3522
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 452,
+        "end": 469,
+        "startLoc": {
+          "line": 452,
+          "column": 2,
+          "position": 3184
+        },
+        "endLoc": {
+          "line": 469,
+          "column": 17,
+          "position": 3325
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": "};\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.fileId).toBe('header-file-789'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 508,
+        "end": 525,
+        "startLoc": {
+          "line": 508,
+          "column": 7,
+          "position": 3599
+        },
+        "endLoc": {
+          "line": 525,
+          "column": 18,
+          "position": 3740
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 452,
+        "end": 469,
+        "startLoc": {
+          "line": 452,
+          "column": 2,
+          "position": 3184
+        },
+        "endLoc": {
+          "line": 469,
+          "column": 17,
+          "position": 3325
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": "};\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.fileId).toBeUndefined",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 535,
+        "end": 552,
+        "startLoc": {
+          "line": 535,
+          "column": 2,
+          "position": 3807
+        },
+        "endLoc": {
+          "line": 552,
+          "column": 14,
+          "position": 3946
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 452,
+        "end": 469,
+        "startLoc": {
+          "line": 452,
+          "column": 2,
+          "position": 3184
+        },
+        "endLoc": {
+          "line": 469,
+          "column": 5,
+          "position": 3323
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": ";\n        mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n        // Act\n        const result$ = interceptor.intercept(\n          mockExecutionContext as ExecutionContext,\n          mockCallHandler\n        );\n\n        await new Promise<void>((resolve) => {\n          result$.subscribe({\n            complete: () => resolve(),\n          });\n        });\n\n        // Assert\n        const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n        expect(auditEvent.action",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 578,
+        "end": 595,
+        "startLoc": {
+          "line": 578,
+          "column": 2,
+          "position": 4236
+        },
+        "endLoc": {
+          "line": 595,
+          "column": 7,
+          "position": 4371
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 452,
+        "end": 284,
+        "startLoc": {
+          "line": 452,
+          "column": 2,
+          "position": 3185
+        },
+        "endLoc": {
+          "line": 284,
+          "column": 9,
+          "position": 1943
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": "});\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.action).toBe('CUSTOMCONTROLLER_CUSTOMMETHOD'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 608,
+        "end": 625,
+        "startLoc": {
+          "line": 608,
+          "column": 2,
+          "position": 4468
+        },
+        "endLoc": {
+          "line": 625,
+          "column": 32,
+          "position": 4610
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 578,
+        "end": 595,
+        "startLoc": {
+          "line": 578,
+          "column": 2,
+          "position": 4234
+        },
+        "endLoc": {
+          "line": 595,
+          "column": 9,
+          "position": 4376
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 19,
+      "fragment": ",\n      };\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.ipAddress",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 640,
+        "end": 658,
+        "startLoc": {
+          "line": 640,
+          "column": 5,
+          "position": 4701
+        },
+        "endLoc": {
+          "line": 658,
+          "column": 10,
+          "position": 4840
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 507,
+        "end": 284,
+        "startLoc": {
+          "line": 507,
+          "column": 18,
+          "position": 3596
+        },
+        "endLoc": {
+          "line": 284,
+          "column": 9,
+          "position": 1943
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 19,
+      "fragment": ",\n      };\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.ipAddress).toBe('198.51.100.1'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 669,
+        "end": 687,
+        "startLoc": {
+          "line": 669,
+          "column": 15,
+          "position": 4907
+        },
+        "endLoc": {
+          "line": 687,
+          "column": 15,
+          "position": 5051
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 507,
+        "end": 658,
+        "startLoc": {
+          "line": 507,
+          "column": 18,
+          "position": 3596
+        },
+        "endLoc": {
+          "line": 658,
+          "column": 14,
+          "position": 4845
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": "};\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.ipAddress).toBe('192.168.1.200'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 697,
+        "end": 714,
+        "startLoc": {
+          "line": 697,
+          "column": 2,
+          "position": 5123
+        },
+        "endLoc": {
+          "line": 714,
+          "column": 16,
+          "position": 5264
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 452,
+        "end": 658,
+        "startLoc": {
+          "line": 452,
+          "column": 2,
+          "position": 3184
+        },
+        "endLoc": {
+          "line": 658,
+          "column": 14,
+          "position": 4845
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 20,
+      "fragment": ",\n        'user-agent': 'Test Browser',\n      };\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.requestSize",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 725,
+        "end": 744,
+        "startLoc": {
+          "line": 725,
+          "column": 7,
+          "position": 5327
+        },
+        "endLoc": {
+          "line": 744,
+          "column": 12,
+          "position": 5473
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 668,
+        "end": 284,
+        "startLoc": {
+          "line": 668,
+          "column": 28,
+          "position": 4900
+        },
+        "endLoc": {
+          "line": 284,
+          "column": 9,
+          "position": 1943
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": "};\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.requestSize).toBeGreaterThan",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 753,
+        "end": 770,
+        "startLoc": {
+          "line": 753,
+          "column": 2,
+          "position": 5546
+        },
+        "endLoc": {
+          "line": 770,
+          "column": 16,
+          "position": 5685
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 452,
+        "end": 744,
+        "startLoc": {
+          "line": 452,
+          "column": 2,
+          "position": 3184
+        },
+        "endLoc": {
+          "line": 744,
+          "column": 5,
+          "position": 5476
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": "));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      expect(auditEvent.responseSize",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 782,
+        "end": 798,
+        "startLoc": {
+          "line": 782,
+          "column": 13,
+          "position": 5790
+        },
+        "endLoc": {
+          "line": 798,
+          "column": 13,
+          "position": 5906
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 267,
+        "end": 284,
+        "startLoc": {
+          "line": 267,
+          "column": 2,
+          "position": 1825
+        },
+        "endLoc": {
+          "line": 284,
+          "column": 9,
+          "position": 1943
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 19,
+      "fragment": ", async () => {\n      // Arrange\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert\n      const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];\n      const",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 843,
+        "end": 861,
+        "startLoc": {
+          "line": 843,
+          "column": 57,
+          "position": 6240
+        },
+        "endLoc": {
+          "line": 861,
+          "column": 6,
+          "position": 6383
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 291,
+        "end": 284,
+        "startLoc": {
+          "line": 291,
+          "column": 62,
+          "position": 1991
+        },
+        "endLoc": {
+          "line": 284,
+          "column": 7,
+          "position": 1939
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": ");\n      mockCallHandler.handle.mockReturnValue(of({ success: true }));\n\n      // Act\n      const result$ = interceptor.intercept(\n        mockExecutionContext as ExecutionContext,\n        mockCallHandler\n      );\n\n      await new Promise<void>((resolve) => {\n        result$.subscribe({\n          complete: () => resolve(),\n        });\n      });\n\n      // Assert - Vérifier que logFileOperation a été tenté (même s'il a échoué)",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 909,
+        "end": 924,
+        "startLoc": {
+          "line": 909,
+          "column": 7,
+          "position": 6737
+        },
+        "endLoc": {
+          "line": 924,
+          "column": 75,
+          "position": 6844
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 578,
+        "end": 282,
+        "startLoc": {
+          "line": 578,
+          "column": 2,
+          "position": 4235
+        },
+        "endLoc": {
+          "line": 282,
+          "column": 10,
+          "position": 1914
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "interface TestAuthenticatedRequest {\n  user?: {\n    id: string;\n    email?: string;\n    roles?: string[];\n    isAdmin?: boolean;\n  };\n  security?: {\n    clientIp: string;\n    threatLevel: 'low' | 'medium' | 'high';\n    isVpn: boolean;\n    isTor: boolean;\n    country: string;\n  };\n  params",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 28,
+        "end": 42,
+        "startLoc": {
+          "line": 28,
+          "column": 1,
+          "position": 112
+        },
+        "endLoc": {
+          "line": 42,
+          "column": 7,
+          "position": 217
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/__tests__/file-security.middleware.spec.ts",
+        "start": 35,
+        "end": 49,
+        "startLoc": {
+          "line": 35,
+          "column": 1,
+          "position": 163
+        },
+        "endLoc": {
+          "line": 49,
+          "column": 7,
+          "position": 268
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        'extracted-file-123'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 292,
+        "end": 302,
+        "startLoc": {
+          "line": 292,
+          "column": 2,
+          "position": 1838
+        },
+        "endLoc": {
+          "line": 302,
+          "column": 21,
+          "position": 1918
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        'generic-id-456'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 313,
+        "end": 323,
+        "startLoc": {
+          "line": 313,
+          "column": 2,
+          "position": 1975
+        },
+        "endLoc": {
+          "line": 323,
+          "column": 17,
+          "position": 2055
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        'query-file-789'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 334,
+        "end": 344,
+        "startLoc": {
+          "line": 334,
+          "column": 2,
+          "position": 2112
+        },
+        "endLoc": {
+          "line": 344,
+          "column": 17,
+          "position": 2192
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.WRITE);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        'body-file-101'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 356,
+        "end": 366,
+        "startLoc": {
+          "line": 356,
+          "column": 2,
+          "position": 2259
+        },
+        "endLoc": {
+          "line": 366,
+          "column": 16,
+          "position": 2339
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 227,
+        "end": 237,
+        "startLoc": {
+          "line": 227,
+          "column": 2,
+          "position": 1409
+        },
+        "endLoc": {
+          "line": 237,
+          "column": 11,
+          "position": 1489
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        'header-file-202'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 380,
+        "end": 390,
+        "startLoc": {
+          "line": 380,
+          "column": 7,
+          "position": 2406
+        },
+        "endLoc": {
+          "line": 390,
+          "column": 18,
+          "position": 2486
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        validUuid",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 423,
+        "end": 433,
+        "startLoc": {
+          "line": 423,
+          "column": 2,
+          "position": 2711
+        },
+        "endLoc": {
+          "line": 433,
+          "column": 10,
+          "position": 2791
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        customId",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 445,
+        "end": 455,
+        "startLoc": {
+          "line": 445,
+          "column": 2,
+          "position": 2858
+        },
+        "endLoc": {
+          "line": 455,
+          "column": 9,
+          "position": 2938
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        simpleId",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 467,
+        "end": 477,
+        "startLoc": {
+          "line": 467,
+          "column": 2,
+          "position": 3005
+        },
+        "endLoc": {
+          "line": 477,
+          "column": 9,
+          "position": 3085
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": "};\n        mockReflector.get.mockReturnValue(FileOperation.READ);\n\n        // Act & Assert\n        await expect(\n          guard.canActivate(mockExecutionContext as ExecutionContext)\n        ).rejects.toThrow(BadRequestException);\n      }\n      \n      expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();\n    });\n  }",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 516,
+        "end": 527,
+        "startLoc": {
+          "line": 516,
+          "column": 2,
+          "position": 3336
+        },
+        "endLoc": {
+          "line": 527,
+          "column": 2,
+          "position": 3411
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 496,
+        "end": 510,
+        "startLoc": {
+          "line": 496,
+          "column": 2,
+          "position": 3187
+        },
+        "endLoc": {
+          "line": 510,
+          "column": 8,
+          "position": 3263
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "};\n      mockReflector.get.mockReturnValue(FileOperation.READ);\n      mockFileSecurityService.checkFileAccess.mockResolvedValue(true);\n\n      // Act\n      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);\n\n      // Assert\n      expect(result).toBe(true);\n      expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(\n        'accessible-file-123'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 535,
+        "end": 545,
+        "startLoc": {
+          "line": 535,
+          "column": 2,
+          "position": 3464
+        },
+        "endLoc": {
+          "line": 545,
+          "column": 22,
+          "position": 3544
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/guards/__tests__/file-access.guard.spec.ts",
+        "start": 206,
+        "end": 216,
+        "startLoc": {
+          "line": 206,
+          "column": 2,
+          "position": 1272
+        },
+        "endLoc": {
+          "line": 216,
+          "column": 11,
+          "position": 1352
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": ", async () => {\n      // Arrange\n      configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true; // Activer le scan\n        return defaultValue;\n      });\n      // CORRECTION: Créer une nouvelle instance de service avec la config mise à jour\n      const localService = new VirusScannerService(configService);\n      const oversizedBuffer",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 125,
+        "end": 133,
+        "startLoc": {
+          "line": 125,
+          "column": 39,
+          "position": 1178
+        },
+        "endLoc": {
+          "line": 133,
+          "column": 16,
+          "position": 1267
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 110,
+        "end": 118,
+        "startLoc": {
+          "line": 110,
+          "column": 28,
+          "position": 1040
+        },
+        "endLoc": {
+          "line": 118,
+          "column": 12,
+          "position": 1129
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true;\n        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;\n        if (key === 'VIRUS_SCAN_RETRIES') return 2;\n        return defaultValue;\n      });\n\n      const serviceWithEnabledScanning = new VirusScannerService(configService);\n      \n      // Simuler un header PE (Windows executable)",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 196,
+        "end": 205,
+        "startLoc": {
+          "line": 196,
+          "column": 7,
+          "position": 1928
+        },
+        "endLoc": {
+          "line": 205,
+          "column": 45,
+          "position": 2030
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 87,
+        "end": 95,
+        "startLoc": {
+          "line": 87,
+          "column": 7,
+          "position": 787
+        },
+        "endLoc": {
+          "line": 95,
+          "column": 6,
+          "position": 887
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", async () => {\n      // Arrange - Activer le scan\n      configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true;\n        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;\n        if (key === 'VIRUS_SCAN_RETRIES') return 2;\n        return defaultValue;\n      });\n\n      const serviceWithEnabledScanning = new VirusScannerService(configService);\n      const maliciousScriptBuffer",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 266,
+        "end": 276,
+        "startLoc": {
+          "line": 266,
+          "column": 59,
+          "position": 2568
+        },
+        "endLoc": {
+          "line": 276,
+          "column": 22,
+          "position": 2685
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 194,
+        "end": 95,
+        "startLoc": {
+          "line": 194,
+          "column": 60,
+          "position": 1913
+        },
+        "endLoc": {
+          "line": 95,
+          "column": 14,
+          "position": 889
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true;\n        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;\n        if (key === 'VIRUS_SCAN_RETRIES') return 2;\n        return defaultValue;\n      });\n\n      const serviceWithRetries",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 290,
+        "end": 297,
+        "startLoc": {
+          "line": 290,
+          "column": 7,
+          "position": 2820
+        },
+        "endLoc": {
+          "line": 297,
+          "column": 19,
+          "position": 2907
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 87,
+        "end": 94,
+        "startLoc": {
+          "line": 87,
+          "column": 7,
+          "position": 787
+        },
+        "endLoc": {
+          "line": 94,
+          "column": 27,
+          "position": 874
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true;\n        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;\n        if (key === 'VIRUS_SCAN_RETRIES') return 2;\n        return defaultValue;\n      });\n\n      const serviceWithEnabledScanning = new VirusScannerService(configService);\n\n      // Act",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 318,
+        "end": 327,
+        "startLoc": {
+          "line": 318,
+          "column": 7,
+          "position": 3094
+        },
+        "endLoc": {
+          "line": 327,
+          "column": 7,
+          "position": 3195
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 87,
+        "end": 95,
+        "startLoc": {
+          "line": 87,
+          "column": 7,
+          "position": 787
+        },
+        "endLoc": {
+          "line": 95,
+          "column": 6,
+          "position": 887
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ", async () => {\n      // Arrange - Activer le scan\n      configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true;\n        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;\n        if (key === 'VIRUS_SCAN_RETRIES') return 2;\n        return defaultValue;\n      });\n\n      const serviceWithBrokenScanner",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 336,
+        "end": 345,
+        "startLoc": {
+          "line": 336,
+          "column": 61,
+          "position": 3267
+        },
+        "endLoc": {
+          "line": 345,
+          "column": 25,
+          "position": 3369
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 194,
+        "end": 94,
+        "startLoc": {
+          "line": 194,
+          "column": 60,
+          "position": 1913
+        },
+        "endLoc": {
+          "line": 94,
+          "column": 27,
+          "position": 874
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true;\n        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;\n        if (key === 'VIRUS_SCAN_RETRIES') return 2;\n        return defaultValue;\n      });\n\n      const serviceWithErrorScanner",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 369,
+        "end": 376,
+        "startLoc": {
+          "line": 369,
+          "column": 7,
+          "position": 3545
+        },
+        "endLoc": {
+          "line": 376,
+          "column": 24,
+          "position": 3632
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 87,
+        "end": 94,
+        "startLoc": {
+          "line": 87,
+          "column": 7,
+          "position": 787
+        },
+        "endLoc": {
+          "line": 94,
+          "column": 27,
+          "position": 874
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ", async () => {\n      // Arrange - Activer le scan\n      configService.get.mockImplementation((key: string, defaultValue?: any) => {\n        if (key === 'SCAN_VIRUS_ENABLED') return true;\n        if (key === 'VIRUS_SCAN_TIMEOUT') return 5000;\n        if (key === 'VIRUS_SCAN_RETRIES') return 2;\n        return defaultValue;\n      });\n\n      const serviceWithEnabledScanning = new VirusScannerService(configService);\n      \n      const testFiles",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 431,
+        "end": 442,
+        "startLoc": {
+          "line": 431,
+          "column": 45,
+          "position": 4070
+        },
+        "endLoc": {
+          "line": 442,
+          "column": 10,
+          "position": 4189
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/security/__tests__/virus-scanner.service.spec.ts",
+        "start": 194,
+        "end": 95,
+        "startLoc": {
+          "line": 194,
+          "column": 60,
+          "position": 1913
+        },
+        "endLoc": {
+          "line": 95,
+          "column": 14,
+          "position": 889
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ",\n        actualMimeType: null,\n        fileSignature: null,\n      });\n\n      fileValidator.validateContent.mockResolvedValue({\n        safe: true,\n        threats: [],\n        warnings: [],\n        metadata: {},\n        analysis: {},\n      });\n\n      rateLimitService.checkLimit.mockResolvedValue({\n        allowed: true,\n        limit: 20,\n        remaining",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 335,
+        "end": 351,
+        "startLoc": {
+          "line": 335,
+          "column": 22,
+          "position": 2479
+        },
+        "endLoc": {
+          "line": 351,
+          "column": 10,
+          "position": 2579
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 158,
+        "end": 173,
+        "startLoc": {
+          "line": 158,
+          "column": 18,
+          "position": 1120
+        },
+        "endLoc": {
+          "line": 173,
+          "column": 46,
+          "position": 1219
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 20,
+      "fragment": "presignedUrlExpiry: 1800,\n              maxPresignedUrls: 5,\n              ipRestrictionEnabled: false,\n              rateLimitUploadsPerMinute: 20,\n              abuseBlockDuration: 60,\n              deviceFingerprintingEnabled: false,\n              securityTokenSecret: 'test_security_token_secret_with_minimum_32_characters_length',\n            },\n            processing: {\n              maxFileSize: 10485760,\n              allowedMimeTypes: ['image/jpeg', 'application/pdf', 'text/plain'],\n              virusScanTimeout: 5000,\n            },\n          };\n        }\n        return null;\n      });\n\n      const file: UploadFileDto = {\n        filename: 'test.pdf'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 372,
+        "end": 391,
+        "startLoc": {
+          "line": 372,
+          "column": 15,
+          "position": 2773
+        },
+        "endLoc": {
+          "line": 391,
+          "column": 11,
+          "position": 2899
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 199,
+        "end": 218,
+        "startLoc": {
+          "line": 199,
+          "column": 15,
+          "position": 1464
+        },
+        "endLoc": {
+          "line": 218,
+          "column": 16,
+          "position": 1590
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 23,
+      "fragment": ",\n        documentType: DocumentType.DOCUMENT,\n      };\n      const userId = generateTestUUID(true);\n\n      fileValidator.validateFormat.mockResolvedValue({\n        valid: true,\n        errors: [],\n        warnings: [],\n        detectedMimeType: 'application/pdf',\n        actualMimeType: null,\n        fileSignature: null,\n      });\n\n      fileValidator.validateContent.mockResolvedValue({\n        safe: true,\n        threats: [],\n        warnings: [],\n        metadata: {},\n        analysis: {},\n      });\n\n      virusScanner",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 394,
+        "end": 416,
+        "startLoc": {
+          "line": 394,
+          "column": 2,
+          "position": 2923
+        },
+        "endLoc": {
+          "line": 416,
+          "column": 13,
+          "position": 3066
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 149,
+        "end": 171,
+        "startLoc": {
+          "line": 149,
+          "column": 10,
+          "position": 1054
+        },
+        "endLoc": {
+          "line": 171,
+          "column": 17,
+          "position": 1197
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": ",\n        actualMimeType: null,\n        fileSignature: null,\n      });\n\n      fileValidator.validateContent.mockResolvedValue({\n        safe: true,\n        threats: [],\n        warnings: [],\n        metadata: {},\n        analysis: {},\n      });\n\n      virusScanner.scanFile.mockRejectedValue",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 403,
+        "end": 416,
+        "startLoc": {
+          "line": 403,
+          "column": 18,
+          "position": 2989
+        },
+        "endLoc": {
+          "line": 416,
+          "column": 18,
+          "position": 3070
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 230,
+        "end": 243,
+        "startLoc": {
+          "line": 230,
+          "column": 27,
+          "position": 1681
+        },
+        "endLoc": {
+          "line": 243,
+          "column": 18,
+          "position": 1762
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "),\n        documentType: DocumentType.DOCUMENT,\n      };\n      const userId = generateTestUUID(true);\n\n      fileValidator.validateFormat.mockResolvedValue({\n        valid: true,\n        errors: [],\n        warnings: [],\n        detectedMimeType: 'text/plain',\n        actualMimeType: null,\n        fileSignature: null,\n      });\n\n      fileValidator.validateContent.mockResolvedValue({\n        safe: false",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 441,
+        "end": 456,
+        "startLoc": {
+          "line": 441,
+          "column": 32,
+          "position": 3302
+        },
+        "endLoc": {
+          "line": 456,
+          "column": 6,
+          "position": 3404
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 282,
+        "end": 297,
+        "startLoc": {
+          "line": 282,
+          "column": 7,
+          "position": 2076
+        },
+        "endLoc": {
+          "line": 297,
+          "column": 5,
+          "position": 2178
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ",\n        resetTime: new Date(Date.now() + 60000),\n      });\n\n      // Act\n      const result = await service.validateFileUpload(file, userId);\n\n      // Assert\n      expect(result.passed).toBe(false);\n      expect(result.threats).toContain(SecurityThreat.SUSPICIOUS_CONTENT",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 466,
+        "end": 475,
+        "startLoc": {
+          "line": 466,
+          "column": 3,
+          "position": 3474
+        },
+        "endLoc": {
+          "line": 475,
+          "column": 19,
+          "position": 3555
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 351,
+        "end": 360,
+        "startLoc": {
+          "line": 351,
+          "column": 3,
+          "position": 2583
+        },
+        "endLoc": {
+          "line": 360,
+          "column": 15,
+          "position": 2664
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 19,
+      "fragment": "],\n        warnings: [],\n        detectedMimeType: 'application/pdf',\n        actualMimeType: null,\n        fileSignature: null,\n      });\n\n      fileValidator.validateContent.mockResolvedValue({\n        safe: true,\n        threats: [],\n        warnings: [],\n        metadata: {},\n        analysis: {},\n      });\n\n      rateLimitService.checkLimit.mockResolvedValue({\n        allowed: true,\n        limit: 20,\n        remaining: 20",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 492,
+        "end": 510,
+        "startLoc": {
+          "line": 492,
+          "column": 17,
+          "position": 3688
+        },
+        "endLoc": {
+          "line": 510,
+          "column": 3,
+          "position": 3807
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 156,
+        "end": 351,
+        "startLoc": {
+          "line": 156,
+          "column": 2,
+          "position": 1104
+        },
+        "endLoc": {
+          "line": 351,
+          "column": 3,
+          "position": 2582
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": "};\n\n      fileMetadataService.getFileMetadata.mockResolvedValue({\n        id: fileId,\n        userId: userId,\n        filename: 'test.pdf',\n        contentType: 'application/pdf',\n        size: 1024,\n        storageKey: storageKey,\n      });\n\n      storageService.generatePresignedUrl.mockResolvedValue({\n        url: 'https://s3.test.coders.com/test-coders-documents/files/test.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=1800',\n        expiresAt: new Date(Date.now() + 1800000), // Limité à 1800 secondes",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 692,
+        "end": 705,
+        "startLoc": {
+          "line": 692,
+          "column": 7,
+          "position": 5231
+        },
+        "endLoc": {
+          "line": 705,
+          "column": 26,
+          "position": 5328
+        }
+      },
+      "secondFile": {
+        "name": "src/domain/services/__tests__/file-security.service.spec.ts",
+        "start": 621,
+        "end": 635,
+        "startLoc": {
+          "line": 621,
+          "column": 7,
+          "position": 4655
+        },
+        "endLoc": {
+          "line": 635,
+          "column": 2,
+          "position": 4753
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 21,
+      "fragment": "interface AuthenticatedRequest extends Request {\n  user?: {\n    id: string;\n    email?: string;\n    roles?: string[];\n    isAdmin?: boolean;\n  };\n  \n  // Métadonnées de sécurité ajoutées par le middleware\n  security?: {\n    clientIp: string;\n    threatLevel: 'low' | 'medium' | 'high';\n    isVpn: boolean;\n    isTor: boolean;\n    country: string;\n  };\n}\n\n/**\n * Interface pour les événements d'audit des fichiers\n */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/file-audit.interceptor.ts",
+        "start": 18,
+        "end": 38,
+        "startLoc": {
+          "line": 18,
+          "column": 1,
+          "position": 104
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 4,
+          "position": 220
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/file-security.middleware.ts",
+        "start": 27,
+        "end": 47,
+        "startLoc": {
+          "line": 27,
+          "column": 1,
+          "position": 139
+        },
+        "endLoc": {
+          "line": 47,
+          "column": 4,
+          "position": 255
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 28,
+      "fragment": "interface FileAuditEvent {\n  id: string;\n  fileId?: string;\n  userId?: string;\n  action: string;\n  method: string;\n  endpoint: string;\n  timestamp: Date;\n  ipAddress: string;\n  userAgent: string;\n  duration: number;\n  success: boolean;\n  statusCode: number;\n  errorMessage?: string;\n  requestSize?: number;\n  responseSize?: number;\n  securityContext?: {\n    threatLevel: string;\n    isVpn: boolean;\n    isTor: boolean;\n    country: string;\n  };\n  additionalMetadata?: Record<string, any>;\n}\n\n/**\n * Interface pour le service d'audit (injecté via DI)\n */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/interceptors/file-audit.interceptor.ts",
+        "start": 39,
+        "end": 66,
+        "startLoc": {
+          "line": 39,
+          "column": 1,
+          "position": 222
+        },
+        "endLoc": {
+          "line": 66,
+          "column": 4,
+          "position": 394
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/interceptors/__tests__/file-audit.interceptor.spec.ts",
+        "start": 24,
+        "end": 51,
+        "startLoc": {
+          "line": 24,
+          "column": 1,
+          "position": 73
+        },
+        "endLoc": {
+          "line": 51,
+          "column": 4,
+          "position": 245
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 24,
+      "fragment": "/**\n * Interface pour étendre Request avec les informations utilisateur\n */\ninterface AuthenticatedRequest extends Request {\n  user?: {\n    id: string;\n    email?: string;\n    roles?: string[];\n    isAdmin?: boolean;\n  };\n  \n  // Métadonnées de sécurité ajoutées par le middleware\n  security?: {\n    clientIp: string;\n    threatLevel: 'low' | 'medium' | 'high';\n    isVpn: boolean;\n    isTor: boolean;\n    country: string;\n  };\n}\n\n/**\n * Interface pour le résultat de vérification d'accès\n */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/presentation/guards/file-access.guard.ts",
+        "start": 17,
+        "end": 40,
+        "startLoc": {
+          "line": 17,
+          "column": 1,
+          "position": 110
+        },
+        "endLoc": {
+          "line": 40,
+          "column": 4,
+          "position": 228
+        }
+      },
+      "secondFile": {
+        "name": "src/presentation/middleware/file-security.middleware.ts",
+        "start": 24,
+        "end": 47,
+        "startLoc": {
+          "line": 24,
+          "column": 1,
+          "position": 137
+        },
+        "endLoc": {
+          "line": 47,
+          "column": 4,
+          "position": 255
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ": string, options: FindOptions = {}): Promise<FileMetadata[]> {\n    const {\n      limit = 20,\n      offset = 0,\n      sortBy = 'createdAt',\n      sortOrder = 'desc',\n      includeDeleted = false,\n      contentType,\n      processingStatus,\n      documentType,\n      tags\n    } = options;\n    \n    try {\n      const",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/persistence/file-metadata.repository.impl.ts",
+        "start": 189,
+        "end": 203,
+        "startLoc": {
+          "line": 189,
+          "column": 10,
+          "position": 1378
+        },
+        "endLoc": {
+          "line": 203,
+          "column": 6,
+          "position": 1480
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/persistence/file-metadata.repository.impl.ts",
+        "start": 139,
+        "end": 153,
+        "startLoc": {
+          "line": 139,
+          "column": 7,
+          "position": 969
+        },
+        "endLoc": {
+          "line": 153,
+          "column": 42,
+          "position": 1071
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "}\n        })\n      };\n      \n      const files = await this.prisma.files.findMany({\n        where,\n        orderBy: { [sortField]: sortOrder },\n        take: limit,\n        skip: offset\n      });\n      \n      return files.map(file => this.mapToFileMetadata(file));\n      \n    } catch (error) {\n      this.logger.error(`Failed to find files for project ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/persistence/file-metadata.repository.impl.ts",
+        "start": 214,
+        "end": 228,
+        "startLoc": {
+          "line": 214,
+          "column": 11,
+          "position": 1624
+        },
+        "endLoc": {
+          "line": 228,
+          "column": 35,
+          "position": 1735
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/persistence/file-metadata.repository.impl.ts",
+        "start": 167,
+        "end": 181,
+        "startLoc": {
+          "line": 167,
+          "column": 11,
+          "position": 1226
+        },
+        "endLoc": {
+          "line": 181,
+          "column": 32,
+          "position": 1337
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 25,
+      "fragment": "fileCount: totalStats._count,\n        byContentType: byContentType.map(item => ({\n          contentType: item.content_type,\n          size: Number(item._sum.size || 0),\n          count: item._count\n        })),\n        // ✅ NOUVEAU: Ajout byDocumentType\n        byDocumentType: byDocType.map(item => ({\n          documentType: item.document_type || 'unknown',\n          size: Number(item._sum.size || 0),\n          count: item._count\n        })),\n        byProcessingStatus: byStatus.map(item => ({\n          status: item.processing_status || 'unknown',\n          count: item._count\n        })),\n        // ✅ NOUVEAU: Ajout topTags\n        topTags: tagStats.map(item => ({\n          tag: item.tag,\n          count: Number(item.count)\n        })),\n        calculatedAt: new Date()\n      };\n      \n      await",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/infrastructure/persistence/file-metadata.repository.impl.ts",
+        "start": 563,
+        "end": 587,
+        "startLoc": {
+          "line": 563,
+          "column": 9,
+          "position": 4507
+        },
+        "endLoc": {
+          "line": 587,
+          "column": 6,
+          "position": 4737
+        }
+      },
+      "secondFile": {
+        "name": "src/infrastructure/persistence/file-metadata.repository.impl.ts",
+        "start": 472,
+        "end": 496,
+        "startLoc": {
+          "line": 472,
+          "column": 9,
+          "position": 3763
+        },
+        "endLoc": {
+          "line": 496,
+          "column": 24,
+          "position": 3993
+        }
+      }
+    }
+  ],
+  "filename": "/Users/nicolasbernard/Desktop/coders-workplace/backend/file-system/node_modules/@jscpd/html-reporter/dist/templates/main.pug"
+}

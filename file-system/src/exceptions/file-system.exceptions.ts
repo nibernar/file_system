@@ -130,17 +130,21 @@ export class UnauthorizedFileAccessException extends HttpException {
 /**
  * Exception de fichier non trouvé
  */
-export class FileNotFoundException extends HttpException {
-  constructor(fileId: string) {
-    super(
-      {
-        message: `File with id ${fileId} not found`,
-        error: 'File Not Found',
-        fileId,
-        timestamp: new Date().toISOString()
-      },
-      HttpStatus.NOT_FOUND
-    );
+export class FileNotFoundException extends Error {
+  public readonly fileId: string;
+  public readonly reason?: string;
+  public readonly originalError?: string;
+
+  constructor(fileId: string, options?: { reason?: string; originalError?: string }) {
+    const message = options?.reason 
+      ? `Fichier non trouvé: ${fileId} - ${options.reason}`
+      : `Fichier non trouvé: ${fileId}`;
+    
+    super(message);
+    this.name = 'FileNotFoundException';
+    this.fileId = fileId;
+    this.reason = options?.reason;
+    this.originalError = options?.originalError;
   }
 }
 
@@ -236,19 +240,17 @@ export class ContentValidationException extends HttpException {
 /**
  * Exception de traitement de fichier
  */
-export class ProcessingException extends HttpException {
+export class ProcessingException extends Error {
+  public readonly fileId: string;
+  public readonly operation: string;
+  public readonly reason: string;
+
   constructor(fileId: string, operation: string, reason: string) {
-    super(
-      {
-        message: `Processing failed for file ${fileId} during ${operation}: ${reason}`,
-        error: 'File Processing Error',
-        fileId,
-        operation,
-        reason,
-        timestamp: new Date().toISOString()
-      },
-      HttpStatus.INTERNAL_SERVER_ERROR
-    );
+    super(`Erreur de traitement pour ${fileId} (${operation}): ${reason}`);
+    this.name = 'ProcessingException';
+    this.fileId = fileId;
+    this.operation = operation;
+    this.reason = reason;
   }
 }
 
@@ -377,5 +379,83 @@ export class CDNDistributionException extends HttpException {
       },
       HttpStatus.BAD_GATEWAY
     );
+  }
+}
+
+/**
+ * Exception levée lors d'un échec d'optimisation de fichier
+ */
+export class OptimizationException extends Error {
+  public readonly fileId: string;
+  public readonly operation: string;
+  public readonly reason: string;
+  public readonly originalError?: Error;
+
+  constructor(
+    fileId: string, 
+    operation: string, 
+    reason: string, 
+    originalError?: Error
+  ) {
+    super(`Optimisation échouée pour ${fileId} (${operation}): ${reason}`);
+    this.name = 'OptimizationException';
+    this.fileId = fileId;
+    this.operation = operation;
+    this.reason = reason;
+    this.originalError = originalError;
+  }
+}
+
+/**
+ * Exception levée lors d'un échec de génération de miniature
+ */
+export class ThumbnailGenerationException extends Error {
+  public readonly fileId: string;
+  public readonly operation: string;
+  public readonly reason: string;
+  public readonly originalError?: Error;
+
+  constructor(
+    fileId: string, 
+    operation: string, 
+    reason: string, 
+    originalError?: Error
+  ) {
+    super(`Génération miniature échouée pour ${fileId} (${operation}): ${reason}`);
+    this.name = 'ThumbnailGenerationException';
+    this.fileId = fileId;
+    this.operation = operation;
+    this.reason = reason;
+    this.originalError = originalError;
+  }
+}
+
+/**
+ * Exception levée lors d'un échec de conversion de format
+ */
+export class FormatConversionException extends Error {
+  public readonly fileId: string;
+  public readonly operation: string;
+  public readonly reason: string;
+  public readonly fromFormat: string;
+  public readonly toFormat: string;
+  public readonly originalError?: Error;
+
+  constructor(
+    fileId: string, 
+    operation: string, 
+    reason: string,
+    fromFormat: string,
+    toFormat: string,
+    originalError?: Error
+  ) {
+    super(`Conversion format échouée pour ${fileId} (${fromFormat} → ${toFormat}): ${reason}`);
+    this.name = 'FormatConversionException';
+    this.fileId = fileId;
+    this.operation = operation;
+    this.reason = reason;
+    this.fromFormat = fromFormat;
+    this.toFormat = toFormat;
+    this.originalError = originalError;
   }
 }
