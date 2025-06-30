@@ -216,7 +216,7 @@ export class DocumentProcessorService {
       // 1. Détection d'encodage automatique
       const detectedEncoding = chardet.detect(sourceBuffer) || 'utf8';
       this.logger.debug(`Encodage détecté pour ${fileId}: ${detectedEncoding}`);
-      
+
       // 2. Conversion en texte avec encodage approprié
       let textContent = '';
       try {
@@ -230,7 +230,7 @@ export class DocumentProcessorService {
         this.logger.warn(`Erreur décodage ${detectedEncoding}, fallback UTF-8: ${encodingError.message}`);
         textContent = sourceBuffer.toString('utf8');
       }
-      
+
       // 3. Calcul métadonnées basiques
       const lineCount = textContent.split(/\r?\n/).length;
       const characterCount = textContent.length;

@@ -270,11 +270,11 @@ export class FileProcessingService {
       );
       
       return {
-        jobId: String(job.id),
-        status: 'queued' as any,
-        progress: 0,
-        estimatedDuration,
-      };
+      jobId: String(job.id),
+      status: 'queued' as any,
+      progress: 0,
+      estimatedDuration,
+    };
       
     } catch (error) {
       this.logger.error(`Échec ajout queue ${fileId}: ${error.message}`);

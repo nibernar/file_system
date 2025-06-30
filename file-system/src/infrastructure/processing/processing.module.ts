@@ -1,8 +1,3 @@
-/**
- * Module de traitement de fichiers - Version corrigée
- * 
- * Cette version corrige les erreurs de types et s'adapte à votre structure existante
- */
 
 import { Module, DynamicModule, Type } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';

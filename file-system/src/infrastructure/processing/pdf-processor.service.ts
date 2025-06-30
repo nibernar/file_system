@@ -779,7 +779,7 @@ export class PdfProcessorService {
         });
       }
       
-      process.stderr.on('data', (data) => {
+      process.stderr?.on('data', (data) => {
         stderr += data.toString();
       });
       

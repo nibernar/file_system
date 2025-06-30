@@ -41,7 +41,7 @@ export interface ImageOptimizationOptions {
   quality?: number;
   
   /** Format de sortie souhaité */
-  format?: keyof typeof ImageFormat;
+  format?: ImageFormat;
   
   /** Préserver les métadonnées EXIF */
   preserveExif?: boolean;
@@ -215,7 +215,7 @@ export class ImageProcessorService {
         maxWidth: options.maxWidth || 1920,
         maxHeight: options.maxHeight || 1080,
         quality: options.quality || this.config.processing.imageOptimizationQuality,
-        format: options.format || 'webp',
+        format: options.format || ImageFormat.WEBP,
         preserveExif: options.preserveExif || false,
         progressive: options.progressive !== false,
         optimizeForWeb: options.optimizeForWeb !== false
@@ -264,7 +264,7 @@ export class ImageProcessorService {
       
       // Application optimisations spécifiques par format
       switch (config.format) {
-        case 'webp':
+        case ImageFormat.WEBP:  // 'webp'
           pipeline = pipeline.webp({
             quality: config.quality,
             effort: config.optimizeForWeb ? 6 : 4,
@@ -273,7 +273,7 @@ export class ImageProcessorService {
           });
           break;
           
-        case 'jpeg':
+        case ImageFormat.JPEG:  // 'jpeg'
           pipeline = pipeline.jpeg({
             quality: config.quality,
             progressive: config.progressive,
@@ -282,7 +282,7 @@ export class ImageProcessorService {
           });
           break;
           
-        case 'png':
+        case ImageFormat.PNG:   // 'png'
           pipeline = pipeline.png({
             compressionLevel: config.optimizeForWeb ? 9 : 6,
             adaptiveFiltering: true,
@@ -290,7 +290,7 @@ export class ImageProcessorService {
           });
           break;
           
-        case 'avif':
+        case ImageFormat.AVIF:  // 'avif'
           pipeline = pipeline.avif({
             quality: config.quality,
             effort: config.optimizeForWeb ? 9 : 6,
@@ -598,31 +598,33 @@ export class ImageProcessorService {
     const quality = Math.round(this.config.processing.imageOptimizationQuality * 0.9); // -10% pour thumbnails
     
     switch (format) {
-      case ImageFormat.WEBP:
-        return { 
-          quality, 
-          effort: 4, 
-          smartSubsample: true,
-          preset: 'photo'
-        };
-      case ImageFormat.JPEG:
-        return { 
-          quality, 
-          progressive: true, 
-          mozjpeg: true,
-          optimiseScans: true
-        };
-      case ImageFormat.PNG:
-        return { 
-          compressionLevel: 8, 
-          adaptiveFiltering: true,
-          progressive: true
-        };
-      case ImageFormat.AVIF:
+      case ImageFormat.WEBP:  // = 'webp'
         return { 
           quality, 
           effort: 6, 
+          smartSubsample: true,
+          preset: 'photo'
+        };
+      case ImageFormat.JPEG:  // = 'jpeg'
+        return { 
+          quality, 
+          progressive: true, 
+          mozjpeg: true
+        };
+      case ImageFormat.PNG:   // = 'png'
+        return { 
+          compressionLevel: 9, 
+          adaptiveFiltering: true
+        };
+      case ImageFormat.AVIF:  // = 'avif'
+        return { 
+          quality, 
+          effort: 9, 
           chromaSubsampling: '4:2:0' as const
+        };
+      case ImageFormat.GIF:   // = 'gif'
+        return { 
+          progressive: true
         };
       default:
         return { quality };

@@ -1,5 +1,5 @@
 // src/app.controller.ts
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Controller, Get, Inject, Post, Body } from '@nestjs/common';
 import { AppService } from './app.service';
 import { IFileMetadataRepository } from './domain/repositories/file-metadata.repository';
 
@@ -35,5 +35,10 @@ export class AppController {
     const retrieved = await this.fileRepository.findById(file.id);
     
     return { created: file, retrieved };
+  }
+
+  @Post('test-document')
+  async handlePost(@Body() body: { text: string }) {
+    return { message: 'Texte reçu avec succès', texte: body.text };
   }
 }
