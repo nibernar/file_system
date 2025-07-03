@@ -15,7 +15,8 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import * as sharp from 'sharp';
 import {
-  ImageFormat
+  ImageFormat,
+  LocalThumbnailResult
 } from '../../types/file-system.types';
 import type { FileSystemConfig } from '../../config/file-system.config';
 import { GarageStorageService } from '../garage/garage-storage.service';
@@ -88,29 +89,7 @@ export interface LocalOptimizedImage {
 /**
  * Résultat de génération de thumbnail
  */
-export interface LocalThumbnailResult {
-  /** Succès de la génération */
-  success: boolean;
-  
-  /** URL du thumbnail principal */
-  url: string;
-  
-  /** URLs par format généré */
-  formats: Array<{
-    format: ImageFormat;
-    url: string;
-    size: number;
-  }>;
-  
-  /** Taille du thumbnail en pixels */
-  dimensions: {
-    width: number;
-    height: number;
-  };
-  
-  /** Message d'erreur si échec */
-  error?: string;
-}
+
 
 /**
  * Résultat de conversion de format
@@ -461,8 +440,14 @@ export class ImageProcessorService {
       return {
         success: true,
         url: primaryUrl,
-        formats: generatedFormats,
-        dimensions: { width: size, height: size }
+        storageKey: `${fileId}/thumbnails/${size}`,
+        width: size,
+        height: size,
+        format: generatedFormats[0]?.format || ImageFormat.WEBP,
+        size: generatedFormats[0]?.size || 0,
+        quality: 85, // Valeur par défaut
+        dimensions: { width: size, height: size },
+        formats: generatedFormats
       };
       
     } catch (error) {
@@ -475,8 +460,14 @@ export class ImageProcessorService {
       return {
         success: false,
         url: '',
-        formats: [],
+        storageKey: '',
+        width: 0,
+        height: 0,
+        format: ImageFormat.WEBP,
+        size: 0,
+        quality: 0,
         dimensions: { width: 0, height: 0 },
+        formats: [],
         error: error.message
       };
     }

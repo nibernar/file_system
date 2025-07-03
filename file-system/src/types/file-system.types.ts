@@ -388,6 +388,9 @@ export interface ProcessingOptions {
   
   /** Forcer le re-traitement même si déjà traité */
   forceReprocess?: boolean;
+  priority?: number;
+  urgent?: boolean;
+  reason?: string;
 }
 
 /**
@@ -414,6 +417,7 @@ export interface ProcessingResult {
   
   /** Temps total de traitement en millisecondes */
   processingTime: number;
+  metadata?: FileMetadata;
 }
 
 /**
@@ -434,6 +438,25 @@ export interface FileOptimizations {
   
   /** Gain en pourcentage */
   spaceSavingPercent: number;
+}
+
+/**
+ * Données pour job de génération de thumbnail
+ */
+export interface ThumbnailJobData {
+  fileId: string;
+  sizes: string | string[];
+  format?: string;
+  quality?: number;
+}
+
+/**
+ * Données pour job de conversion
+ */
+export interface ConversionJobData {
+  fileId: string;
+  targetFormat: string;
+  options?: any;
 }
 
 // ============================================================================
@@ -1243,7 +1266,6 @@ export interface VersionOptions {
   maxVersions?: number;
   changeType: VersionChangeType;
   namingStrategy?: 'sequential' | 'timestamp' | 'semantic';
-  // NOUVELLES PROPRIÉTÉS
   description?: string;
   userId?: string;
 }
@@ -1261,8 +1283,10 @@ export interface QueueJobResult {
   completedAt?: Date;
   duration?: number;
   metadata?: Record<string, any>;
-  // NOUVELLE PROPRIÉTÉ
   estimatedDuration?: number;
+  queuePosition?: number;
+  priority?: number;
+  createdAt?: Date;
 }
 
 /**
@@ -1331,13 +1355,57 @@ export interface UpdateFileMetadataDto {
   projectId?: string;
   customMetadata?: Record<string, any>;
   force?: boolean;
-  // NOUVELLE PROPRIÉTÉ
   processingStatus?: ProcessingStatus;
 }
 
 /**
  * Résultat de génération de miniature
  */
+export interface LocalThumbnailResult {
+  /** Succès de la génération */
+  success: boolean;
+  
+  /** URL du thumbnail principal */
+  url: string;
+  
+  /** Clé de stockage */
+  storageKey?: string;
+  
+  /** Largeur en pixels */
+  width: number;
+  
+  /** Hauteur en pixels */
+  height: number;
+  
+  /** Format du thumbnail */
+  format: ImageFormat;
+  
+  /** Taille en bytes */
+  size: number;
+  
+  /** Qualité appliquée */
+  quality: number;
+  
+  /** Dimensions du thumbnail */
+  dimensions?: {
+    width: number;
+    height: number;
+  };
+  
+  /** Formats générés */
+  formats?: Array<{
+    format: ImageFormat;
+    url: string;
+    size: number;
+  }>;
+  
+  /** Message d'erreur si échec */
+  error?: string;
+}
+
+export interface ConversionResult extends FormatConversionResult {
+}
+
 export interface ThumbnailResult {
   url: string;
   storageKey: string;
@@ -1347,9 +1415,7 @@ export interface ThumbnailResult {
   size: number;
   generationTime: number;
   quality: number;
+  variants?: LocalThumbnailResult[];
 }
 
-/**
- * Référence à la configuration du système (évite duplication)
- */
 export type FileSystemConfig = import('../config/file-system.config').FileSystemConfig;

@@ -56,3 +56,7 @@ npm run test:file-system:step-1-2
 $ npm install -g @nestjs/mau
 $ mau deploy
 ```
+
+//a deactiver en prod !!!!
+# Tester l'API : Allez sur http://localhost:3000/api/docs
+# Tester les queues : Allez sur http://localhost:3000/admin/queues

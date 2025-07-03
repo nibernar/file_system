@@ -1,44 +1,141 @@
 // src/app.controller.ts
-import { Controller, Get, Inject, Post, Body } from '@nestjs/common';
+import { Controller, Get, Inject, Post, Body, BadRequestException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { IsString, IsNotEmpty } from 'class-validator';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 import { AppService } from './app.service';
 import { IFileMetadataRepository } from './domain/repositories/file-metadata.repository';
+import { FILE_PROCESSING_QUEUE_NAME } from './infrastructure/queue/file-processing.queue';
 
+class TestDocumentDto {
+  @IsString()
+  @IsNotEmpty()
+  text: string;
+}
+
+@ApiTags('Tests')
 @Controller()
 export class AppController {
+
   constructor(
-    private readonly appService: AppService,
-    
-    @Inject('IFileMetadataRepository')
-    private readonly fileRepository: IFileMetadataRepository,
+    @InjectQueue(FILE_PROCESSING_QUEUE_NAME) 
+    private readonly fileProcessingQueue: Queue,
   ) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
-  @Get('test')
-  async test() {
-    // Test création
-    const file = await this.fileRepository.create({
-      userId: 'test-123',
-      filename: 'test.pdf',
-      originalName: 'Test.pdf',
-      contentType: 'application/pdf',
-      size: 1000,
-      storageKey: `test-${Date.now()}.pdf`,
-      checksumMd5: 'test-md5',
-      checksumSha256: 'test-sha256',
-    });
-
-    // Test récupération
-    const retrieved = await this.fileRepository.findById(file.id);
-    
-    return { created: file, retrieved };
-  }
-
   @Post('test-document')
-  async handlePost(@Body() body: { text: string }) {
-    return { message: 'Texte reçu avec succès', texte: body.text };
+  @ApiOperation({ summary: 'Test de traitement de document avec Bull Queue' })
+  @ApiBody({
+    description: 'JSON avec le texte à traiter',
+    type: TestDocumentDto,
+    examples: {
+      example1: {
+        summary: 'Exemple simple',
+        value: {
+          text: 'Bonjour, ceci est un test !'
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 200, description: 'Texte traité avec succès' })
+  @ApiResponse({ status: 400, description: 'Champ text manquant' })
+  async handlePost(@Body() body: TestDocumentDto) {
+    try {
+      // Ajouter une tâche à la queue Bull
+      const job = await this.fileProcessingQueue.add('process-text', {
+        text: body.text,
+        timestamp: new Date().toISOString(),
+        type: 'test-document',
+        source: 'app-controller'
+      });
+
+      // Récupérer les statistiques de la queue
+      const [waiting, active, completed, failed] = await Promise.all([
+        this.fileProcessingQueue.getWaiting().then(jobs => jobs.length),
+        this.fileProcessingQueue.getActive().then(jobs => jobs.length),
+        this.fileProcessingQueue.getCompleted().then(jobs => jobs.length),
+        this.fileProcessingQueue.getFailed().then(jobs => jobs.length)
+      ]);
+
+      return { 
+        message: 'Texte reçu avec succès', 
+        texte: body.text,
+        timestamp: new Date().toISOString(),
+        job: {
+          id: job.id,
+          name: job.name,
+          queue: this.fileProcessingQueue.name
+        },
+        queueStats: {
+          waiting,
+          active,
+          completed,
+          failed
+        }
+      };
+    } catch (error) {
+      throw new BadRequestException(`Erreur lors de l'ajout à la queue: ${error.message}`);
+    }
+  }
+
+  /**
+   * Endpoint pour ajouter plusieurs tâches de test
+   */
+  @Post('test-document/bulk')
+  @ApiOperation({ summary: 'Ajouter plusieurs tâches de test à la queue' })
+  @ApiResponse({ status: 200, description: 'Tâches ajoutées avec succès' })
+  async addBulkJobs() {
+    const jobs: Array<{ id: string | number; index: number; name: string }> = [];
+    
+    for (let i = 1; i <= 5; i++) {
+      const job = await this.fileProcessingQueue.add('process-text', { // ← Changez ici
+        text: `Document de test automatique numéro ${i}`,
+        timestamp: new Date().toISOString(),
+        type: 'bulk-test',
+        index: i,
+        source: 'bulk-generator'
+      });
+      
+      jobs.push({ 
+        id: job.id, 
+        index: i,
+        name: job.name
+      });
+    }
+
+    return {
+      message: `${jobs.length} tâches de test ajoutées à la queue`,
+      jobs: jobs,
+      timestamp: new Date().toISOString(),
+      queue: this.fileProcessingQueue.name
+    };
+  }
+
+  /**
+   * Endpoint pour obtenir les statistiques de la queue
+   */
+  @Get('queue-stats')
+  @ApiOperation({ summary: 'Statistiques de la queue de traitement' })
+  @ApiResponse({ status: 200, description: 'Statistiques récupérées' })
+  async getQueueStats() {
+    const [waiting, active, completed, failed, paused] = await Promise.all([
+      this.fileProcessingQueue.getWaiting().then(jobs => jobs.length),
+      this.fileProcessingQueue.getActive().then(jobs => jobs.length),
+      this.fileProcessingQueue.getCompleted().then(jobs => jobs.length),
+      this.fileProcessingQueue.getFailed().then(jobs => jobs.length),
+      this.fileProcessingQueue.isPaused()
+    ]);
+
+    return {
+      queue: this.fileProcessingQueue.name,
+      stats: {
+        waiting,
+        active,
+        completed,
+        failed,
+        paused
+      },
+      timestamp: new Date().toISOString()
+    };
   }
 }

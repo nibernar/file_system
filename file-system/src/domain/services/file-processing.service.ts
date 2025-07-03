@@ -722,7 +722,7 @@ export class FileProcessingService {
   /**
    * Récupère les métadonnées d'un fichier
    */
-  private async getFileMetadata(fileId: string): Promise<FileMetadata> {
+  async getFileMetadata(fileId: string): Promise<FileMetadata> {
     const metadata = await this.fileMetadataRepository.findById(fileId);
     
     if (!metadata) {

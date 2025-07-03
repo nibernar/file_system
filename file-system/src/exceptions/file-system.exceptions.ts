@@ -255,6 +255,26 @@ export class ProcessingException extends Error {
 }
 
 /**
+ * Exception pour les erreurs de queue de traitement
+ */
+export class ProcessingQueueException extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ProcessingQueueException';
+  }
+}
+
+/**
+ * Exception pour les erreurs de traitement de fichier
+ */
+export class FileProcessingException extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FileProcessingException';
+  }
+}
+
+/**
  * Exception de timeout de traitement
  */
 export class ProcessingTimeoutException extends HttpException {
