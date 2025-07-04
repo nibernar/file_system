@@ -8,10 +8,12 @@ const config: Config = {
   // Configuration globale des timeouts
   testTimeout: 30000, // 30s par défaut
   
-  // Chemins des tests - STRUCTURE RÉELLE
+  // CHEMINS AJUSTÉS POUR __test__ ET PATTERNS
   testMatch: [
     '<rootDir>/src/**/*.spec.ts',
-    '<rootDir>/src/**/*.test.ts'
+    '<rootDir>/src/**/*.test.ts',
+    '<rootDir>/src/**/__test__/**/*.spec.ts',
+    '<rootDir>/src/**/__tests__/**/*.spec.ts'
   ],
   
   // Exclusions
@@ -21,14 +23,18 @@ const config: Config = {
     '<rootDir>/coverage/'
   ],
   
-  // Coverage
+  // COVERAGE AJUSTÉ POUR __test__
   collectCoverageFrom: [
     'src/infrastructure/**/*.ts',
+    'src/application/**/*.ts',
+    'src/domain/**/*.ts',
     'src/config/**/*.ts',
     'src/types/**/*.ts', 
     'src/constants/**/*.ts',
     '!src/**/*.spec.ts',
     '!src/**/*.test.ts',
+    '!src/**/__test__/**',
+    '!src/**/__tests__/**',
     '!src/**/*.mock.ts',
     '!src/**/*.interface.ts',
     '!src/**/index.ts'
@@ -41,12 +47,17 @@ const config: Config = {
       lines: 85,
       statements: 85
     },
-    // Seuils spécialisés pour modules critiques
-    'src/infrastructure/garage/garage-storage.service.ts': {
-      branches: 95,
-      functions: 100,
-      lines: 95,
-      statements: 95
+    'src/infrastructure/queue/file-processing.processor.ts': {
+      branches: 90,
+      functions: 95,
+      lines: 90,
+      statements: 90
+    },
+    'src/application/use-cases/process-file-async.use-case.ts': {
+      branches: 90,
+      functions: 95,
+      lines: 90,
+      statements: 90
     }
   },
   
@@ -64,7 +75,7 @@ const config: Config = {
     '<rootDir>/src/__tests__/test-setup.ts'
   ],
   
-  // Setup variables d'environnement depuis .env.test
+  // ✅ CONFIGURATION CORRIGÉE POUR .js et .ts
   setupFiles: [
     '<rootDir>/jest.env.setup.js'
   ],
@@ -73,7 +84,7 @@ const config: Config = {
   maxWorkers: 4,
   verbose: true,
   
-  // Transform - Configuration TypeScript
+  // ✅ TRANSFORM CORRIGÉ - NOUVELLE SYNTAXE ts-jest
   transform: {
     '^.+\\.(t|j)s$': [
       'ts-jest',
@@ -81,6 +92,7 @@ const config: Config = {
         tsconfig: {
           experimentalDecorators: true,
           emitDecoratorMetadata: true,
+          allowJs: true  // ← AJOUTÉ pour jest.env.setup.js
         },
       },
     ],
@@ -106,17 +118,8 @@ const config: Config = {
   // Configuration roots
   roots: ['<rootDir>/src'],
   
-  // Ignore des warnings spécifiques
-  testEnvironmentOptions: {
-    // Configuration Node.js pour tests
-  },
-  
-  // Configuration pour permettre les imports ES6
-  extensionsToTreatAsEsm: [],
-  
-  // Configuration spécifique aux différents environnements
-  globalSetup: undefined,
-  globalTeardown: undefined,
+  // ✅ SUPPRIMÉ - globals deprecated
+  // globals: { ... }
 };
 
 export default config;

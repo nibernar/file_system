@@ -1274,7 +1274,7 @@ export interface VersionOptions {
  * Résultat d'un job dans la queue de traitement
  */
 export interface QueueJobResult {
-  jobId: string | number;
+  jobId: string;
   status: ProcessingJobStatus;
   result?: ProcessingResult;
   error?: string;
