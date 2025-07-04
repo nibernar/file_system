@@ -86,9 +86,6 @@ export interface LocalOptimizedImage {
   storageKey?: string;
 }
 
-/**
- * Résultat de génération de thumbnail
- */
 
 
 /**
@@ -460,7 +457,7 @@ export class ImageProcessorService {
       return {
         success: false,
         url: '',
-        storageKey: '',
+        storageKey: undefined,
         width: 0,
         height: 0,
         format: ImageFormat.WEBP,
@@ -529,7 +526,7 @@ export class ImageProcessorService {
       
       if (successfulConversions === 0) {
         throw new FormatConversionException(
-          fileId, // Assurez-vous que cette variable existe
+          fileId,
           'format_conversion',
           'Aucune conversion de format réussie',
           sourceMetadata.format || 'unknown',
@@ -675,11 +672,11 @@ export class ImageProcessorService {
       
     } catch (error) {
       throw new FormatConversionException(
-        fileId, // Assurez-vous que cette variable existe
+        fileId,
         'sharp_conversion', 
         `Erreur Sharp: ${error.message}`,
         sourceFormat,
-        targetFormat || 'unknown' // Assurez-vous que cette variable existe
+        targetFormat || 'unknown'
       );
     }
   }

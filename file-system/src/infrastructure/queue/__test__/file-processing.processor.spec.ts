@@ -1272,10 +1272,9 @@ describe('FileProcessingProcessor', () => {
 
     describe('Thumbnail Size Parsing', () => {
       it('should parse thumbnail sizes correctly', () => {
-        // On teste directement les valeurs attendues
-        expect(150).toBe(150); // small size
-        expect(300).toBe(300); // medium size 
-        expect(500).toBe(500); // large size
+        expect(150).toBe(150);
+        expect(300).toBe(300);
+        expect(500).toBe(500);
       });
     });
 

@@ -17,7 +17,6 @@ import {
   ImageProcessorService, 
   ImageOptimizationOptions,
   LocalOptimizedImage,
-  LocalThumbnailResult,
   LocalConversionResult
 } from '../image-processor.service';
 import { GarageStorageService } from '../../garage/garage-storage.service';
@@ -27,7 +26,8 @@ import {
   FileMetadata,
   VirusScanStatus,
   ProcessingStatus,
-  DocumentType
+  DocumentType,
+  LocalThumbnailResult
 } from '../../../types/file-system.types';
 import {
   FileNotFoundException,
@@ -428,20 +428,26 @@ describe('ImageProcessorService', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(result.formats).toHaveLength(2);
-      expect(result.dimensions.width).toBe(thumbnailSize);
-      expect(result.dimensions.height).toBe(thumbnailSize);
+      expect(result.dimensions).toBeDefined();
+      if (result.dimensions) {
+        expect(result.dimensions.width).toBe(thumbnailSize);
+        expect(result.dimensions.height).toBe(thumbnailSize);
+      }
 
       // Vérification formats générés
-      const webpFormat = result.formats.find(f => f.format === ImageFormat.WEBP);
-      const jpegFormat = result.formats.find(f => f.format === ImageFormat.JPEG);
+      expect(result.formats).toBeDefined();
+      if (result.formats) {
+        const webpFormat = result.formats.find(f => f.format === ImageFormat.WEBP);
+        const jpegFormat = result.formats.find(f => f.format === ImageFormat.JPEG);
 
-      expect(webpFormat).toBeDefined();
-      expect(webpFormat?.url).toContain('cdn.test.coders.com');
-      expect(jpegFormat).toBeDefined();
-      expect(jpegFormat?.url).toContain('cdn.test.coders.com');
+        expect(webpFormat).toBeDefined();
+        expect(webpFormat?.url).toContain('cdn.test.coders.com');
+        expect(jpegFormat).toBeDefined();
+        expect(jpegFormat?.url).toContain('cdn.test.coders.com');
 
-      // Vérification URL principale (premier format)
-      expect(result.url).toEqual(webpFormat?.url);
+        // Vérification URL principale (premier format)
+        expect(result.url).toEqual(webpFormat?.url);
+      }
 
       // Vérification pipeline redimensionnement thumbnail
       expect(mockSharpInstance.resize).toHaveBeenCalledWith(thumbnailSize, thumbnailSize, {
