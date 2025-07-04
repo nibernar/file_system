@@ -51,10 +51,8 @@ import {
   ThumbnailResult,
   ConversionJobData,
   FormatConversionResult,
-  ProcessingJobType,
   ProcessingStatus,
   VersionChangeType,
-  QueueJobResult,
   FileMetadata,
   VirusScanStatus,
   SecurityScanResult,
@@ -63,8 +61,6 @@ import {
   ImageFormat,
   VersionOptions,
 } from '../../types/file-system.types';
-
-// Exceptions
 import {
   FileNotFoundException,
   ProcessingException,
@@ -116,18 +112,6 @@ export class FileProcessingProcessor {
   // PROCESSEURS PRINCIPAUX - Jobs de la Queue
   // ============================================================================
 
-  /**
-   * Process principal pour le traitement complet d'un fichier uploadé
-   *
-   * Workflow intelligent selon le type de fichier :
-   * 1. Validation et récupération métadonnées
-   * 2. Scan sécurité et validation
-   * 3. Traitement spécialisé selon le type MIME
-   * 4. Optimisation et compression
-   * 5. Génération thumbnails/previews
-   * 6. Extraction métadonnées pour indexation
-   * 7. Finalisation et sauvegarde
-   */
   @Process('process-uploaded-file')
   async processUploadedFile(
     job: Job<ProcessingJobData>,
@@ -143,7 +127,6 @@ export class FileProcessingProcessor {
     });
 
     try {
-      // Étape 1 : Initialisation et validation (0-10%)
       await job.progress(0);
       await job.log(`Processing initiated for file ${fileId}`);
 
@@ -155,14 +138,12 @@ export class FileProcessingProcessor {
         `File validated: ${contentType}, size: ${fileMetadata.size} bytes`,
       );
 
-      // Initialisation du résultat
       const result: ProcessingResult = {
         success: false,
         processingTime: 0,
         metadata: fileMetadata,
       };
 
-      // Étape 2 : Scan sécurité (10-25%)
       await job.progress(15);
       await job.log('Starting security scan');
 
@@ -181,7 +162,6 @@ export class FileProcessingProcessor {
       await job.progress(25);
       await job.log('Security scan completed: CLEAN');
 
-      // Étape 3 : Traitement spécialisé selon le type (25-70%)
       await job.progress(30);
 
       if (this.isImageFile(contentType)) {
@@ -200,11 +180,9 @@ export class FileProcessingProcessor {
 
       await job.progress(70);
 
-      // Étape 4 : Finalisation (70-100%)
       await job.progress(80);
       await job.log('Finalizing processing');
 
-      // Mise à jour du statut en base
       await this.updateFileProcessingStatus(
         fileId,
         ProcessingStatus.COMPLETED,
@@ -213,7 +191,6 @@ export class FileProcessingProcessor {
 
       await job.progress(90);
 
-      // Métriques finales
       result.processingTime = Date.now() - startTime;
       result.success = true;
 
@@ -275,7 +252,6 @@ export class FileProcessingProcessor {
     try {
       await job.progress(0);
 
-      // Validation du fichier
       const fileMetadata = await this.getAndValidateFile(fileId);
       if (!this.isImageFile(fileMetadata.contentType)) {
         throw new ThumbnailGenerationException(
@@ -288,14 +264,12 @@ export class FileProcessingProcessor {
       await job.progress(20);
       await job.log('File validated for thumbnail generation');
 
-      // Utilisation du service d'images avec la vraie signature
       const thumbnailSize = this.parseThumbnailSize(sizes);
       const thumbnailFormats = this.parseThumbnailFormats(format);
 
       await job.progress(40);
       await job.log(`Generating ${thumbnailFormats.length} thumbnail formats`);
 
-      // Génération avec votre service réel
       const thumbnailResult = await this.imageProcessor.generateThumbnail(
         fileId,
         thumbnailSize,
@@ -304,14 +278,13 @@ export class FileProcessingProcessor {
 
       await job.progress(80);
 
-      // Conversion vers le format attendu par la queue
       const result: ThumbnailResult = {
         url: thumbnailResult.url,
         storageKey: `${fileId}/thumbnail/${Date.now()}`,
         width: thumbnailResult.dimensions?.width || thumbnailSize,
         height: thumbnailResult.dimensions?.height || thumbnailSize,
         format: thumbnailFormats[0],
-        size: 0, // À calculer si nécessaire
+        size: 0,
         generationTime: Date.now() - startTime,
         quality: quality || 85,
       };
@@ -339,7 +312,6 @@ export class FileProcessingProcessor {
     try {
       await job.progress(0);
 
-      // Validation
       const fileMetadata = await this.getAndValidateFile(fileId);
       if (!this.isPdfFile(fileMetadata.contentType)) {
         throw new OptimizationException(
@@ -352,7 +324,6 @@ export class FileProcessingProcessor {
       await job.progress(20);
       await job.log('PDF validation completed');
 
-      // Optimisation avec votre service réel
       const optimizationResult = await this.pdfProcessor.optimizePdf(fileId, {
         compressionLevel: options.pdfCompressionLevel || 6,
         linearize: true,
@@ -366,7 +337,6 @@ export class FileProcessingProcessor {
         `PDF optimized: ${(optimizationResult.compressionRatio * 100).toFixed(1)}% size ratio`,
       );
 
-      // Mise à jour métadonnées
       await this.updateFileProcessingStatus(
         fileId,
         ProcessingStatus.COMPLETED,
@@ -415,7 +385,6 @@ export class FileProcessingProcessor {
       let conversionResult: FormatConversionResult;
 
       if (this.isImageFile(fileMetadata.contentType)) {
-        // Conversion d'image
         const imageFormats = [targetFormat as ImageFormat];
         const results = await this.imageProcessor.generateMultipleFormats(
           fileId,
@@ -437,7 +406,6 @@ export class FileProcessingProcessor {
           success: result.success,
         };
       } else {
-        // Fallback pour autres types
         throw new Error(
           `Format conversion not supported for ${fileMetadata.contentType}`,
         );
@@ -445,7 +413,6 @@ export class FileProcessingProcessor {
 
       await job.progress(90);
 
-      // Création d'une nouvelle version si demandé
       if (options.createVersion !== false) {
         await this.createFileVersion(fileId, {
           createVersion: true,
@@ -484,7 +451,6 @@ export class FileProcessingProcessor {
 
       await job.progress(20);
 
-      // Nouveau scan de sécurité
       const scanResult = await this.performSecurityScan(fileId, fileMetadata);
 
       await job.progress(70);
@@ -493,7 +459,6 @@ export class FileProcessingProcessor {
         await job.log(`SECURITY ALERT: Threats detected in file ${fileId}`);
         await this.quarantineFile(fileId, scanResult.threatsFound);
       } else {
-        // Mise à jour du statut clean
         await this.fileMetadataRepository.update(fileId, {
           virusScanStatus: VirusScanStatus.CLEAN,
         });
@@ -527,17 +492,14 @@ export class FileProcessingProcessor {
       await job.progress(0);
       await job.log('Starting text processing');
 
-      // Simulation d'un traitement
       await job.progress(25);
       await job.log('Analyzing text content');
 
-      // Petite pause pour simuler le traitement
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       await job.progress(50);
       await job.log('Processing text metadata');
 
-      // Analyse simple du texte
       const wordCount = text.split(/\s+/).length;
       const charCount = text.length;
       const hasUpperCase = /[A-Z]/.test(text);
@@ -592,7 +554,6 @@ export class FileProcessingProcessor {
     result: ProcessingResult,
   ): Promise<void> {
     try {
-      // Optimisation image si demandée
       if (options.optimizeForWeb !== false) {
         await job.progress(35);
         await job.log('Optimizing image for web delivery');
@@ -617,14 +578,13 @@ export class FileProcessingProcessor {
         };
       }
 
-      // Génération thumbnail si demandée
       if (options.generateThumbnail !== false) {
         await job.progress(50);
         await job.log('Generating image thumbnail');
 
         const thumbnailResult = await this.imageProcessor.generateThumbnail(
           fileId,
-          150, // Taille par défaut
+          150,
           [ImageFormat.WEBP, ImageFormat.JPEG],
         );
 
@@ -633,23 +593,19 @@ export class FileProcessingProcessor {
         }
       }
 
-      // Extraction métadonnées image si demandée
       if (options.extractMetadata !== false) {
         await job.progress(60);
         await job.log('Extracting image metadata');
 
-        // Simulation - votre ImageProcessor pourrait avoir cette méthode
         result.extractedMetadata = {
           type: 'image',
           extractedAt: new Date(),
-          // Ajoutez d'autres métadonnées selon votre implémentation
         };
       }
     } catch (error) {
       this.logger.warn(
         `Image processing partially failed for ${fileId}: ${error.message}`,
       );
-      // Non bloquant - continuer le traitement
     }
   }
 
@@ -663,7 +619,6 @@ export class FileProcessingProcessor {
     result: ProcessingResult,
   ): Promise<void> {
     try {
-      // Optimisation PDF si demandée
       if (options.optimizeForWeb !== false) {
         await job.progress(40);
         await job.log('Optimizing PDF');
@@ -678,7 +633,6 @@ export class FileProcessingProcessor {
           this.convertOptimizedPdfToFileOptimizations(optimized);
       }
 
-      // Génération preview PDF si demandée
       if (options.generateThumbnail !== false) {
         await job.progress(55);
         await job.log('Generating PDF preview');
@@ -694,7 +648,6 @@ export class FileProcessingProcessor {
         }
       }
 
-      // Extraction métadonnées PDF
       if (options.extractMetadata !== false) {
         await job.progress(65);
         await job.log('Extracting PDF metadata');
@@ -710,7 +663,6 @@ export class FileProcessingProcessor {
       this.logger.warn(
         `PDF processing partially failed for ${fileId}: ${error.message}`,
       );
-      // Non bloquant
     }
   }
 
@@ -727,7 +679,6 @@ export class FileProcessingProcessor {
       await job.progress(40);
       await job.log('Processing document');
 
-      // Traitement avec votre service de documents
       const documentResult = await this.documentProcessor.processDocument(
         fileId,
         {
@@ -743,7 +694,7 @@ export class FileProcessingProcessor {
         result.extractedMetadata = {
           type: 'document',
           ...documentResult.specializedMetadata,
-          textContent: documentResult.textContent?.substring(0, 1000), // Extrait
+          textContent: documentResult.textContent?.substring(0, 1000),
           wordCount: documentResult.wordCount,
           lineCount: documentResult.lineCount,
           detectedLanguage: documentResult.detectedLanguage,
@@ -751,7 +702,6 @@ export class FileProcessingProcessor {
           extractedAt: new Date(),
         };
 
-        // Si encodage optimisé
         if (documentResult.optimizedEncoding) {
           result.optimizations = {
             originalSize: documentResult.characterCount,
@@ -787,7 +737,6 @@ export class FileProcessingProcessor {
     await job.progress(50);
     await job.log('Processing as generic file');
 
-    // Extraction métadonnées basiques uniquement
     if (options.extractMetadata !== false) {
       const fileMetadata = result.metadata;
       result.extractedMetadata = {
@@ -830,7 +779,6 @@ export class FileProcessingProcessor {
     fileId: string,
     metadata: FileMetadata,
   ): Promise<SecurityScanResult> {
-    // Simulation du scan - à remplacer par votre vraie logique de sécurité
     return {
       safe: true,
       threatsFound: [],
@@ -997,7 +945,6 @@ export class FileProcessingProcessor {
     };
   }
 
-  // Type checking helpers
   private isImageFile(contentType: string): boolean {
     return contentType.startsWith('image/');
   }
@@ -1024,7 +971,6 @@ export class FileProcessingProcessor {
    * Détection simple de langue
    */
   private detectLanguage(text: string): string {
-    // Détection très basique
     const frenchWords = [
       'le',
       'la',

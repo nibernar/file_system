@@ -13,19 +13,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { spawn } from 'child_process';
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import * as os from 'os';
 import {
   PdfProcessorService,
   PdfOptimizationOptions,
-  OptimizedPdf,
-  PdfMetadata,
-  PdfPreview,
 } from '../pdf-processor.service';
 import { GarageStorageService } from '../../garage/garage-storage.service';
 import { FILE_SYSTEM_CONFIG } from '../../../config/file-system.config';
 import {
-  ImageFormat,
   FileMetadata,
   VirusScanStatus,
   ProcessingStatus,
@@ -41,10 +36,8 @@ import {
   createTestPDFBuffer,
   createTestJPEGBuffer,
   generateTestUUID,
-  delay,
 } from '../../../__tests__/test-setup';
 
-// Mock des modules Node.js pour tests isolés
 jest.mock('child_process');
 jest.mock('fs/promises');
 jest.mock('os');
@@ -99,7 +92,6 @@ describe('PdfProcessorService', () => {
     stderr: string = '',
   ) => {
     const mock = {
-      // Streams obligatoires
       stdout: {
         on: jest.fn().mockImplementation((event, callback) => {
           if (event === 'data' && stdout) {
@@ -121,7 +113,6 @@ describe('PdfProcessorService', () => {
         end: jest.fn(),
       },
 
-      // Gestion des événements processus
       on: jest.fn().mockImplementation((event, callback) => {
         if (event === 'close') {
           setImmediate(() => callback(exitCode));
@@ -156,9 +147,7 @@ describe('PdfProcessorService', () => {
       const config = sequence[callIndex] || sequence[sequence.length - 1];
       callIndex++;
 
-      // Si un command est spécifié, vérifier qu'il correspond
       if (config.command && command !== config.command) {
-        // Utiliser la config par défaut si pas de match
         return createSimpleProcessMock(0, '', '') as any;
       }
 
@@ -175,7 +164,6 @@ describe('PdfProcessorService', () => {
   // =============================================================================
 
   beforeEach(async () => {
-    // Configuration de base
     mockConfig = {
       processing: {
         virusScanTimeout: 30000,
@@ -186,7 +174,6 @@ describe('PdfProcessorService', () => {
       },
     };
 
-    // Mock services
     const mockStorageService = {
       downloadObject: jest.fn(),
       uploadObject: jest.fn(),
@@ -201,7 +188,6 @@ describe('PdfProcessorService', () => {
       error: jest.fn(),
     };
 
-    // Configuration mocks filesystem
     mockOs.tmpdir.mockReturnValue('/tmp');
     mockFs.access.mockResolvedValue(undefined);
     mockFs.mkdir.mockResolvedValue(undefined);
@@ -209,11 +195,9 @@ describe('PdfProcessorService', () => {
     mockFs.readFile.mockResolvedValue(Buffer.from('default-file-content'));
     mockFs.unlink.mockResolvedValue(undefined);
 
-    // Reset complet des mocks
     mockSpawn.mockReset();
     mockSpawn.mockClear();
 
-    // Configuration module NestJS
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PdfProcessorService,
@@ -223,12 +207,10 @@ describe('PdfProcessorService', () => {
       ],
     }).compile();
 
-    // Récupération instances
     service = module.get<PdfProcessorService>(PdfProcessorService);
     storageService = module.get(GarageStorageService);
     logger = module.get(Logger);
 
-    // Mock par défaut pour les vérifications d'outils dans le constructeur
     mockSpawn.mockImplementation((command: string) => {
       if (
         command.includes('version') ||
@@ -266,10 +248,9 @@ describe('PdfProcessorService', () => {
 
   describe('optimizePdf - Optimisation avec Ghostscript', () => {
     it('should optimize PDF with complete compression workflow', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourcePdfBuffer = createTestPDFBuffer();
-      const optimizedSize = 150; // Taille plus petite que l'original
+      const optimizedSize = 150;
 
       const options: PdfOptimizationOptions = {
         compressionLevel: 8,
@@ -280,7 +261,6 @@ describe('PdfProcessorService', () => {
         maxImageDpi: 150,
       };
 
-      // Configuration storage
       storageService.downloadObject.mockResolvedValue({
         body: sourcePdfBuffer,
         metadata: {
@@ -301,7 +281,6 @@ describe('PdfProcessorService', () => {
         uploadDuration: 500,
       });
 
-      // Configuration séquence d'appels spawn
       createSequentialSpawnMock([
         {
           command: 'pdfinfo',
@@ -324,17 +303,14 @@ Page size: 612 x 792 pts (letter)`,
         },
       ]);
 
-      // Mock fichiers temporaires
       const optimizedBuffer = Buffer.from('a'.repeat(optimizedSize));
       mockFs.readFile
-        .mockResolvedValueOnce(optimizedBuffer) // Lecture après ghostscript
-        .mockResolvedValueOnce(optimizedBuffer) // Lecture après qpdf
-        .mockResolvedValueOnce(optimizedBuffer); // Lecture finale
+        .mockResolvedValueOnce(optimizedBuffer)
+        .mockResolvedValueOnce(optimizedBuffer)
+        .mockResolvedValueOnce(optimizedBuffer);
 
-      // Act
       const result = await service.optimizePdf(fileId, options);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.originalSize).toBe(sourcePdfBuffer.length);
       expect(result.optimizedSize).toBe(optimizedSize);
@@ -349,8 +325,6 @@ Page size: 612 x 792 pts (letter)`,
         ]),
       );
       expect(result.pageCount).toBe(5);
-
-      // Vérification des appels
       expect(mockSpawn).toHaveBeenCalledWith('pdfinfo', expect.any(Array));
       expect(mockSpawn).toHaveBeenCalledWith(
         'gs',
@@ -363,7 +337,6 @@ Page size: 612 x 792 pts (letter)`,
     });
 
     it('should handle Ghostscript errors gracefully', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const corruptedPdfBuffer = Buffer.from('not-a-pdf');
 
@@ -378,7 +351,6 @@ Page size: 612 x 792 pts (letter)`,
         fromCache: false,
       });
 
-      // Configuration : pdfinfo OK, ghostscript FAIL
       createSequentialSpawnMock([
         {
           command: 'pdfinfo',
@@ -392,7 +364,6 @@ Page size: 612 x 792 pts (letter)`,
         },
       ]);
 
-      // Act & Assert
       await expect(service.optimizePdf(fileId, {})).rejects.toThrow(
         OptimizationException,
       );
@@ -405,7 +376,6 @@ Page size: 612 x 792 pts (letter)`,
 
   describe('generatePreview - Génération Previews Images', () => {
     it('should generate multi-page previews successfully', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourcePdfBuffer = createTestPDFBuffer();
       const pageCount = 3;
@@ -422,7 +392,6 @@ Page size: 612 x 792 pts (letter)`,
         fromCache: false,
       });
 
-      // Configuration spawn pour preview
       createSequentialSpawnMock([
         {
           command: 'pdfinfo',
@@ -437,7 +406,6 @@ Page size: 612 x 792 pts (letter)`,
         },
       ]);
 
-      // Mock lecture images
       const pageBuffers = Array(pageCount)
         .fill(null)
         .map(() => createTestJPEGBuffer());
@@ -445,7 +413,6 @@ Page size: 612 x 792 pts (letter)`,
         mockFs.readFile.mockResolvedValueOnce(buffer);
       });
 
-      // Mock sauvegarde
       const uploadPromises = Array(pageCount)
         .fill(null)
         .map((_, i) =>
@@ -459,10 +426,8 @@ Page size: 612 x 792 pts (letter)`,
           }),
         );
 
-      // Act
       const result = await service.generatePreview(fileId, pageCount, dpi);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.pagePreview).toHaveLength(pageCount);
       expect(result.thumbnailUrl).toContain('cdn.test.coders.com');
@@ -473,15 +438,12 @@ Page size: 612 x 792 pts (letter)`,
       });
 
       expect(storageService.uploadObject).toHaveBeenCalledTimes(pageCount);
-
-      // Le service fait du nettoyage : pages + fichiers temporaires
       expect(mockFs.unlink).toHaveBeenCalledTimes(pageCount + 1);
     });
 
     it('should validate preview generation parameters', async () => {
       const fileId = generateTestUUID();
 
-      // Tests de validation synchrones (pas besoin de mocks complexes)
       await expect(service.generatePreview(fileId, 3, 500)).rejects.toThrow(
         ThumbnailGenerationException,
       );
@@ -506,7 +468,6 @@ Page size: 612 x 792 pts (letter)`,
 
   describe('extractMetadata - Extraction Métadonnées PDF', () => {
     it('should extract complete PDF metadata successfully', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourcePdfBuffer = createTestPDFBuffer();
 
@@ -535,7 +496,6 @@ Page size:      612 x 792 pts (letter)`;
         fromCache: false,
       });
 
-      // Configuration spawn
       createSequentialSpawnMock([
         {
           command: 'pdfinfo',
@@ -549,10 +509,8 @@ Page size:      612 x 792 pts (letter)`;
         },
       ]);
 
-      // Act
       const metadata = await service.extractMetadata(fileId);
 
-      // Assert
       expect(metadata).toBeDefined();
       expect(metadata.title).toBe('Test Document Title');
       expect(metadata.author).toBe('John Doe');
@@ -564,10 +522,8 @@ Page size:      612 x 792 pts (letter)`;
       expect(metadata.pdfVersion).toBe('1.7');
       expect(metadata.encrypted).toBe(false);
       expect(metadata.hasAcroForm).toBe(false);
-
       expect(metadata.creationDate).toBeInstanceOf(Date);
       expect(metadata.modificationDate).toBeInstanceOf(Date);
-
       expect(metadata.pageSize).toEqual({
         width: 612,
         height: 792,
@@ -579,7 +535,6 @@ Page size:      612 x 792 pts (letter)`;
     });
 
     it('should handle pdfinfo command failures', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const corruptedPdfBuffer = Buffer.from('not-a-pdf-file');
 
@@ -594,7 +549,6 @@ Page size:      612 x 792 pts (letter)`;
         fromCache: false,
       });
 
-      // Mock processus qui échoue
       createSequentialSpawnMock([
         {
           command: 'pdfinfo',
@@ -603,7 +557,6 @@ Page size:      612 x 792 pts (letter)`;
         },
       ]);
 
-      // Act & Assert
       await expect(service.extractMetadata(fileId)).rejects.toThrow(
         ProcessingException,
       );
@@ -626,7 +579,6 @@ Page size:      612 x 792 pts (letter)`;
         OptimizationException,
       );
 
-      // Vérifier qu'aucun traitement PDF n'a été tenté
       const processedCalls = mockSpawn.mock.calls.filter(
         (call) =>
           ['gs', 'qpdf', 'pdftoppm'].includes(call[0]) &&
@@ -636,11 +588,9 @@ Page size:      612 x 792 pts (letter)`;
     });
 
     it('should recover from temporary failures', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourcePdfBuffer = createTestPDFBuffer();
 
-      // Premier échec puis succès
       storageService.downloadObject
         .mockRejectedValueOnce(new Error('Storage temporarily unavailable'))
         .mockResolvedValueOnce({
@@ -654,12 +604,10 @@ Page size:      612 x 792 pts (letter)`;
           fromCache: false,
         });
 
-      // Premier échec
       await expect(service.optimizePdf(fileId, {})).rejects.toThrow(
         OptimizationException,
       );
 
-      // Setup pour le retry réussi
       createSequentialSpawnMock([
         {
           command: 'pdfinfo',
@@ -685,7 +633,6 @@ Page size:      612 x 792 pts (letter)`;
         uploadDuration: 400,
       });
 
-      // Second essai réussit
       const result = await service.optimizePdf(fileId, {});
 
       expect(result.optimizedSize).toBe(optimizedBuffer.length);
@@ -707,7 +654,6 @@ Page size:      612 x 792 pts (letter)`;
         fromCache: false,
       });
 
-      // Configuration : pdfinfo OK, ghostscript timeout
       createSequentialSpawnMock([
         {
           command: 'pdfinfo',
@@ -716,7 +662,7 @@ Page size:      612 x 792 pts (letter)`;
         },
         {
           command: 'gs',
-          exitCode: -1, // Force une erreur
+          exitCode: -1,
         },
       ]);
 

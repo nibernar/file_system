@@ -38,7 +38,6 @@ import {
   FileProcessingException,
 } from '../../exceptions/file-system.exceptions';
 import { MetricsService } from '../../infrastructure/monitoring/metrics.service';
-import { CacheService } from '../../infrastructure/cache/cache.service';
 
 /**
  * Configuration des priorités de traitement
@@ -46,19 +45,10 @@ import { CacheService } from '../../infrastructure/cache/cache.service';
  * Définit les règles de priorité selon différents critères
  */
 interface PriorityConfiguration {
-  /** Priorité de base par type de document */
   documentTypePriority: Record<DocumentType, number>;
-
-  /** Bonus de priorité pour utilisateurs premium */
   premiumUserBonus: number;
-
-  /** Pénalité pour gros fichiers */
   largeSizePenalty: number;
-
-  /** Seuil de taille pour pénalité (en bytes) */
   largeSizeThreshold: number;
-
-  /** Priorité minimale et maximale */
   minPriority: number;
   maxPriority: number;
 }
@@ -91,7 +81,7 @@ export class ProcessFileAsyncUseCase {
     },
     premiumUserBonus: 2,
     largeSizePenalty: -2,
-    largeSizeThreshold: 50 * 1024 * 1024, // 50MB
+    largeSizeThreshold: 50 * 1024 * 1024,
     minPriority: 1,
     maxPriority: 10,
   };
@@ -140,18 +130,14 @@ export class ProcessFileAsyncUseCase {
     this.logger.log(`Processing file ${fileId} asynchronously`, { options });
 
     try {
-      // Étape 1 : Validation du fichier
       const fileMetadata = await this.validateAndGetFile(fileId);
 
-      // Étape 2 : Vérification de l'état de traitement
       this.validateProcessingState(fileMetadata);
 
-      // Étape 3 : Calcul de la priorité
       const priority = this.calculateJobPriority(fileMetadata, options);
 
       this.logger.debug(`Calculated priority ${priority} for file ${fileId}`);
 
-      // Étape 4 : Préparation des données du job
       const jobData = this.prepareJobData(
         fileId,
         fileMetadata,
@@ -159,22 +145,17 @@ export class ProcessFileAsyncUseCase {
         options,
       );
 
-      // Étape 5 : Ajout à la queue avec configuration appropriée
       const job = await this.addToQueue(jobData, priority);
 
-      // Étape 6 : Mise à jour du statut en base de données
       await this.updateFileStatus(fileId, ProcessingStatus.PROCESSING, {
         jobId: job.id as string,
         queuedAt: new Date(),
       });
 
-      // Étape 7 : Cache des informations du job pour suivi rapide
       await this.cacheJobInfo(fileId, job);
 
-      // Étape 8 : Métriques et monitoring
       await this.recordMetrics(fileMetadata, priority, Date.now() - startTime);
 
-      // Étape 9 : Estimation du temps de traitement
       const estimatedDuration = this.estimateProcessingDuration(
         fileMetadata,
         options,
@@ -200,7 +181,6 @@ export class ProcessFileAsyncUseCase {
     } catch (error) {
       this.logger.error(`Failed to queue file ${fileId} for processing`, error);
 
-      // Mise à jour du statut en cas d'erreur
       await this.updateFileStatus(fileId, ProcessingStatus.FAILED, {
         error: error.message,
         failedAt: new Date(),
@@ -263,17 +243,14 @@ export class ProcessFileAsyncUseCase {
         throw new ProcessingQueueException(`Job ${jobId} not found`);
       }
 
-      // Vérification que le job peut être annulé
       const state = await job.getState();
       if (state === 'completed' || state === 'failed') {
         this.logger.warn(`Cannot cancel job ${jobId} in state ${state}`);
         return false;
       }
 
-      // Annulation du job
       await job.remove();
 
-      // Mise à jour du statut du fichier
       const jobData = job.data as ProcessingJobData;
       if (jobData.fileId) {
         await this.updateFileStatus(jobData.fileId, ProcessingStatus.PENDING, {
@@ -307,7 +284,6 @@ export class ProcessFileAsyncUseCase {
         throw new ProcessingQueueException(`Job ${jobId} not found`);
       }
 
-      // Vérification que le job est en échec
       const state = await job.getState();
       if (state !== 'failed') {
         throw new ProcessingQueueException(
@@ -315,7 +291,6 @@ export class ProcessFileAsyncUseCase {
         );
       }
 
-      // Réessai du job
       await job.retry();
 
       this.logger.log(`Job ${jobId} retried successfully`);
@@ -345,7 +320,6 @@ export class ProcessFileAsyncUseCase {
     const results: QueueJobResult[] = [];
     const errors: Array<{ fileId: string; error: Error }> = [];
 
-    // Traitement parallèle avec limite de concurrence
     const batchSize = 10;
     for (let i = 0; i < fileIds.length; i += batchSize) {
       const batch = fileIds.slice(i, i + batchSize);
@@ -423,7 +397,6 @@ export class ProcessFileAsyncUseCase {
       );
     }
 
-    // Vérification supplémentaire pour le scan antivirus
     if (fileMetadata.virusScanStatus === VirusScanStatus.INFECTED) {
       throw new FileProcessingException(
         `File ${fileMetadata.id} is infected and cannot be processed`,
@@ -442,36 +415,26 @@ export class ProcessFileAsyncUseCase {
     fileMetadata: FileMetadata,
     options: ProcessingOptions,
   ): number {
-    let priority = 5; // Priorité de base
+    let priority = 5;
 
-    // 1. Priorité selon le type de document
     const typePriority =
       this.priorityConfig.documentTypePriority[fileMetadata.documentType];
     if (typePriority) {
       priority = typePriority;
     }
 
-    // 2. Bonus pour utilisateur premium (à implémenter avec auth)
-    // if (user.isPremium) {
-    //   priority += this.priorityConfig.premiumUserBonus;
-    // }
-
-    // 3. Pénalité pour gros fichiers
     if (fileMetadata.size > this.priorityConfig.largeSizeThreshold) {
       priority += this.priorityConfig.largeSizePenalty;
     }
 
-    // 4. Priorité explicite dans les options
     if (options.priority !== undefined) {
       priority = options.priority;
     }
 
-    // 5. Ajustement selon l'urgence (si spécifié)
     if (options.urgent) {
       priority = Math.max(priority + 3, 8);
     }
 
-    // 6. Normalisation dans les limites
     priority = Math.max(
       this.priorityConfig.minPriority,
       Math.min(this.priorityConfig.maxPriority, priority),
@@ -522,7 +485,7 @@ export class ProcessFileAsyncUseCase {
       startedAt: undefined,
       completedAt: undefined,
       fileData: {
-        buffer: Buffer.alloc(0), // Sera chargé par le processor
+        buffer: Buffer.alloc(0),
         metadata: fileMetadata,
       },
       userId: fileMetadata.userId,
@@ -550,14 +513,14 @@ export class ProcessFileAsyncUseCase {
           attempts: 3,
           backoff: {
             type: 'exponential',
-            delay: 5000, // 5s, 10s, 20s
+            delay: 5000,
           },
           removeOnComplete: {
-            age: 24 * 3600, // Garder 24h pour historique
-            count: 1000, // Garder max 1000 jobs complétés
+            age: 24 * 3600,
+            count: 1000,
           },
           removeOnFail: {
-            age: 7 * 24 * 3600, // Garder 7 jours pour debug
+            age: 7 * 24 * 3600,
           },
           timeout: this.calculateTimeout(jobData.fileData?.metadata),
         },
@@ -581,23 +544,20 @@ export class ProcessFileAsyncUseCase {
    * @returns Timeout en millisecondes
    */
   private calculateTimeout(metadata?: FileMetadata): number {
-    if (!metadata) return 60000; // 1 minute par défaut
+    if (!metadata) return 60000;
 
-    // Base: 30s + 1s par MB
     const baseTimeout = 30000;
     const sizeTimeout = Math.ceil(metadata.size / (1024 * 1024)) * 1000;
 
-    // Ajustement selon le type
     let typeMultiplier = 1;
     if (metadata.contentType === 'application/pdf') {
-      typeMultiplier = 1.5; // PDFs prennent plus de temps
+      typeMultiplier = 1.5;
     } else if (metadata.contentType.startsWith('video/')) {
-      typeMultiplier = 2; // Vidéos encore plus
+      typeMultiplier = 2;
     }
 
     const timeout = (baseTimeout + sizeTimeout) * typeMultiplier;
 
-    // Max 10 minutes
     return Math.min(timeout, 600000);
   }
 
@@ -620,7 +580,6 @@ export class ProcessFileAsyncUseCase {
       });
     } catch (error) {
       this.logger.error(`Failed to update file status for ${fileId}`, error);
-      // Ne pas propager l'erreur pour ne pas bloquer le traitement
     }
   }
 
@@ -654,7 +613,6 @@ export class ProcessFileAsyncUseCase {
     priority: number,
     queueTime: number,
   ): Promise<void> {
-    // Métriques de performance
     await this.metricsService.recordHistogram(
       'file_processing_queue_time',
       queueTime,
@@ -664,7 +622,6 @@ export class ProcessFileAsyncUseCase {
       },
     );
 
-    // Métriques de priorité
     await this.metricsService.recordHistogram(
       'file_processing_priority',
       priority,
@@ -673,7 +630,6 @@ export class ProcessFileAsyncUseCase {
       },
     );
 
-    // Compteur de jobs
     await this.metricsService.incrementCounter('file_processing_jobs_queued', {
       contentType: fileMetadata.contentType,
     });
@@ -690,17 +646,14 @@ export class ProcessFileAsyncUseCase {
     fileMetadata: FileMetadata,
     options: ProcessingOptions,
   ): number {
-    // Base: 5s + 0.5s par MB
     let duration = 5000 + (fileMetadata.size / (2 * 1024 * 1024)) * 1000;
 
-    // Ajustements selon le type
     if (fileMetadata.contentType === 'application/pdf') {
       duration *= 1.5;
     } else if (fileMetadata.contentType.startsWith('video/')) {
       duration *= 3;
     }
 
-    // Ajustements selon les options
     if (options.generateThumbnail) duration += 2000;
     if (options.optimizeForWeb) duration += 3000;
     if (options.extractMetadata) duration += 1000;
@@ -718,9 +671,6 @@ export class ProcessFileAsyncUseCase {
     try {
       const counts = await this.fileProcessingQueue.getJobCounts();
       const priority = job.opts.priority || 0;
-
-      // Estimation basique basée sur les jobs en attente
-      // Les jobs de priorité plus élevée passeront devant
       const waitingJobs = counts.waiting || 0;
       const position = Math.ceil((waitingJobs * (11 - priority)) / 10);
 

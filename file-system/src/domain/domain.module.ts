@@ -1,11 +1,9 @@
-// src/domain/domain.module.ts
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { FileProcessingService } from './services/file-processing.service';
 import { FileSecurityService } from './services/file-security.service';
 import { FileMetadataService } from './services/file-metadata.service';
 import { FileVersioningService } from './services/file-versioning.service';
-
 import { PersistenceModule } from '../infrastructure/persistence/persistence.module';
 import { GarageModule } from '../infrastructure/garage/garage.module';
 import { SecurityModule } from '../infrastructure/security/security.module';

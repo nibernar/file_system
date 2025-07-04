@@ -20,7 +20,6 @@ export class PrismaService
   }
 
   async enableShutdownHooks(app: INestApplication) {
-    // Utilisation des événements process standards pour le shutdown
     const cleanup = async () => {
       await this.$disconnect();
       await app.close();

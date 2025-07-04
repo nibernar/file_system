@@ -1,4 +1,3 @@
-// src/infrastructure/processing/processing.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ImageProcessorService } from './image-processor.service';

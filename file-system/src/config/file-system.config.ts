@@ -2,7 +2,6 @@ import { registerAs } from '@nestjs/config';
 import {
   IsString,
   IsNumber,
-  IsBoolean,
   IsArray,
   IsOptional,
   validateSync,
@@ -28,29 +27,15 @@ import { plainToClass, Transform } from 'class-transformer';
  * offrant autonomie infrastructure et contrôle complet des données.
  */
 export interface GarageConfig {
-  /** URL d'endpoint du service Garage S3 (ex: https://s3.coders.com) */
   endpoint: string;
-
-  /** Clé d'accès pour l'authentification Garage S3 */
   accessKey: string;
-
-  /** Clé secrète pour l'authentification Garage S3 */
   secretKey: string;
-
-  /** Configuration des buckets S3 pour différents types de données */
   buckets: {
-    /** Bucket principal pour les documents utilisateur */
     documents: string;
-    /** Bucket pour les sauvegardes et archivage */
     backups: string;
-    /** Bucket pour les fichiers temporaires pendant traitement */
     temp: string;
   };
-
-  /** Région AWS compatible pour Garage S3 (ex: eu-west-1) */
   region: string;
-
-  /** Force path-style pour compatibilité Garage S3 */
   forcePathStyle: boolean;
 }
 
@@ -61,22 +46,11 @@ export interface GarageConfig {
  * les performances d'accès aux fichiers depuis le monde entier.
  */
 export interface CDNConfig {
-  /** URL de base du CDN (ex: https://cdn.coders.com) */
   baseUrl: string;
-
-  /** Directives de contrôle de cache par défaut */
   cacheControl: string;
-
-  /** Token d'authentification pour l'API d'invalidation CDN */
   invalidationToken: string;
-
-  /** Liste des emplacements edge disponibles pour la distribution */
   edgeLocations: string[];
-
-  /** TTL par défaut du cache CDN en secondes */
   defaultTtl: number;
-
-  /** TTL maximum du cache CDN en secondes */
   maxTtl: number;
 }
 
@@ -87,28 +61,13 @@ export interface CDNConfig {
  * et la validation des fichiers uploadés.
  */
 export interface ProcessingConfig {
-  /** Taille maximale autorisée pour un fichier en octets (100MB par défaut) */
   maxFileSize: number;
-
-  /** Liste des types MIME autorisés pour l'upload */
   allowedMimeTypes: string[];
-
-  /** Timeout pour le scan antivirus en millisecondes */
   virusScanTimeout: number;
-
-  /** Qualité de compression pour l'optimisation d'images (0-100) */
   imageOptimizationQuality: number;
-
-  /** Taille des thumbnails générés en pixels */
   thumbnailSize: number;
-
-  /** Niveau de compression PDF (0-9, 9 = maximum) */
   pdfCompressionLevel: number;
-
-  /** Nombre maximum de workers pour le traitement parallèle */
   maxWorkers: number;
-
-  /** Taille des chunks pour le traitement streaming en octets */
   chunkSize: number;
 }
 
@@ -119,28 +78,13 @@ export interface ProcessingConfig {
  * la validation, le scan antivirus et le contrôle d'accès.
  */
 export interface SecurityConfig {
-  /** Durée d'expiration des URLs pré-signées en secondes */
   presignedUrlExpiry: number;
-
-  /** Nombre maximum d'URLs pré-signées par utilisateur */
   maxPresignedUrls: number;
-
-  /** Activation des restrictions par adresse IP */
   ipRestrictionEnabled: boolean;
-
-  /** Activation du scan antivirus pour tous les fichiers */
   scanVirusEnabled: boolean;
-
-  /** Nombre maximum d'uploads par utilisateur par minute */
   rateLimitUploadsPerMinute: number;
-
-  /** Durée de blacklist temporaire en cas d'abus (secondes) */
   abuseBlockDuration: number;
-
-  /** Activation du device fingerprinting avancé */
   deviceFingerprintingEnabled: boolean;
-
-  /** Clé secrète pour la signature des tokens sécurisés */
   securityTokenSecret: string;
 }
 
@@ -151,16 +95,9 @@ export interface SecurityConfig {
  * gestion centralisée et cohérente.
  */
 export interface FileSystemConfig {
-  /** Configuration du service de stockage Garage S3 */
   garage: GarageConfig;
-
-  /** Configuration du service CDN */
   cdn: CDNConfig;
-
-  /** Configuration du traitement des fichiers */
   processing: ProcessingConfig;
-
-  /** Configuration de la sécurité */
   security: SecurityConfig;
 }
 
@@ -171,7 +108,6 @@ export interface FileSystemConfig {
  * de l'application selon les contraintes définies.
  */
 class FileSystemConfigValidation {
-  // Configuration Garage S3
   @IsString()
   GARAGE_ENDPOINT: string;
 
@@ -193,7 +129,6 @@ class FileSystemConfigValidation {
   @IsString()
   GARAGE_REGION: string;
 
-  // Configuration CDN
   @IsString()
   CDN_BASE_URL: string;
 
@@ -219,7 +154,6 @@ class FileSystemConfigValidation {
   @IsOptional()
   CDN_MAX_TTL: number;
 
-  // Configuration Processing
   @IsNumber()
   @Transform(({ value }) => parseInt(value, 10))
   @IsOptional()
@@ -260,7 +194,6 @@ class FileSystemConfigValidation {
   @IsOptional()
   PROCESSING_CHUNK_SIZE: number;
 
-  // Configuration Security
   @IsNumber()
   @Transform(({ value }) => parseInt(value, 10))
   @IsOptional()
@@ -272,17 +205,13 @@ class FileSystemConfigValidation {
   MAX_PRESIGNED_URLS: number;
 
   @Transform(({ value }) => {
-    // Si pas défini, utiliser la valeur par défaut (true)
     if (value === undefined || value === null) return true;
-    // Sinon convertir : 'true' donne true, tout le reste donne false
     return String(value).toLowerCase() === 'true';
   })
   IP_RESTRICTION_ENABLED: boolean;
 
   @Transform(({ value }) => {
-    // Si pas défini, utiliser la valeur par défaut (true)
     if (value === undefined || value === null) return true;
-    // Sinon convertir : 'true' donne true, tout le reste donne false
     return String(value).toLowerCase() === 'true';
   })
   SCAN_VIRUS_ENABLED: boolean;
@@ -298,9 +227,7 @@ class FileSystemConfigValidation {
   ABUSE_BLOCK_DURATION: number;
 
   @Transform(({ value }) => {
-    // Si pas défini, utiliser la valeur par défaut (true)
     if (value === undefined || value === null) return true;
-    // Sinon convertir : 'true' donne true, tout le reste donne false
     return String(value).toLowerCase() === 'true';
   })
   DEVICE_FINGERPRINTING_ENABLED: boolean;
@@ -330,7 +257,6 @@ class FileSystemConfigValidation {
 function validateConfig(
   config: Record<string, unknown>,
 ): FileSystemConfigValidation {
-  // Vérification des chaînes vides pour les champs requis
   const requiredStringFields = [
     'GARAGE_ENDPOINT',
     'GARAGE_ACCESS_KEY',
@@ -393,30 +319,30 @@ const DEFAULT_CONFIG: Partial<FileSystemConfig> = {
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ],
-    virusScanTimeout: 30000, // 30 secondes
+    virusScanTimeout: 30000,
     imageOptimizationQuality: 85,
     thumbnailSize: 200,
     pdfCompressionLevel: 6,
     maxWorkers: 4,
-    chunkSize: 64 * 1024, // 64KB
+    chunkSize: 64 * 1024,
   },
   security: {
-    presignedUrlExpiry: 3600, // 1 heure
+    presignedUrlExpiry: 3600,
     maxPresignedUrls: 10,
     ipRestrictionEnabled: true,
     scanVirusEnabled: true,
     rateLimitUploadsPerMinute: 10,
-    abuseBlockDuration: 300, // 5 minutes
+    abuseBlockDuration: 300,
     deviceFingerprintingEnabled: true,
-    securityTokenSecret: '', // Sera rempli par l'env var
+    securityTokenSecret: '',
   },
   cdn: {
-    baseUrl: '', // Sera rempli par l'env var
-    cacheControl: 'public, max-age=86400', // 24 heures
-    invalidationToken: '', // Sera rempli par l'env var
+    baseUrl: '',
+    cacheControl: 'public, max-age=86400',
+    invalidationToken: '',
     edgeLocations: ['eu-west-1', 'us-east-1', 'ap-southeast-1'],
-    defaultTtl: 86400, // 24 heures
-    maxTtl: 604800, // 7 jours
+    defaultTtl: 86400,
+    maxTtl: 604800,
   },
 };
 
@@ -431,10 +357,8 @@ const DEFAULT_CONFIG: Partial<FileSystemConfig> = {
  * @throws Error si des variables requises sont manquantes ou invalides
  */
 export default registerAs('fileSystem', (): FileSystemConfig => {
-  // Validation des variables d'environnement
   const validatedEnv = validateConfig(process.env);
 
-  // Construction de la configuration finale
   const config: FileSystemConfig = {
     garage: {
       endpoint: validatedEnv.GARAGE_ENDPOINT,
@@ -446,7 +370,7 @@ export default registerAs('fileSystem', (): FileSystemConfig => {
         temp: validatedEnv.GARAGE_BUCKET_TEMP,
       },
       region: validatedEnv.GARAGE_REGION,
-      forcePathStyle: true, // Toujours true pour Garage S3
+      forcePathStyle: true,
     },
 
     cdn: {
@@ -493,7 +417,6 @@ export default registerAs('fileSystem', (): FileSystemConfig => {
       maxPresignedUrls:
         validatedEnv.MAX_PRESIGNED_URLS ||
         DEFAULT_CONFIG.security!.maxPresignedUrls,
-      // Gestion booléens : undefined = défaut, 'true' = true, tout le reste = false
       ipRestrictionEnabled:
         process.env.IP_RESTRICTION_ENABLED === undefined
           ? DEFAULT_CONFIG.security!.ipRestrictionEnabled
@@ -601,7 +524,7 @@ export function getEnvironmentConfig(env: string): Partial<FileSystemConfig> {
         ...baseConfig,
         processing: {
           ...baseConfig.processing!,
-          maxFileSize: 10 * 1024 * 1024, // 10MB en dev
+          maxFileSize: 10 * 1024 * 1024,
           maxWorkers: 2,
           allowedMimeTypes: baseConfig.processing!.allowedMimeTypes,
           virusScanTimeout: baseConfig.processing!.virusScanTimeout,
@@ -613,7 +536,7 @@ export function getEnvironmentConfig(env: string): Partial<FileSystemConfig> {
         },
         security: {
           ...baseConfig.security!,
-          scanVirusEnabled: false, // Désactivé en dev
+          scanVirusEnabled: false,
           deviceFingerprintingEnabled: false,
           securityTokenSecret: baseConfig.security!.securityTokenSecret,
           presignedUrlExpiry: baseConfig.security!.presignedUrlExpiry,
@@ -630,7 +553,7 @@ export function getEnvironmentConfig(env: string): Partial<FileSystemConfig> {
         ...baseConfig,
         processing: {
           ...baseConfig.processing!,
-          maxFileSize: 50 * 1024 * 1024, // 50MB en staging
+          maxFileSize: 50 * 1024 * 1024,
           allowedMimeTypes: baseConfig.processing!.allowedMimeTypes,
           virusScanTimeout: baseConfig.processing!.virusScanTimeout,
           imageOptimizationQuality:
@@ -642,7 +565,7 @@ export function getEnvironmentConfig(env: string): Partial<FileSystemConfig> {
         },
         security: {
           ...baseConfig.security!,
-          rateLimitUploadsPerMinute: 20, // Plus permissif en staging
+          rateLimitUploadsPerMinute: 20,
           securityTokenSecret: baseConfig.security!.securityTokenSecret,
           presignedUrlExpiry: baseConfig.security!.presignedUrlExpiry,
           maxPresignedUrls: baseConfig.security!.maxPresignedUrls,

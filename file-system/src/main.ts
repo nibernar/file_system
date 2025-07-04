@@ -1,4 +1,3 @@
-// src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -8,10 +7,8 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Configuration globale de l'API
   app.setGlobalPrefix('api/v1');
 
-  // Validation globale
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -23,13 +20,11 @@ async function bootstrap() {
     }),
   );
 
-  // CORS
   app.enableCors({
     origin: process.env.CORS_ORIGIN || '*',
     credentials: true,
   });
 
-  // Configuration Swagger (Documentation API)
   if (
     process.env.NODE_ENV !== 'production' ||
     process.env.SWAGGER_ENABLED === 'true'
@@ -53,7 +48,6 @@ async function bootstrap() {
     logger.log('📚 Swagger documentation enabled at /api/docs');
   }
 
-  // Bull Board pour monitoring des queues (optionnel)
   if (process.env.BULL_BOARD_ENABLED === 'true') {
     try {
       const { createBullBoard } = await import('@bull-board/api');
@@ -64,7 +58,6 @@ async function bootstrap() {
       const serverAdapter = new ExpressAdapter();
       serverAdapter.setBasePath('/admin/queues');
 
-      // Récupérer la queue en utilisant le token
       const queueToken = getQueueToken('file-processing');
       const fileProcessingQueue = app.get(queueToken);
 
@@ -80,17 +73,14 @@ async function bootstrap() {
     }
   }
 
-  // Graceful shutdown
   app.enableShutdownHooks();
 
-  // Démarrage du serveur
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
 
   logger.log(`🚀 Application is running on: http://localhost:${port}`);
   logger.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
 
-  // Afficher les endpoints disponibles
   logger.log('📍 Available endpoints:');
   logger.log(`   - API: http://localhost:${port}/api/v1`);
 

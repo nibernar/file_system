@@ -1,5 +1,3 @@
-// src/infrastructure/persistence/__tests__/file-metadata.repository.spec.ts
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -52,7 +50,6 @@ describe('FileMetadataRepository', () => {
   });
 
   it('should create file metadata with all required fields', async () => {
-    // Arrange
     const createDto = {
       userId: 'user-123',
       filename: 'test.pdf',
@@ -99,10 +96,8 @@ describe('FileMetadataRepository', () => {
       },
     );
 
-    // Act
     const result = await repository.create(createDto);
 
-    // Assert
     expect(result).toBeDefined();
     expect(result.id).toBe('file-123');
     expect(result.filename).toBe('test.pdf');
@@ -110,7 +105,6 @@ describe('FileMetadataRepository', () => {
   });
 
   it('should find files by user with proper filtering', async () => {
-    // Arrange
     const userId = 'user-123';
     const mockFiles = [
       {
@@ -138,10 +132,8 @@ describe('FileMetadataRepository', () => {
 
     (prismaService.files.findMany as jest.Mock).mockResolvedValue(mockFiles);
 
-    // Act
     const result = await repository.findByUserId(userId, { limit: 10 });
 
-    // Assert
     expect(result).toHaveLength(1);
     expect(result[0].userId).toBe(userId);
     expect(prismaService.files.findMany).toHaveBeenCalledWith({
@@ -153,7 +145,6 @@ describe('FileMetadataRepository', () => {
   });
 
   it('should update metadata while preserving constraints', async () => {
-    // Arrange
     const fileId = 'file-123';
     const updates = {
       filename: 'updated.pdf',
@@ -179,16 +170,13 @@ describe('FileMetadataRepository', () => {
       },
     );
 
-    // Act
     const result = await repository.update(fileId, updates);
 
-    // Assert
     expect(result).toBeDefined();
     expect(result.filename).toBe('updated.pdf');
   });
 
   it('should calculate storage usage accurately', async () => {
-    // Arrange
     const userId = 'user-123';
     const mockTotalStats = {
       _sum: { size: BigInt(1000000) },
@@ -223,10 +211,8 @@ describe('FileMetadataRepository', () => {
       .mockResolvedValueOnce(mockByDocumentType);
     (prismaService.$queryRaw as jest.Mock).mockResolvedValue(mockTagStats);
 
-    // Act
     const result = await repository.getUserStorageUsage(userId);
 
-    // Assert
     expect(result.totalSize).toBe(1000000);
     expect(result.fileCount).toBe(10);
     expect(result.byContentType).toHaveLength(1);
@@ -234,7 +220,6 @@ describe('FileMetadataRepository', () => {
   });
 
   it('should handle concurrent access correctly', async () => {
-    // Arrange
     const userId = 'user-123';
     const concurrentCount = 5;
 
@@ -246,13 +231,11 @@ describe('FileMetadataRepository', () => {
     (prismaService.$queryRaw as jest.Mock).mockResolvedValue([]);
     (cacheManager.get as jest.Mock).mockResolvedValue(null);
 
-    // Act - Appels simultanés
     const promises = Array.from({ length: concurrentCount }, () =>
       repository.getUserStorageUsage(userId),
     );
     const results = await Promise.all(promises);
 
-    // Assert
     expect(results).toHaveLength(concurrentCount);
     results.forEach((result) => {
       expect(result.totalSize).toBe(1000);
@@ -261,7 +244,6 @@ describe('FileMetadataRepository', () => {
   });
 
   it('should cache frequently accessed metadata', async () => {
-    // Arrange
     const fileId = 'file-123';
     const cachedMetadata = {
       id: fileId,
@@ -283,10 +265,8 @@ describe('FileMetadataRepository', () => {
 
     (cacheManager.get as jest.Mock).mockResolvedValue(cachedMetadata);
 
-    // Act
     const result = await repository.findById(fileId);
 
-    // Assert
     expect(result).toEqual(cachedMetadata);
     expect(cacheManager.get).toHaveBeenCalledWith(`file:metadata:${fileId}`);
     expect(prismaService.files.findUnique).not.toHaveBeenCalled();

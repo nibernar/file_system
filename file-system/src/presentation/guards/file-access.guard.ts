@@ -1,4 +1,3 @@
-// src/presentation/guards/file-access.guard.ts
 import {
   Injectable,
   CanActivate,
@@ -92,11 +91,9 @@ export class FileAccessGuard implements CanActivate {
     const requestId = this.generateRequestId();
 
     try {
-      // 1. Extraction du contexte de requête
       const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
       const handler = context.getHandler();
 
-      // 2. Validation de l'authentification
       const user = request.user;
       if (!user || !user.id) {
         this.logger.warn(`Access attempt without authentication`, {
@@ -105,13 +102,11 @@ export class FileAccessGuard implements CanActivate {
         throw new UnauthorizedException('Authentication required');
       }
 
-      // 3. Extraction de l'opération requise via décorateur
       const requiredOperation = this.reflector.get<FileOperation>(
         FILE_OPERATION_KEY,
         handler,
       );
       if (!requiredOperation) {
-        // Si aucune opération spécifiée, on autorise (pour les endpoints génériques)
         this.logger.debug(`No file operation required for endpoint`, {
           userId: user.id,
           path: request.path,
@@ -120,7 +115,6 @@ export class FileAccessGuard implements CanActivate {
         return true;
       }
 
-      // 4. Extraction de l'ID du fichier depuis la requête
       const fileId = this.extractFileId(request);
       if (!fileId) {
         this.logger.warn(`File access attempt without fileId`, {
@@ -132,7 +126,6 @@ export class FileAccessGuard implements CanActivate {
         throw new BadRequestException('File ID is required');
       }
 
-      // Validation format ID fichier
       if (!this.isValidFileId(fileId)) {
         this.logger.warn(`Invalid file ID format: ${fileId}`, {
           userId: user.id,
@@ -141,14 +134,12 @@ export class FileAccessGuard implements CanActivate {
         throw new BadRequestException('Invalid file ID format');
       }
 
-      // 5. Vérification des permissions via FileSecurityService existant
       const hasAccess = await this.fileSecurityService.checkFileAccess(
         fileId,
         user.id,
         requiredOperation,
       );
 
-      // 6. Gestion du résultat
       if (!hasAccess) {
         this.logger.warn(`File access denied`, {
           userId: user.id,
@@ -165,14 +156,9 @@ export class FileAccessGuard implements CanActivate {
           operation: requiredOperation,
           ipAddress: request.security?.clientIp || request.ip,
         });
-        // L'audit est déjà géré dans FileSecurityService.checkFileAccess()
-        // donc pas besoin de dupliquer ici
-
-        // Erreur générique pour éviter la fuite d'information
         throw new ForbiddenException('Access denied');
       }
 
-      // 7. Logging succès et métriques
       const duration = Date.now() - startTime;
       this.logger.log(`File access granted`, {
         userId: user.id,
@@ -187,15 +173,12 @@ export class FileAccessGuard implements CanActivate {
     } catch (error) {
       const duration = Date.now() - startTime;
 
-      // Log erreur mais sans exposer de détails sensibles
       this.logger.error(`File access guard error: ${error.message}`, {
         duration,
         requestId,
-        // Ne pas logger la stack complète en production
         ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
       });
 
-      // Re-throw les erreurs HTTP connues
       if (
         error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
@@ -204,7 +187,6 @@ export class FileAccessGuard implements CanActivate {
         throw error;
       }
 
-      // Erreur générique pour les erreurs inattendues
       throw new ForbiddenException('Access verification failed');
     }
   }
@@ -223,27 +205,22 @@ export class FileAccessGuard implements CanActivate {
    * @private
    */
   private extractFileId(request: AuthenticatedRequest): string | null {
-    // Priorité 1: Paramètres de route les plus communs
     if (request.params?.fileId) {
       return request.params.fileId;
     }
 
-    // Alternative: paramètre 'id' générique
     if (request.params?.id) {
       return request.params.id;
     }
 
-    // Priorité 2: Query parameters
     if (request.query?.fileId && typeof request.query.fileId === 'string') {
       return request.query.fileId;
     }
 
-    // Priorité 3: Corps de la requête (pour POST/PUT)
     if (request.body?.fileId) {
       return request.body.fileId;
     }
 
-    // Priorité 4: Headers personnalisés (pour certaines APIs)
     const headerFileId = request.headers['x-file-id'];
     if (headerFileId && typeof headerFileId === 'string') {
       return headerFileId;
@@ -279,31 +256,24 @@ export class FileAccessGuard implements CanActivate {
       return false;
     }
 
-    // Rejet explicite des caractères dangereux
     const dangerousChars = /[<>'"&|;$`\\\/\.\.\s]/;
     if (dangerousChars.test(fileId)) {
       return false;
     }
 
-    // Longueur minimale pour éviter les IDs trop courts (aligné sur les tests)
     if (fileId.length < 8) {
-      // Changé de 3 à 8
       return false;
     }
 
-    // Longueur maximale raisonnable
     if (fileId.length > 255) {
       return false;
     }
 
-    // UUID v4 format standard
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-    // Format préfixé flexible (file-, doc-, etc.)
     const prefixedIdRegex = /^[a-zA-Z]+[-_][a-zA-Z0-9-_]{2,}$/;
 
-    // Identifiants alphanumériques simples (au moins 8 caractères)
     const simpleIdRegex = /^[a-zA-Z0-9-_]{8,}$/;
 
     return (
@@ -381,7 +351,6 @@ export class FileAccessGuard implements CanActivate {
   ): void {
     const isDevelopment = process.env.NODE_ENV === 'development';
 
-    // En production, on évite de logger les données sensibles
     const sanitizedData = isDevelopment ? data : this.sanitizeLogData(data);
 
     this.logger[level](message, sanitizedData);
@@ -404,7 +373,6 @@ export class FileAccessGuard implements CanActivate {
 
     const sanitized = { ...data };
 
-    // Masquer les informations potentiellement sensibles
     const sensitiveFields = ['password', 'token', 'secret', 'key', 'auth'];
 
     for (const field of sensitiveFields) {
@@ -413,7 +381,6 @@ export class FileAccessGuard implements CanActivate {
       }
     }
 
-    // Tronquer les IDs trop longs pour éviter les fuites
     if (sanitized.fileId && typeof sanitized.fileId === 'string') {
       sanitized.fileId =
         sanitized.fileId.length > 20

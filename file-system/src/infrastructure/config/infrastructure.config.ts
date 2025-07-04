@@ -10,7 +10,6 @@
 import { registerAs } from '@nestjs/config';
 
 export const infrastructureConfig = registerAs('infrastructure', () => ({
-  // Configuration Storage
   storage: {
     garage: {
       endpoint: process.env.GARAGE_ENDPOINT || 'http://localhost:3900',
@@ -25,7 +24,6 @@ export const infrastructureConfig = registerAs('infrastructure', () => ({
     },
   },
 
-  // Configuration Cache
   cache: {
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
@@ -37,7 +35,6 @@ export const infrastructureConfig = registerAs('infrastructure', () => ({
     maxItems: parseInt(process.env.CACHE_MAX_ITEMS || '10000', 10),
   },
 
-  // Configuration Queue
   queue: {
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
@@ -49,7 +46,6 @@ export const infrastructureConfig = registerAs('infrastructure', () => ({
     maxJobs: parseInt(process.env.QUEUE_MAX_JOBS || '100', 10),
   },
 
-  // Configuration Processing
   processing: {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '104857600', 10), // 100MB
     timeout: parseInt(process.env.PROCESSING_TIMEOUT || '300000', 10), // 5min
@@ -57,7 +53,6 @@ export const infrastructureConfig = registerAs('infrastructure', () => ({
     thumbnailSize: parseInt(process.env.THUMBNAIL_SIZE || '200', 10),
   },
 
-  // Configuration Security
   security: {
     virusScan: {
       enabled: process.env.VIRUS_SCAN_ENABLED === 'true',
@@ -69,7 +64,6 @@ export const infrastructureConfig = registerAs('infrastructure', () => ({
     },
   },
 
-  // Configuration Monitoring
   monitoring: {
     metrics: {
       enabled: process.env.METRICS_ENABLED !== 'false',

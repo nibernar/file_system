@@ -1,11 +1,9 @@
-// src/presentation/presentation.module.ts
 import { Module } from '@nestjs/common';
 import { FileAccessGuard } from './guards/file-access.guard';
 import { TestFilesController } from './controllers/test-files.controller';
 import { FileSecurityService } from '../domain/services/file-security.service';
 import { VirusScannerService } from '../infrastructure/security/virus-scanner.service';
 import { FileValidatorService } from '../infrastructure/security/file-validator.service';
-import { FileAuditInterceptor } from './interceptors/file-audit.interceptor';
 
 /**
  * Providers temporaires pour les tests - remplacer par les vrais services plus tard
@@ -71,10 +69,8 @@ const mockStorageService = {
   providers: [
     FileAccessGuard,
     FileSecurityService,
-    // Services existants (à adapter selon votre structure)
     VirusScannerService,
     FileValidatorService,
-    // Providers temporaires pour les tests
     mockAuditService,
     mockRateLimitService,
     mockFileMetadataService,

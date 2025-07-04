@@ -1,14 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
 import {
   UploadFileDto,
   FormatValidation,
   ContentValidation,
-  MimeTypeValidation,
 } from '../../types/file-system.types';
 import {
-  FILE_SYSTEM_CONSTANTS,
   FILE_SIZE_LIMITS,
   SUPPORTED_MIME_TYPES,
 } from '../../constants/file-system.constants';
@@ -24,52 +21,43 @@ export class FileValidatorService {
   private readonly allowedMimeTypes: string[];
   private readonly strictValidation: boolean;
 
-  // Magic numbers pour détection type réel
   private readonly magicNumbers = new Map<string, string[]>([
-    // Images
     ['image/jpeg', ['FFD8FF']],
     ['image/png', ['89504E47']],
-    ['image/gif', ['474946383761', '474946383961']], // GIF87a, GIF89a
-    ['image/webp', ['52494646', '57454250']], // RIFF + WEBP
+    ['image/gif', ['474946383761', '474946383961']],
+    ['image/webp', ['52494646', '57454250']],
     ['image/bmp', ['424D']],
     ['image/tiff', ['49492A00', '4D4D002A']],
-
-    // Documents
     ['application/pdf', ['255044462D']],
     ['application/zip', ['504B0304', '504B0506', '504B0708']],
     ['application/x-rar-compressed', ['526172211A0700']],
     ['application/x-7z-compressed', ['377ABCAF271C']],
 
-    // Office documents (ZIP-based)
     [
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       ['504B0304'],
-    ], // .docx
+    ],
     [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ['504B0304'],
-    ], // .xlsx
+    ],
     [
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       ['504B0304'],
-    ], // .pptx
+    ],
 
-    // Texte
-    ['text/plain', []], // Pas de magic number spécifique
-    ['text/html', ['3C21444F43545950452068746D6C', '3C68746D6C']], // <!DOCTYPE html, <html
-    ['text/xml', ['3C3F786D6C']], // <?xml
-    ['application/json', []], // Validation par parsing JSON
+    ['text/plain', []],
+    ['text/html', ['3C21444F43545950452068746D6C', '3C68746D6C']],
+    ['text/xml', ['3C3F786D6C']],
+    ['application/json', []],
 
-    // Audio/Vidéo
-    ['audio/mpeg', ['494433', 'FFFB', 'FFF3', 'FFF2']], // MP3
-    ['audio/wav', ['52494646']], // RIFF
-    ['video/mp4', ['66747970']], // ftyp
-    ['video/avi', ['52494646']], // RIFF
-
-    // Exécutables (interdits)
-    ['application/x-executable', ['7F454C46', '4D5A']], // ELF, PE
-    ['application/x-msdos-program', ['4D5A']], // PE/EXE
-    ['application/x-msdownload', ['4D5A']], // PE/EXE
+    ['audio/mpeg', ['494433', 'FFFB', 'FFF3', 'FFF2']],
+    ['audio/wav', ['52494646']],
+    ['video/mp4', ['66747970']],
+    ['video/avi', ['52494646']],
+    ['application/x-executable', ['7F454C46', '4D5A']],
+    ['application/x-msdos-program', ['4D5A']],
+    ['application/x-msdownload', ['4D5A']],
   ]);
 
   constructor(private readonly configService: ConfigService) {
@@ -110,30 +98,24 @@ export class FileValidatorService {
     };
 
     try {
-      // 1. Validation taille
       if (!this.validateFileSize(file.size, validation)) {
         return validation;
       }
 
-      // 2. Validation nom de fichier
       if (!this.validateFilename(file.filename, validation)) {
         return validation;
       }
 
-      // 3. Validation MIME type déclaré
       if (!this.validateDeclaredMimeType(file.contentType, validation)) {
         return validation;
       }
 
-      // 4. Validation magic numbers (si buffer disponible)
       if (file.buffer) {
         await this.validateMagicNumbers(file, validation);
       }
 
-      // 5. Validation cohérence extension/MIME
       this.validateExtensionMimeConsistency(file, validation);
 
-      // 6. Validation spécifique par type
       if (file.buffer && validation.valid) {
         await this.validateSpecificFormat(file, validation);
       }
@@ -178,19 +160,14 @@ export class FileValidatorService {
         return validation;
       }
 
-      // 1. Analyse heuristique générale
       await this.performHeuristicAnalysis(file, validation);
 
-      // 2. Validation contenu selon type MIME
       await this.validateContentByType(file, validation);
 
-      // 3. Détection scripts malveillants
       await this.detectMaliciousScripts(file, validation);
 
-      // 4. Validation métadonnées intégrées
       await this.validateEmbeddedMetadata(file, validation);
 
-      // 5. Analyse entropie (détection chiffrement/compression suspecte)
       this.analyzeEntropy(file, validation);
 
       this.logger.log(
@@ -247,13 +224,12 @@ export class FileValidatorService {
     filename: string,
     validation: FormatValidation,
   ): boolean {
-    // Patterns dangereux
     const dangerousPatterns = [
-      /\.\./, // Path traversal
-      /[<>:"|?*]/, // Caractères interdits Windows
-      /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, // Noms réservés Windows
-      /^\.+$/, // Seulement des points
-      /\.(exe|scr|bat|cmd|com|pif|vbs|js|jar|app|deb|rpm)$/i, // Extensions dangereuses
+      /\.\./,
+      /[<>:"|?*]/,
+      /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i,
+      /^\.+$/,
+      /\.(exe|scr|bat|cmd|com|pif|vbs|js|jar|app|deb|rpm)$/i,
     ];
 
     for (const pattern of dangerousPatterns) {
@@ -266,14 +242,12 @@ export class FileValidatorService {
       }
     }
 
-    // Longueur
     if (filename.length > 255) {
       validation.valid = false;
       validation.errors.push('Filename too long (max 255 characters)');
       return false;
     }
 
-    // Caractères de contrôle
     if (/[\x00-\x1F\x7F-\x9F]/.test(filename)) {
       validation.valid = false;
       validation.errors.push('Filename contains control characters');
@@ -296,7 +270,6 @@ export class FileValidatorService {
       return false;
     }
 
-    // Format MIME type
     if (
       !/^[a-zA-Z][a-zA-Z0-9][a-zA-Z0-9\!\#\$\&\-\^]*\/[a-zA-Z0-9][a-zA-Z0-9\!\#\$\&\-\^]*$/.test(
         mimeType,
@@ -307,7 +280,6 @@ export class FileValidatorService {
       return false;
     }
 
-    // Vérification liste autorisée
     const isAllowed = this.allowedMimeTypes.some((allowed) => {
       if (allowed.endsWith('/*')) {
         return mimeType.startsWith(allowed.slice(0, -1));
@@ -337,7 +309,6 @@ export class FileValidatorService {
       .toUpperCase();
     validation.fileSignature = fileSignature;
 
-    // Vérification magic numbers
     const expectedMagics = this.magicNumbers.get(file.contentType) || [];
 
     if (expectedMagics.length > 0) {
@@ -346,7 +317,6 @@ export class FileValidatorService {
       );
 
       if (!signatureMatch) {
-        // Tentative détection type réel
         const detectedType = this.detectMimeTypeFromSignature(fileSignature);
         validation.actualMimeType = detectedType;
 
@@ -444,7 +414,6 @@ export class FileValidatorService {
   ): Promise<void> {
     const buffer = file.buffer;
 
-    // Vérification patterns suspects
     const suspiciousPatterns = [
       /javascript:/gi,
       /<script[^>]*>/gi,
@@ -480,7 +449,6 @@ export class FileValidatorService {
     const buffer = file.buffer;
 
     if (file.contentType.startsWith('text/')) {
-      // Validation encodage texte
       try {
         const text = buffer.toString('utf8');
         validation.metadata.textLength = text.length;
@@ -511,13 +479,11 @@ export class FileValidatorService {
     const buffer = file.buffer;
     const content = buffer.toString('ascii', 0, Math.min(buffer.length, 16384));
 
-    // Scripts shell
     if (content.startsWith('#!')) {
       validation.threats.push('Shell script detected');
       validation.safe = false;
     }
 
-    // Commandes système dangereuses
     const dangerousCommands = [
       'rm -rf',
       'del /s',
@@ -544,8 +510,6 @@ export class FileValidatorService {
     file: UploadFileDto,
     validation: ContentValidation,
   ): Promise<void> {
-    // TODO: Implémenter extraction et validation métadonnées EXIF, XMP, etc.
-    // Vérifier absence de données sensibles dans métadonnées
     validation.analysis.metadataExtracted = false;
   }
 
@@ -561,7 +525,6 @@ export class FileValidatorService {
 
     validation.analysis.entropy = entropy;
 
-    // Entropie très élevée = possiblement chiffré/compressé de manière suspecte
     if (entropy > 7.5) {
       validation.warnings.push(
         `High entropy detected (${entropy.toFixed(2)}), file may be encrypted or highly compressed`,
@@ -606,7 +569,6 @@ export class FileValidatorService {
       return;
     }
 
-    // Vérification fin de fichier PDF
     const endContent = buffer.toString(
       'ascii',
       Math.max(0, buffer.length - 128),
@@ -640,14 +602,11 @@ export class FileValidatorService {
   ): void {
     const content = buffer.toString('utf8');
 
-    // Vérification basique XML
     if (!content.trim().startsWith('<')) {
       validation.valid = false;
       validation.errors.push('Invalid XML: must start with <');
       return;
     }
-
-    // TODO: Validation XML plus poussée avec parser
   }
 
   /**
@@ -658,7 +617,6 @@ export class FileValidatorService {
     mimeType: string,
     validation: FormatValidation,
   ): void {
-    // Validation basique selon le type
     switch (mimeType) {
       case 'image/jpeg':
         if (

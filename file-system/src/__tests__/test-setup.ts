@@ -1,5 +1,3 @@
-// src/__tests__/test-setup.ts
-
 /**
  * Configuration globale des tests pour le système de fichiers Coders V1
  *
@@ -32,14 +30,11 @@ import { randomBytes, createHash } from 'crypto';
  * Respecte les variables déjà chargées depuis .env.test et ajoute uniquement les manquantes
  */
 const setupTestEnvironment = (): void => {
-  // Variables complémentaires (seulement si pas déjà définies)
   const complementaryEnvVars = {
-    // Configuration Node.js (respect .env.test)
     NODE_ENV: process.env.NODE_ENV || 'test',
     TZ: process.env.TZ || 'UTC',
     LOG_LEVEL: process.env.LOG_LEVEL || 'error',
 
-    // Garage S3 Configuration (respect .env.test en priorité)
     GARAGE_ENDPOINT:
       process.env.GARAGE_ENDPOINT || 'https://s3.test.coders.com',
     GARAGE_ACCESS_KEY:
@@ -54,8 +49,6 @@ const setupTestEnvironment = (): void => {
     GARAGE_BUCKET_TEMP: process.env.GARAGE_BUCKET_TEMP || 'test-coders-temp',
     GARAGE_REGION: process.env.GARAGE_REGION || 'eu-west-1',
     GARAGE_FORCE_PATH_STYLE: process.env.GARAGE_FORCE_PATH_STYLE || 'true',
-
-    // Garage S3 Configuration Tests d'Intégration (Step 1.2)
     GARAGE_TEST_ENDPOINT:
       process.env.GARAGE_TEST_ENDPOINT || 'http://localhost:3900',
     GARAGE_TEST_REGION: process.env.GARAGE_TEST_REGION || 'garage',
@@ -66,8 +59,6 @@ const setupTestEnvironment = (): void => {
       'abcdef1234567890abcdef1234567890abcdef12',
     GARAGE_TEST_BUCKET:
       process.env.GARAGE_TEST_BUCKET || `test-integration-${Date.now()}`,
-
-    // CDN Configuration (respect .env.test)
     CDN_BASE_URL: process.env.CDN_BASE_URL || 'https://cdn.test.coders.com',
     CDN_CACHE_CONTROL: process.env.CDN_CACHE_CONTROL || 'public, max-age=300',
     CDN_INVALIDATION_TOKEN:
@@ -78,9 +69,7 @@ const setupTestEnvironment = (): void => {
     CDN_DEFAULT_TTL: process.env.CDN_DEFAULT_TTL || '300',
     CDN_MAX_TTL: process.env.CDN_MAX_TTL || '3600',
     CDN_INVALIDATION_ENABLED: process.env.CDN_INVALIDATION_ENABLED || 'false',
-
-    // Processing Configuration (respect .env.test)
-    MAX_FILE_SIZE: process.env.MAX_FILE_SIZE || '104857600', // Respect .env.test value
+    MAX_FILE_SIZE: process.env.MAX_FILE_SIZE || '104857600',
     ALLOWED_MIME_TYPES:
       process.env.ALLOWED_MIME_TYPES ||
       'image/jpeg,image/png,image/gif,image/webp,application/pdf,text/plain,text/markdown,application/json',
@@ -90,8 +79,6 @@ const setupTestEnvironment = (): void => {
     IMAGE_OPTIMIZATION_QUALITY: process.env.IMAGE_OPTIMIZATION_QUALITY || '85',
     THUMBNAIL_SIZE: process.env.THUMBNAIL_SIZE || '128',
     PDF_COMPRESSION_LEVEL: process.env.PDF_COMPRESSION_LEVEL || '6',
-
-    // Security Configuration (respect .env.test)
     PRESIGNED_URL_EXPIRY: process.env.PRESIGNED_URL_EXPIRY || '1800',
     MAX_PRESIGNED_URLS: process.env.MAX_PRESIGNED_URLS || '10',
     IP_RESTRICTION_ENABLED: process.env.IP_RESTRICTION_ENABLED || 'false',
@@ -133,7 +120,6 @@ const setupTestEnvironment = (): void => {
     CLEANUP_TEMP_FILES: process.env.CLEANUP_TEMP_FILES || 'true',
   };
 
-  // Application uniquement des variables manquantes (pas d'écrasement)
   Object.keys(complementaryEnvVars).forEach((key) => {
     if (!process.env[key]) {
       process.env[key] = complementaryEnvVars[key];
@@ -158,11 +144,9 @@ const setupTestEnvironment = (): void => {
  * Appliqué uniquement pour les tests unitaires (Step 1.2)
  */
 const setupAWSMocks = (): void => {
-  // Mock principal du client S3 avec réponses par défaut
   jest.mock('@aws-sdk/client-s3', () => ({
     S3Client: jest.fn().mockImplementation(() => ({
       send: jest.fn().mockResolvedValue({
-        // Valeurs par défaut pour éviter les erreurs undefined
         ETag: '"default-etag"',
         Location: 'https://test-garage.example.com/test-bucket/default-object',
         UploadId: 'default-upload-id',
@@ -192,7 +176,6 @@ const setupAWSMocks = (): void => {
       destroy: jest.fn(),
     })),
 
-    // Commands pour opérations de base
     PutObjectCommand: jest.fn().mockImplementation((input) => ({
       input,
       resolveMiddleware: jest.fn(),
@@ -214,7 +197,6 @@ const setupAWSMocks = (): void => {
       resolveMiddleware: jest.fn(),
     })),
 
-    // Commands pour multipart upload
     CreateMultipartUploadCommand: jest.fn().mockImplementation((input) => ({
       input,
       resolveMiddleware: jest.fn(),
@@ -232,7 +214,6 @@ const setupAWSMocks = (): void => {
       resolveMiddleware: jest.fn(),
     })),
 
-    // Commands avancées
     CopyObjectCommand: jest.fn().mockImplementation((input) => ({
       input,
       resolveMiddleware: jest.fn(),
@@ -242,12 +223,10 @@ const setupAWSMocks = (): void => {
       resolveMiddleware: jest.fn(),
     })),
 
-    // Waiters et utilitaires
     waitUntilObjectExists: jest.fn().mockResolvedValue({}),
     waitUntilObjectNotExists: jest.fn().mockResolvedValue({}),
   }));
 
-  // Mock des utilitaires S3 avec structure correcte
   jest.mock('@aws-sdk/s3-request-presigner', () => ({
     getSignedUrl: jest
       .fn()
@@ -258,7 +237,6 @@ const setupAWSMocks = (): void => {
       }),
   }));
 
-  // Mock de la librairie de upload multipart avec réponse complète
   jest.mock('@aws-sdk/lib-storage', () => ({
     Upload: jest.fn().mockImplementation((params) => ({
       done: jest.fn().mockResolvedValue({
@@ -272,7 +250,6 @@ const setupAWSMocks = (): void => {
     })),
   }));
 
-  // Mock UUID pour reproductibilité des tests
   jest.mock('uuid', () => ({
     v4: jest.fn(() => 'mock-uuid-v4-for-tests-12345678'),
   }));
@@ -289,30 +266,21 @@ const setupAWSMocks = (): void => {
  * Mise en place de l'environnement de test complet
  */
 beforeAll(async () => {
-  // 1. Configuration variables d'environnement complémentaires
-  // (jest.env.setup.js a déjà chargé .env.test)
   setupTestEnvironment();
-
-  // 2. Configuration des mocks AWS SDK pour tests unitaires
   setupAWSMocks();
-
-  // 3. Configuration timezone pour tests déterministes
   process.env.TZ = 'UTC';
+  jest.setTimeout(60000);
 
-  // 4. Configuration des timeouts pour tests d'intégration
-  jest.setTimeout(60000); // 60 secondes max par test (pour tests d'intégration)
-
-  // 5. Configuration console selon LOG_LEVEL de .env.test
   const originalConsole = console;
   if (process.env.NODE_ENV === 'test') {
     const logLevel = process.env.LOG_LEVEL || 'error';
     global.console = {
       ...originalConsole,
       log: logLevel === 'error' ? jest.fn() : originalConsole.log,
-      debug: jest.fn(), // Toujours masquer debug
+      debug: jest.fn(),
       info: logLevel === 'error' ? jest.fn() : originalConsole.info,
-      warn: originalConsole.warn, // Garder les warnings
-      error: originalConsole.error, // Garder les erreurs
+      warn: originalConsole.warn,
+      error: originalConsole.error,
     };
   }
 
@@ -324,10 +292,8 @@ beforeAll(async () => {
  * Reset des mocks et état propre
  */
 beforeEach(() => {
-  // Reset des mocks entre chaque test pour isolation
   jest.clearAllMocks();
 
-  // Reset des timers si utilisés dans les tests
   if (jest.isMockFunction(setTimeout)) {
     jest.clearAllTimers();
   }
@@ -338,12 +304,10 @@ beforeEach(() => {
  * Optionnel : nettoyage spécifique si nécessaire
  */
 afterEach(async () => {
-  // Attendre que tous les timers se terminent
   if (jest.isMockFunction(setTimeout)) {
     jest.runOnlyPendingTimers();
   }
 
-  // Petit délai pour permettre aux promesses de se résoudre
   await new Promise((resolve) => setTimeout(resolve, 10));
 });
 
@@ -352,10 +316,8 @@ afterEach(async () => {
  * Restauration de l'état initial
  */
 afterAll(() => {
-  // Restauration des mocks
   jest.restoreAllMocks();
 
-  // Restauration console si nécessaire
   if (process.env.NODE_ENV === 'test') {
     // Restaurer console sera fait automatiquement par Jest
   }
@@ -448,55 +410,10 @@ export function createTestPDFBuffer(): Buffer {
  */
 export function createTestJPEGBuffer(): Buffer {
   const jpegHeader = Buffer.from([
-    0xff,
-    0xd8, // SOI (Start of Image)
-    0xff,
-    0xe0, // APP0
-    0x00,
-    0x10, // Length of APP0 segment
-    0x4a,
-    0x46,
-    0x49,
-    0x46,
-    0x00, // "JFIF\0"
-    0x01,
-    0x01, // JFIF version 1.1
-    0x01, // Density units (inches)
-    0x00,
-    0x48, // X density (72 DPI)
-    0x00,
-    0x48, // Y density (72 DPI)
-    0x00,
-    0x00, // Thumbnail width and height (0 = no thumbnail)
-
-    // Minimal quantization table and image data
-    0xff,
-    0xc0, // SOF0 (Start of Frame)
-    0x00,
-    0x11, // Length
-    0x08, // Data precision
-    0x00,
-    0x01,
-    0x00,
-    0x01, // Image dimensions (1x1)
-    0x01, // Number of components
-    0x01,
-    0x11,
-    0x00, // Component info
-
-    0xff,
-    0xda, // SOS (Start of Scan)
-    0x00,
-    0x08, // Length
-    0x01, // Number of components
-    0x01,
-    0x00, // Component selector and Huffman table
-    0x00,
-    0x3f,
-    0x00, // Spectral selection
-
-    0xff,
-    0xd9, // EOI (End of Image)
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
+    0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, 0xff, 0xc0, 0x00, 0x11,
+    0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0xff, 0xda, 0x00,
+    0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00, 0xff, 0xd9,
   ]);
 
   return jpegHeader;
@@ -513,68 +430,16 @@ export function createTestPNGBuffer(): Buffer {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
   ]);
   const ihdrChunk = Buffer.from([
-    0x00,
-    0x00,
-    0x00,
-    0x0d, // Length
-    0x49,
-    0x48,
-    0x44,
-    0x52, // "IHDR"
-    0x00,
-    0x00,
-    0x00,
-    0x01, // Width: 1
-    0x00,
-    0x00,
-    0x00,
-    0x01, // Height: 1
-    0x08,
-    0x02,
-    0x00,
-    0x00,
-    0x00, // Bit depth, color type, compression, filter, interlace
-    0x90,
-    0x77,
-    0x53,
-    0xde, // CRC
+    0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+    0xde,
   ]);
   const idatChunk = Buffer.from([
-    0x00,
-    0x00,
-    0x00,
-    0x0a, // Length
-    0x49,
-    0x44,
-    0x41,
-    0x54, // "IDAT"
-    0x78,
-    0x9c,
-    0x62,
-    0x00,
-    0x00,
-    0x00,
-    0x02,
-    0x00,
-    0x01, // Compressed data
-    0xe2,
-    0x21,
-    0xbc,
-    0x33, // CRC
+    0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x00,
+    0x00, 0x00, 0x02, 0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33,
   ]);
   const iendChunk = Buffer.from([
-    0x00,
-    0x00,
-    0x00,
-    0x00, // Length
-    0x49,
-    0x45,
-    0x4e,
-    0x44, // "IEND"
-    0xae,
-    0x42,
-    0x60,
-    0x82, // CRC
+    0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
   ]);
 
   return Buffer.concat([pngSignature, ihdrChunk, idatChunk, iendChunk]);

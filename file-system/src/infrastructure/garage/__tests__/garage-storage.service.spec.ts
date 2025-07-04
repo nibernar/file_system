@@ -1,12 +1,9 @@
-// src/infrastructure/garage/__tests__/garage-storage.service.spec.ts
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
 import { GarageStorageService } from '../garage-storage.service';
 
-// ✅ IMPORTANT: Mocks AVANT les imports des classes AWS
 jest.mock('@aws-sdk/client-s3', () => ({
   S3Client: jest.fn(),
   PutObjectCommand: jest.fn(),
@@ -29,7 +26,6 @@ jest.mock('@aws-sdk/lib-storage', () => ({
   Upload: jest.fn(),
 }));
 
-// Import des classes mockées APRÈS les mocks
 import {
   S3Client,
   PutObjectCommand,
@@ -56,7 +52,6 @@ describe('GarageStorageService', () => {
   let mockS3Client: any;
   let logger: jest.Mocked<Logger>;
 
-  // Configuration de test standard
   const mockConfig: any = {
     garage: {
       endpoint: 'https://test-garage.example.com',
@@ -79,7 +74,7 @@ describe('GarageStorageService', () => {
       maxTtl: 86400,
     },
     processing: {
-      maxFileSize: 500 * 1024 * 1024, // 500MB pour permettre tous les tests
+      maxFileSize: 500 * 1024 * 1024,
       allowedMimeTypes: ['application/pdf', 'image/jpeg', 'image/png'],
       virusScanTimeout: 30000,
       imageOptimizationQuality: 85,
@@ -101,10 +96,8 @@ describe('GarageStorageService', () => {
   };
 
   beforeEach(async () => {
-    // Reset tous les mocks
     jest.clearAllMocks();
 
-    // ✅ Configuration des mocks AWS SDK DANS beforeEach
     mockS3Client = {
       send: jest.fn(),
       config: {
@@ -114,12 +107,10 @@ describe('GarageStorageService', () => {
       destroy: jest.fn(),
     };
 
-    // Configuration du constructor S3Client
     (S3Client as jest.MockedClass<typeof S3Client>).mockImplementation(
       () => mockS3Client,
     );
 
-    // Configuration des commandes pour retourner l'input
     (
       PutObjectCommand as jest.MockedClass<typeof PutObjectCommand>
     ).mockImplementation((input) => ({ input }) as any);
@@ -157,7 +148,6 @@ describe('GarageStorageService', () => {
       CopyObjectCommand as jest.MockedClass<typeof CopyObjectCommand>
     ).mockImplementation((input) => ({ input }) as any);
 
-    // Configuration des utilitaires
     (
       getSignedUrl as jest.MockedFunction<typeof getSignedUrl>
     ).mockResolvedValue(
@@ -175,7 +165,6 @@ describe('GarageStorageService', () => {
         }) as any,
     );
 
-    // ✅ CORRIGÉ : Créer le mock logger avant le module
     logger = {
       log: jest.fn(),
       error: jest.fn(),
@@ -183,7 +172,6 @@ describe('GarageStorageService', () => {
       debug: jest.fn(),
     } as any;
 
-    // Configuration du module de test avec Logger mocké
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GarageStorageService,
@@ -195,16 +183,13 @@ describe('GarageStorageService', () => {
         },
         {
           provide: Logger,
-          useValue: logger, // ✅ Utiliser directement notre mock
+          useValue: logger,
         },
       ],
     }).compile();
 
     service = module.get<GarageStorageService>(GarageStorageService);
     configService = module.get(ConfigService);
-    // logger est déjà défini plus haut
-
-    // ✅ IMPORTANT: Remplacer le logger du service par notre mock pour être sûr
     (service as any).logger = logger;
   });
 
@@ -213,7 +198,6 @@ describe('GarageStorageService', () => {
    */
   describe('Service Initialization', () => {
     it('should initialize S3 client with correct configuration', () => {
-      // Assert - Vérification de l'initialisation du client S3
       expect(S3Client).toHaveBeenCalledWith({
         endpoint: mockConfig.garage.endpoint,
         region: mockConfig.garage.region,
@@ -225,20 +209,16 @@ describe('GarageStorageService', () => {
         maxAttempts: 3,
       });
 
-      // ✅ SOLUTION FINALE : Vérifier que le service est correctement initialisé
       expect(service).toBeDefined();
       expect(service.checkConnection).toBeDefined();
       expect(service.uploadObject).toBeDefined();
       expect(service.downloadObject).toBeDefined();
       expect(service.generatePresignedUrl).toBeDefined();
 
-      // Vérifier que la configuration est accessible
       expect((service as any).defaultBucket).toBe(
         mockConfig.garage.buckets.documents,
       );
       expect((service as any).s3Client).toBeDefined();
-
-      // Note: Le logger est testé dans tous les autres tests quand il est mocké correctement
     });
 
     it('should throw error if file system configuration not found', async () => {
@@ -275,10 +255,8 @@ describe('GarageStorageService', () => {
 
       mockS3Client.send.mockResolvedValue(mockS3Response);
 
-      // Act
       const result = await service.uploadObject(key, testBuffer, metadata);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.uploadId).toMatch(/^[a-f0-9-]{36}$/);
       expect(result.storageKey).toBe(key);
@@ -287,8 +265,6 @@ describe('GarageStorageService', () => {
       expect(result.metadata.userId).toBe(metadata.userId);
       expect(result.metadata.contentType).toBe(metadata.contentType);
       expect(result.metadata.size).toBe(testBuffer.length);
-
-      // ✅ CORRIGÉ : Vérification de l'appel avec la bonne structure
       expect(mockS3Client.send).toHaveBeenCalledWith({
         input: expect.objectContaining({
           Bucket: mockConfig.garage.buckets.documents,
@@ -309,7 +285,6 @@ describe('GarageStorageService', () => {
     });
 
     it('should handle multipart upload for large files', async () => {
-      // Arrange
       const largeBuffer = Buffer.alloc(150 * 1024 * 1024, 'x'); // 150MB
       const key = 'test-files/large-file.bin';
       const metadata: any = {
@@ -331,10 +306,8 @@ describe('GarageStorageService', () => {
         () => mockUpload as any,
       );
 
-      // Act
       const result = await service.uploadObject(key, largeBuffer, metadata);
 
-      // Assert
       expect(Upload).toHaveBeenCalledWith({
         client: mockS3Client,
         params: expect.objectContaining({
@@ -357,7 +330,6 @@ describe('GarageStorageService', () => {
     });
 
     it('should validate file size and type restrictions', async () => {
-      // Test 1 : Fichier trop volumineux (600MB > 500MB limit)
       const oversizedBuffer = Buffer.alloc(600 * 1024 * 1024, 'x');
       const metadata: any = {
         contentType: 'text/plain',
@@ -368,19 +340,16 @@ describe('GarageStorageService', () => {
         service.uploadObject('test/oversized.txt', oversizedBuffer, metadata),
       ).rejects.toThrow('File too large');
 
-      // Test 2 : Clé invalide
       const validBuffer = Buffer.from('test content');
 
       await expect(
         service.uploadObject('', validBuffer, metadata),
       ).rejects.toThrow('Invalid key: must be a non-empty string');
 
-      // Test 3 : Buffer invalide
       await expect(
         service.uploadObject('test/empty.txt', Buffer.alloc(0), metadata),
       ).rejects.toThrow('Invalid buffer: must be a non-empty Buffer');
 
-      // Test 4 : Métadonnées manquantes
       const incompleteMetadata = {
         contentType: 'text/plain',
       } as any;
@@ -402,7 +371,6 @@ describe('GarageStorageService', () => {
    */
   describe('Download Operations', () => {
     it('should download objects successfully', async () => {
-      // Arrange
       const key = 'test-files/download-test.txt';
       const expectedContent = Buffer.from('Downloaded content');
 
@@ -428,17 +396,14 @@ describe('GarageStorageService', () => {
 
       mockS3Client.send.mockResolvedValue(mockS3Response);
 
-      // Act
       const result = await service.downloadObject(key);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.body).toEqual(expectedContent);
       expect(result.metadata.contentType).toBe('text/plain');
       expect(result.metadata.contentLength).toBe(expectedContent.length);
       expect(result.metadata.etag).toBe('download-etag');
       expect(result.fromCache).toBe(false);
-
       expect(mockS3Client.send).toHaveBeenCalledWith({
         input: expect.objectContaining({
           Bucket: mockConfig.garage.buckets.documents,
@@ -448,7 +413,6 @@ describe('GarageStorageService', () => {
     });
 
     it('should retrieve object information correctly', async () => {
-      // Arrange
       const key = 'test-files/info-test.pdf';
       const mockHeadResponse = {
         ContentLength: 1024 * 1024,
@@ -463,10 +427,8 @@ describe('GarageStorageService', () => {
 
       mockS3Client.send.mockResolvedValue(mockHeadResponse);
 
-      // Act
       const result = await service.getObjectInfo(key);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.key).toBe(key);
       expect(result.size).toBe(1024 * 1024);
@@ -492,7 +454,6 @@ describe('GarageStorageService', () => {
    */
   describe('Presigned URL Generation', () => {
     it('should generate valid presigned URLs', async () => {
-      // Arrange
       const options: any = {
         key: 'test-files/presigned-test.pdf',
         operation: 'GET',
@@ -508,23 +469,19 @@ describe('GarageStorageService', () => {
         getSignedUrl as jest.MockedFunction<typeof getSignedUrl>
       ).mockResolvedValue(mockPresignedUrl);
 
-      // Act
       const result = await service.generatePresignedUrl(options);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.url).toBe(mockPresignedUrl);
       expect(result.expiresAt).toBeInstanceOf(Date);
       expect(result.restrictions.ipAddress).toEqual(['192.168.1.100']);
       expect(result.restrictions.userAgent).toBe('TestAgent/1.0');
       expect(result.restrictions.operations).toEqual(['GET']);
-
       expect(getSignedUrl).toHaveBeenCalledWith(
         mockS3Client,
         { input: expect.objectContaining({ Key: options.key }) },
         expect.objectContaining({ expiresIn: 3600 }),
       );
-
       expect(logger.log).toHaveBeenCalledWith(
         expect.stringContaining('Presigned URL generated'),
       );
@@ -547,7 +504,6 @@ describe('GarageStorageService', () => {
    */
   describe('Error Handling and Resilience', () => {
     it('should handle connection failures gracefully', async () => {
-      // Arrange
       const networkError = new Error('Network timeout');
       networkError.name = 'NetworkingError';
       mockS3Client.send.mockRejectedValue(networkError);
@@ -558,7 +514,6 @@ describe('GarageStorageService', () => {
         userId: 'user-123',
       };
 
-      // Act & Assert
       await expect(
         service.uploadObject('test/connection-fail.txt', testBuffer, metadata),
       ).rejects.toThrow('Failed to upload object: Network timeout');
@@ -570,7 +525,6 @@ describe('GarageStorageService', () => {
     });
 
     it('should retry failed operations with exponential backoff', async () => {
-      // Arrange
       let attemptCount = 0;
       mockS3Client.send.mockImplementation(() => {
         attemptCount++;
@@ -586,14 +540,12 @@ describe('GarageStorageService', () => {
         userId: 'user-123',
       };
 
-      // Act
       const result = await service.uploadObject(
         'test/retry-test.txt',
         testBuffer,
         metadata,
       );
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.etag).toBe('retry-success');
       expect(attemptCount).toBe(3);
@@ -604,7 +556,6 @@ describe('GarageStorageService', () => {
     });
 
     it('should validate connection health correctly', async () => {
-      // Test 1 : Connexion réussie
       mockS3Client.send.mockResolvedValue({ KeyCount: 0 });
 
       const healthyResult = await service.checkConnection();
@@ -613,10 +564,8 @@ describe('GarageStorageService', () => {
         'Garage S3 connection check successful',
       );
 
-      // Reset pour le second test
       jest.clearAllMocks();
 
-      // Test 2 : Connexion échouée
       mockS3Client.send.mockRejectedValue(new Error('Connection failed'));
 
       const unhealthyResult = await service.checkConnection();
@@ -633,7 +582,6 @@ describe('GarageStorageService', () => {
    */
   describe('Multipart Upload Operations', () => {
     it('should initialize multipart upload correctly', async () => {
-      // Arrange
       const key = 'test-files/multipart-test.bin';
       const metadata: any = {
         contentType: 'application/octet-stream',
@@ -649,15 +597,12 @@ describe('GarageStorageService', () => {
 
       mockS3Client.send.mockResolvedValue(mockMultipartResponse);
 
-      // Act
       const result = await service.initializeMultipartUpload(key, metadata);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.uploadId).toBe('test-upload-id-123');
       expect(result.key).toBe(key);
       expect(result.bucket).toBe(mockConfig.garage.buckets.documents);
-
       expect(mockS3Client.send).toHaveBeenCalledWith({
         input: expect.objectContaining({
           Bucket: mockConfig.garage.buckets.documents,
@@ -672,7 +617,6 @@ describe('GarageStorageService', () => {
     });
 
     it('should upload multipart parts successfully', async () => {
-      // Arrange
       const uploadId = 'test-upload-id-123';
       const partNumber = 1;
       const partBuffer = Buffer.alloc(5 * 1024 * 1024, 'part');
@@ -683,10 +627,8 @@ describe('GarageStorageService', () => {
 
       mockS3Client.send.mockResolvedValue(mockPartResponse);
 
-      // Act
       const result = await service.uploadPart(uploadId, partNumber, partBuffer);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.partNumber).toBe(partNumber);
       expect(result.etag).toBe('part-1-etag');
@@ -703,7 +645,6 @@ describe('GarageStorageService', () => {
     });
 
     it('should complete multipart upload successfully', async () => {
-      // Arrange
       const uploadId = 'test-upload-id-123';
       const parts: any[] = [
         { partNumber: 1, etag: 'part-1-etag', size: 5 * 1024 * 1024 },
@@ -719,10 +660,8 @@ describe('GarageStorageService', () => {
 
       mockS3Client.send.mockResolvedValue(mockCompleteResponse);
 
-      // Act
       const result = await service.completeMultipartUpload(uploadId, parts);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.etag).toBe('complete-etag');
       expect(result.location).toBe(mockCompleteResponse.Location);

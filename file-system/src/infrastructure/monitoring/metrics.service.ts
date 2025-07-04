@@ -6,7 +6,6 @@ export class MetricsService {
     name: string,
     labels?: Record<string, string>,
   ): Promise<void> {
-    // TODO: Implémenter avec Prometheus ou autre système de métriques
     console.log(`Metric: ${name}`, labels);
   }
 

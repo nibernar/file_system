@@ -26,7 +26,6 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 @Global()
 @Module({
   imports: [
-    // Prometheus pour les métriques
     PrometheusModule.register({
       defaultMetrics: {
         enabled: true,

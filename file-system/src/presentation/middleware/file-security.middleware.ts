@@ -1,4 +1,3 @@
-// src/presentation/middleware/file-security.middleware.ts
 import {
   Injectable,
   NestMiddleware,
@@ -32,7 +31,6 @@ interface AuthenticatedRequest extends Request {
     isAdmin?: boolean;
   };
 
-  // Métadonnées de sécurité ajoutées par le middleware
   security?: {
     clientIp: string;
     threatLevel: 'low' | 'medium' | 'high';
@@ -46,17 +44,11 @@ interface AuthenticatedRequest extends Request {
  * Configuration du middleware de sécurité
  */
 interface SecurityConfig {
-  /** Bloquer automatiquement les IPs Tor */
   blockTor: boolean;
-  /** Bloquer automatiquement les VPNs */
   blockVpn: boolean;
-  /** Niveau de menace maximum autorisé */
   maxThreatLevel: 'low' | 'medium' | 'high';
-  /** Pays bloqués (codes ISO 2 lettres) */
   blockedCountries: string[];
-  /** Endpoints exemptés du rate limiting */
   rateLimitExemptions: string[];
-  /** Mode développement (logging verbose) */
   devMode: boolean;
 }
 
@@ -81,9 +73,9 @@ export class FileSecurityMiddleware implements NestMiddleware {
    */
   private readonly config: SecurityConfig = {
     blockTor: true,
-    blockVpn: false, // En général on ne bloque pas les VPNs car légitimes
+    blockVpn: false,
     maxThreatLevel: 'medium',
-    blockedCountries: [], // À configurer selon vos besoins
+    blockedCountries: [],
     rateLimitExemptions: ['/health', '/metrics'],
     devMode: process.env.NODE_ENV === 'development',
   };
@@ -104,7 +96,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     try {
-      // 1. Extraction de l'IP client
       const clientIp = this.getClientIp(req);
 
       if (this.config.devMode) {
@@ -113,7 +104,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
         );
       }
 
-      // 2. Vérification si l'endpoint est exempté
       if (this.isExemptEndpoint(req.path)) {
         this.logger.debug(
           `Endpoint ${req.path} is exempt from security checks`,
@@ -121,11 +111,9 @@ export class FileSecurityMiddleware implements NestMiddleware {
         return next();
       }
 
-      // 3. Analyse de l'intelligence IP
       const ipIntelligence =
         await this.ipIntelligenceService.getIpIntelligence(clientIp);
 
-      // Ajout des métadonnées de sécurité à la requête
       req.security = {
         clientIp,
         threatLevel: ipIntelligence.threatLevel,
@@ -134,10 +122,8 @@ export class FileSecurityMiddleware implements NestMiddleware {
         country: ipIntelligence.countryCode,
       };
 
-      // 4. Vérifications de sécurité IP
       await this.checkIpSecurity(ipIntelligence, clientIp);
 
-      // 5. Rate limiting
       const rateLimitResult = await this.rateLimitService.checkLimit(
         req.user?.id || clientIp,
         {
@@ -147,10 +133,8 @@ export class FileSecurityMiddleware implements NestMiddleware {
         },
       );
 
-      // 6. Application des headers de rate limiting
       this.setRateLimitHeaders(res, rateLimitResult);
 
-      // 7. Vérification du rate limit
       if (!rateLimitResult.allowed) {
         res.setHeader('Retry-After', rateLimitResult.retryAfter || 60);
 
@@ -163,22 +147,18 @@ export class FileSecurityMiddleware implements NestMiddleware {
         );
       }
 
-      // 8. Incrémentation du compteur de rate limiting
       await this.rateLimitService.incrementCounter(
         req.user?.id || clientIp,
         `${req.method}:${req.path}`,
       );
 
-      // 9. Enregistrement de l'activité IP
       await this.ipIntelligenceService.recordIpActivity(
         clientIp,
         `${req.method}:${req.path}`,
       );
 
-      // 10. Headers de sécurité supplémentaires
       this.setSecurityHeaders(res, req.security);
 
-      // 11. Logging de la requête (si mode dev ou niveau de menace élevé)
       if (this.config.devMode || ipIntelligence.threatLevel !== 'low') {
         const processingTime = Date.now() - startTime;
         this.logger.log(
@@ -188,7 +168,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
 
       next();
     } catch (error) {
-      // Gestion des erreurs
       const processingTime = Date.now() - startTime;
 
       if (error instanceof HttpException) {
@@ -202,8 +181,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
           error.stack,
         );
 
-        // En cas d'erreur inattendue, on laisse passer (fail-open) mais on log
-        // Vous pouvez changer ce comportement selon vos besoins de sécurité
         if (this.config.devMode) {
           next();
         } else {
@@ -220,7 +197,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
     ipIntelligence: any,
     clientIp: string,
   ): Promise<void> {
-    // Vérification du niveau de menace
     if (this.isThreatLevelBlocked(ipIntelligence.threatLevel)) {
       this.logger.warn(
         `High threat IP blocked: ${clientIp} (Level: ${ipIntelligence.threatLevel})`,
@@ -228,7 +204,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
       throw new BadRequestException(`Access denied: IP threat level too high`);
     }
 
-    // Vérification Tor
     if (this.config.blockTor && ipIntelligence.isTor) {
       this.logger.warn(`Tor exit node blocked: ${clientIp}`);
       throw new BadRequestException(
@@ -236,7 +211,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
       );
     }
 
-    // Vérification VPN (si activée)
     if (this.config.blockVpn && ipIntelligence.isVpn) {
       this.logger.warn(`VPN connection blocked: ${clientIp}`);
       throw new BadRequestException(
@@ -244,7 +218,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
       );
     }
 
-    // Vérification pays bloqués
     if (this.config.blockedCountries.includes(ipIntelligence.countryCode)) {
       this.logger.warn(
         `Blocked country access: ${clientIp} from ${ipIntelligence.country}`,
@@ -252,7 +225,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
       throw new BadRequestException('Access denied: Geographic restriction');
     }
 
-    // Vérification via la liste de blocage IP
     const isBlocked = await this.ipIntelligenceService.isIpBlocked(clientIp);
     if (isBlocked) {
       this.logger.warn(`Explicitly blocked IP: ${clientIp}`);
@@ -288,7 +260,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
     res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
     res.setHeader('X-RateLimit-Reset', rateLimitResult.resetTime.toISOString());
 
-    // Headers additionnels pour debugging (mode dev)
     if (this.config.devMode) {
       res.setHeader(
         'X-RateLimit-Used',
@@ -301,18 +272,15 @@ export class FileSecurityMiddleware implements NestMiddleware {
    * Définit les headers de sécurité supplémentaires
    */
   private setSecurityHeaders(res: Response, security: any): void {
-    // Headers informatifs (attention à ne pas exposer trop d'informations)
     if (this.config.devMode) {
       res.setHeader('X-Client-Country', security.country);
       res.setHeader('X-Threat-Level', security.threatLevel);
     }
 
-    // Headers de sécurité standards
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
 
-    // Header personnalisé pour indiquer que la sécurité a été vérifiée
     res.setHeader('X-Security-Check', 'passed');
   }
 
@@ -321,10 +289,8 @@ export class FileSecurityMiddleware implements NestMiddleware {
    * Prend en compte les proxies et load balancers
    */
   private getClientIp(req: Request): string {
-    // Vérification des headers de proxy dans l'ordre de priorité
     const forwardedFor = req.headers['x-forwarded-for'] as string;
     if (forwardedFor) {
-      // Prendre la première IP de la liste (client original)
       return forwardedFor.split(',')[0].trim();
     }
 
@@ -338,7 +304,6 @@ export class FileSecurityMiddleware implements NestMiddleware {
       return clientIp.trim();
     }
 
-    // Fallback sur les propriétés de connexion
     return (
       req.connection?.remoteAddress ||
       req.socket?.remoteAddress ||

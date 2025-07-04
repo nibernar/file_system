@@ -44,20 +44,17 @@ export class VirusScannerService {
       `Starting virus scan for file hash ${fileHash}, size: ${buffer.length} bytes`,
     );
 
-    // Si le scanning est désactivé (dev/test), retourner clean
     if (!this.enabledScanning) {
       this.logger.log('Virus scanning disabled, returning clean result');
       return this.createCleanResult(fileHash, 0);
     }
 
     try {
-      // Vérification taille fichier
       if (buffer.length === 0) {
         throw new VirusScanException('Cannot scan empty file');
       }
 
       if (buffer.length > 100 * 1024 * 1024) {
-        // 100MB max
         this.logger.warn(
           `File too large for virus scan: ${buffer.length} bytes`,
         );
@@ -66,7 +63,6 @@ export class VirusScannerService {
 
       let lastError: Error | null = null;
 
-      // Retry logic: 1 tentative initiale + N retries
       for (let attempt = 1; attempt <= this.retryAttempts + 1; attempt++) {
         try {
           this.logger.log(
@@ -87,13 +83,11 @@ export class VirusScannerService {
             error,
           );
 
-          // Échec rapide en cas de timeout, pas de nouvelle tentative
           if (error instanceof VirusScanTimeoutException) {
             const scanDuration = Date.now() - scanStartTime;
             return this.createTimeoutResult(fileHash, scanDuration);
           }
 
-          // Attente progressive seulement s'il reste des tentatives
           if (attempt <= this.retryAttempts) {
             const delay = Math.pow(2, attempt) * 1000;
             await this.delay(delay);
@@ -101,7 +95,6 @@ export class VirusScannerService {
         }
       }
 
-      // Toutes les tentatives ont échoué
       const scanDuration = Date.now() - scanStartTime;
       this.logger.error(`All virus scan attempts failed for file ${fileHash}`);
       return this.createErrorResult(
@@ -112,7 +105,6 @@ export class VirusScannerService {
     } catch (error) {
       this.logger.error(`Virus scan error for file ${fileHash}:`, error);
 
-      // Ce catch gère les erreurs en dehors de la boucle (ex: fichier vide)
       if (error instanceof VirusScanException) {
         throw error;
       }
@@ -123,7 +115,6 @@ export class VirusScannerService {
         return this.createTimeoutResult(fileHash, scanDuration);
       }
 
-      // Gérer les erreurs inattendues
       return this.createErrorResult(fileHash, error.message, scanDuration);
     }
   }
@@ -132,8 +123,6 @@ export class VirusScannerService {
    * Scan streaming pour gros fichiers
    */
   async scanFileStream(stream: ReadableStream): Promise<VirusScanResult> {
-    // TODO: Implémenter scan streaming pour très gros fichiers
-    // Pour l'instant, conversion en buffer
     this.logger.warn(
       'Stream scanning not yet implemented, converting to buffer',
     );
@@ -168,13 +157,11 @@ export class VirusScannerService {
     error?: string;
   }> {
     try {
-      // Test avec fichier EICAR standard
       const eicarTest = Buffer.from(
         'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*',
       );
       const result = await this.performVirusScan(eicarTest, 'eicar-test');
 
-      // EICAR doit être détecté comme infecté
       if (result.clean) {
         return {
           healthy: false,
@@ -237,10 +224,8 @@ export class VirusScannerService {
     buffer: Buffer,
     fileHash: string,
   ): Promise<VirusScanResult> {
-    // Délai simulation scan
     await this.delay(100 + Math.random() * 500);
 
-    // Détection patterns malveillants connus
     const maliciousPatterns = [
       'EICAR-STANDARD-ANTIVIRUS-TEST-FILE',
       'X5O!P%@AP[4\\PZX54(P^)7CC)7}',
@@ -267,17 +252,11 @@ export class VirusScannerService {
       }
     }
 
-    // Vérification magic numbers suspects
-    const suspiciousMagicNumbers = [
-      'MZ', // PE executable
-      '!<arch>', // Archive
-      'PK\x03\x04', // ZIP (potentiel)
-    ];
+    const suspiciousMagicNumbers = ['MZ', '!<arch>', 'PK\x03\x04'];
 
     const fileHeader = buffer.toString('ascii', 0, 10);
     for (const magic of suspiciousMagicNumbers) {
       if (fileHeader.startsWith(magic)) {
-        // Analyse plus poussée pour executables
         if (this.isExecutableContent(buffer)) {
           detectedThreats.push('Suspicious.Executable.Generic');
         }
@@ -292,7 +271,7 @@ export class VirusScannerService {
       scanId: this.generateScanId(),
       fileHash,
       scanDate: new Date(),
-      scanDuration: 0, // Sera renseigné par l'appelant
+      scanDuration: 0,
       scannerVersion: await this.getScannerVersion(),
       details: {
         patternsChecked: maliciousPatterns.length,
@@ -306,7 +285,6 @@ export class VirusScannerService {
    * Détection contenu exécutable
    */
   private isExecutableContent(buffer: Buffer): boolean {
-    // Vérification headers PE, ELF, Mach-O
     const peHeader = buffer.toString('ascii', 0, 2) === 'MZ';
     const elfHeader = buffer.toString('ascii', 0, 4) === '\x7fELF';
     const machOHeader =
@@ -374,7 +352,7 @@ export class VirusScannerService {
     reason: string,
   ): VirusScanResult {
     return {
-      clean: true, // Considéré clean par défaut si non scannable
+      clean: true,
       threats: [],
       scanId: this.generateScanId(),
       fileHash,
@@ -419,7 +397,7 @@ export class VirusScannerService {
     scanDuration: number,
   ): VirusScanResult {
     return {
-      clean: false, // Considéré suspect en cas de timeout
+      clean: false,
       threats: ['SCAN_TIMEOUT'],
       scanId: this.generateScanId(),
       fileHash,

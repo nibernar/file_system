@@ -32,25 +32,12 @@ import {
  * Options pour l'optimisation d'images
  */
 export interface ImageOptimizationOptions {
-  /** Largeur maximale en pixels */
   maxWidth?: number;
-
-  /** Hauteur maximale en pixels */
   maxHeight?: number;
-
-  /** Qualité de compression (0-100) */
   quality?: number;
-
-  /** Format de sortie souhaité */
   format?: ImageFormat;
-
-  /** Préserver les métadonnées EXIF */
   preserveExif?: boolean;
-
-  /** Compression progressive pour JPEG */
   progressive?: boolean;
-
-  /** Optimisation pour web (taille vs qualité) */
   optimizeForWeb?: boolean;
 }
 
@@ -58,31 +45,16 @@ export interface ImageOptimizationOptions {
  * Résultat d'optimisation d'image détaillé
  */
 export interface LocalOptimizedImage {
-  /** Buffer de l'image optimisée */
   buffer: Buffer;
-
-  /** Taille originale en octets */
   originalSize: number;
-
-  /** Taille optimisée en octets */
   optimizedSize: number;
-
-  /** Ratio de compression (optimizedSize / originalSize) */
   compressionRatio: number;
-
-  /** Format final de l'image */
   format: string;
-
-  /** Dimensions finales */
   dimensions: {
     width: number;
     height: number;
   };
-
-  /** Métadonnées préservées (si demandé) */
   metadata?: Record<string, any>;
-
-  /** Clé de stockage de l'image optimisée */
   storageKey?: string;
 }
 
@@ -90,34 +62,15 @@ export interface LocalOptimizedImage {
  * Résultat de conversion de format
  */
 export interface LocalConversionResult {
-  /** Succès de la conversion */
   success: boolean;
-
-  /** Format source */
   fromFormat: string;
-
-  /** Format de destination */
   toFormat: string;
-
-  /** Buffer de l'image convertie */
   buffer: Buffer;
-
-  /** Taille avant conversion */
   originalSize: number;
-
-  /** Taille après conversion */
   convertedSize: number;
-
-  /** Ratio de compression */
   compressionRatio: number;
-
-  /** Qualité préservée estimée (0-100) */
   qualityRetained: number;
-
-  /** Durée de conversion en millisecondes */
   conversionTime: number;
-
-  /** Message d'erreur si échec */
   error?: string;
 }
 
@@ -129,10 +82,8 @@ export interface LocalConversionResult {
  */
 @Injectable()
 export class ImageProcessorService {
-  /** Logger spécialisé pour le traitement d'images */
   private readonly logger = new Logger(ImageProcessorService.name);
 
-  /** Formats supportés pour l'entrée */
   private readonly supportedInputFormats = [
     'image/jpeg',
     'image/png',
@@ -142,7 +93,6 @@ export class ImageProcessorService {
     'image/avif',
   ];
 
-  /** Configuration Sharp par défaut pour chaque format */
   private readonly formatDefaults = {
     jpeg: { progressive: true, mozjpeg: true },
     png: { compressionLevel: 9, adaptiveFiltering: true },
@@ -183,11 +133,9 @@ export class ImageProcessorService {
     this.logger.debug(`Optimisation image ${fileId} avec options:`, options);
 
     try {
-      // Récupération image source depuis storage
       const sourceBuffer = await this.getImageBuffer(fileId);
       const originalSize = sourceBuffer.length;
 
-      // Configuration optimisation avec defaults intelligents
       const config = {
         maxWidth: options.maxWidth || 1920,
         maxHeight: options.maxHeight || 1080,
@@ -199,10 +147,8 @@ export class ImageProcessorService {
         optimizeForWeb: options.optimizeForWeb !== false,
       };
 
-      // Initialisation pipeline Sharp
       let pipeline = sharp(sourceBuffer);
 
-      // Extraction métadonnées originales pour analyse
       const metadata = await pipeline.metadata();
 
       this.logger.debug(
@@ -210,7 +156,6 @@ export class ImageProcessorService {
           `format: ${metadata.format}, taille: ${originalSize} octets`,
       );
 
-      // Validation format supporté
       if (!this.isFormatSupported(metadata.format)) {
         throw new OptimizationException(
           fileId,
@@ -219,7 +164,6 @@ export class ImageProcessorService {
         );
       }
 
-      // Redimensionnement intelligent préservant ratio
       if (
         metadata.width &&
         metadata.height &&
@@ -228,7 +172,7 @@ export class ImageProcessorService {
         pipeline = pipeline.resize(config.maxWidth, config.maxHeight, {
           fit: 'inside',
           withoutEnlargement: true,
-          kernel: sharp.kernel.lanczos3, // Qualité optimale pour redimensionnement
+          kernel: sharp.kernel.lanczos3,
         });
 
         this.logger.debug(
@@ -237,15 +181,12 @@ export class ImageProcessorService {
         );
       }
 
-      // Gestion métadonnées EXIF
       if (!config.preserveExif) {
-        // Utilisation de withMetadata({}) pour supprimer les métadonnées EXIF
         pipeline = pipeline.withMetadata({});
       }
 
-      // Application optimisations spécifiques par format
       switch (config.format) {
-        case ImageFormat.WEBP: // 'webp'
+        case ImageFormat.WEBP:
           pipeline = pipeline.webp({
             quality: config.quality,
             effort: config.optimizeForWeb ? 6 : 4,
@@ -254,7 +195,7 @@ export class ImageProcessorService {
           });
           break;
 
-        case ImageFormat.JPEG: // 'jpeg'
+        case ImageFormat.JPEG:
           pipeline = pipeline.jpeg({
             quality: config.quality,
             progressive: config.progressive,
@@ -263,7 +204,7 @@ export class ImageProcessorService {
           });
           break;
 
-        case ImageFormat.PNG: // 'png'
+        case ImageFormat.PNG:
           pipeline = pipeline.png({
             compressionLevel: config.optimizeForWeb ? 9 : 6,
             adaptiveFiltering: true,
@@ -271,7 +212,7 @@ export class ImageProcessorService {
           });
           break;
 
-        case ImageFormat.AVIF: // 'avif'
+        case ImageFormat.AVIF:
           pipeline = pipeline.avif({
             quality: config.quality,
             effort: config.optimizeForWeb ? 9 : 6,
@@ -287,14 +228,12 @@ export class ImageProcessorService {
           );
       }
 
-      // Exécution pipeline et récupération résultat
       const optimizedBuffer = await pipeline.toBuffer({
         resolveWithObject: true,
       });
       const optimizedSize = optimizedBuffer.data.length;
       const compressionRatio = optimizedSize / originalSize;
 
-      // Sauvegarde image optimisée dans storage
       const optimizedKey = `${fileId}/optimized/${config.format}/${Date.now()}`;
       await this.storageService.uploadObject(
         optimizedKey,
@@ -372,10 +311,8 @@ export class ImageProcessorService {
     );
 
     try {
-      // Récupération image source
       const sourceBuffer = await this.getImageBuffer(fileId);
 
-      // Validation taille raisonnable
       if (size < 50 || size > 1000) {
         throw new ThumbnailGenerationException(
           fileId,
@@ -384,7 +321,6 @@ export class ImageProcessorService {
         );
       }
 
-      // Génération thumbnails pour chaque format
       const generatedFormats: Array<{
         format: ImageFormat;
         url: string;
@@ -400,11 +336,10 @@ export class ImageProcessorService {
               position: 'center',
               kernel: sharp.kernel.lanczos3,
             })
-            .withMetadata({}) // Suppression métadonnées pour thumbnails
+            .withMetadata({})
             .toFormat(format, this.getThumbnailFormatOptions(format))
             .toBuffer();
 
-          // Sauvegarde thumbnail dans storage
           const thumbnailKey = `${fileId}/thumbnails/${size}/${format}/${Date.now()}`;
           await this.storageService.uploadObject(
             thumbnailKey,
@@ -420,7 +355,6 @@ export class ImageProcessorService {
             },
           );
 
-          // Génération URL CDN pour accès rapide
           const thumbnailUrl = await this.generateCDNUrl(thumbnailKey);
 
           generatedFormats.push({
@@ -429,7 +363,6 @@ export class ImageProcessorService {
             size: thumbnailBuffer.length,
           });
 
-          // Premier format = URL principale
           if (!primaryUrl) {
             primaryUrl = thumbnailUrl;
           }
@@ -441,7 +374,6 @@ export class ImageProcessorService {
           this.logger.warn(
             `Échec génération thumbnail ${format} pour ${fileId}: ${formatError.message}`,
           );
-          // Continuer avec autres formats
         }
       }
 
@@ -465,7 +397,7 @@ export class ImageProcessorService {
         height: size,
         format: generatedFormats[0]?.format || ImageFormat.WEBP,
         size: generatedFormats[0]?.size || 0,
-        quality: 85, // Valeur par défaut
+        quality: 85,
         dimensions: { width: size, height: size },
         formats: generatedFormats,
       };
@@ -533,7 +465,6 @@ export class ImageProcessorService {
             `Échec conversion ${format} pour ${fileId}: ${error.message}`,
           );
 
-          // Ajout résultat d'échec pour traçabilité
           results.push({
             success: false,
             fromFormat: sourceMetadata.format || 'unknown',
@@ -583,8 +514,6 @@ export class ImageProcessorService {
    */
   private async getImageBuffer(fileId: string): Promise<Buffer> {
     try {
-      // TODO: Récupérer storageKey depuis metadata repository
-      // Pour l'instant, utilisation directe du fileId
       const downloadResult = await this.storageService.downloadObject(fileId);
       return downloadResult.body;
     } catch (error) {
@@ -612,34 +541,34 @@ export class ImageProcessorService {
   private getThumbnailFormatOptions(format: ImageFormat): any {
     const quality = Math.round(
       this.config.processing.imageOptimizationQuality * 0.9,
-    ); // -10% pour thumbnails
+    );
 
     switch (format) {
-      case ImageFormat.WEBP: // = 'webp'
+      case ImageFormat.WEBP:
         return {
           quality,
           effort: 6,
           smartSubsample: true,
           preset: 'photo',
         };
-      case ImageFormat.JPEG: // = 'jpeg'
+      case ImageFormat.JPEG:
         return {
           quality,
           progressive: true,
           mozjpeg: true,
         };
-      case ImageFormat.PNG: // = 'png'
+      case ImageFormat.PNG:
         return {
           compressionLevel: 9,
           adaptiveFiltering: true,
         };
-      case ImageFormat.AVIF: // = 'avif'
+      case ImageFormat.AVIF:
         return {
           quality,
           effort: 9,
           chromaSubsampling: '4:2:0' as const,
         };
-      case ImageFormat.GIF: // = 'gif'
+      case ImageFormat.GIF:
         return {
           progressive: true,
         };
@@ -669,7 +598,6 @@ export class ImageProcessorService {
       const conversionTime = Date.now() - startTime;
       const compressionRatio = convertedBuffer.length / sourceBuffer.length;
 
-      // Sauvegarde version convertie
       const convertedKey = `${fileId}/formats/${targetFormat}/${Date.now()}`;
       await this.storageService.uploadObject(convertedKey, convertedBuffer, {
         contentType: `image/${targetFormat}`,
@@ -742,7 +670,6 @@ export class ImageProcessorService {
         };
       case ImageFormat.GIF:
         return {
-          // GIF options limitées dans Sharp
           progressive: true,
         };
       default:
@@ -754,8 +681,6 @@ export class ImageProcessorService {
    * Génère une URL CDN pour un fichier
    */
   private async generateCDNUrl(storageKey: string): Promise<string> {
-    // TODO: Intégration avec service CDN réel
-    // Pour l'instant, retour URL basée sur configuration
     return `${this.config.cdn.baseUrl}/${storageKey}`;
   }
 }

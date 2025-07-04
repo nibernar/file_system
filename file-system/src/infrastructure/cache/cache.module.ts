@@ -34,7 +34,6 @@ import { CacheService } from './cache.service';
           db: redisDb,
           ttl: configService.get<number>('CACHE_TTL', 3600),
           max: configService.get<number>('CACHE_MAX_ITEMS', 10000),
-          // Retirer socket et autres options non supportées
         };
       },
       inject: [ConfigService],

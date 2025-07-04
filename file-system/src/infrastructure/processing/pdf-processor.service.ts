@@ -25,7 +25,6 @@ import { spawn } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
-import { ThumbnailResult, ImageFormat } from '../../types/file-system.types';
 import type { FileSystemConfig } from '../../config/file-system.config';
 import { GarageStorageService } from '../garage/garage-storage.service';
 import { FILE_SYSTEM_CONFIG } from '../../config/file-system.config';
@@ -40,25 +39,12 @@ import {
  * Options pour l'optimisation PDF
  */
 export interface PdfOptimizationOptions {
-  /** Niveau de compression (0-9, 9 = maximum) */
   compressionLevel?: number;
-
-  /** Optimiser les images intégrées */
   optimizeImages?: boolean;
-
-  /** Supprimer les métadonnées sensibles */
   removeMetadata?: boolean;
-
-  /** Lineariser pour affichage web progressif */
   linearize?: boolean;
-
-  /** Qualité des images compressées (0-100) */
   imageQuality?: number;
-
-  /** Convertir les images en noir et blanc si possible */
   grayscaleImages?: boolean;
-
-  /** Résolution maximale des images en DPI */
   maxImageDpi?: number;
 }
 
@@ -66,31 +52,14 @@ export interface PdfOptimizationOptions {
  * Résultat d'optimisation PDF détaillé
  */
 export interface OptimizedPdf {
-  /** Buffer du PDF optimisé */
   buffer: Buffer;
-
-  /** Taille originale en octets */
   originalSize: number;
-
-  /** Taille optimisée en octets */
   optimizedSize: number;
-
-  /** Ratio de compression */
   compressionRatio: number;
-
-  /** Techniques d'optimisation appliquées */
   techniques: string[];
-
-  /** Nombre de pages du document */
   pageCount: number;
-
-  /** Métadonnées préservées */
   metadata?: PdfMetadata;
-
-  /** Clé de stockage du PDF optimisé */
   storageKey?: string;
-
-  /** Durée d'optimisation en millisecondes */
   processingTime: number;
 }
 
@@ -98,56 +67,25 @@ export interface OptimizedPdf {
  * Métadonnées extraites d'un PDF
  */
 export interface PdfMetadata {
-  /** Titre du document */
   title?: string;
-
-  /** Auteur du document */
   author?: string;
-
-  /** Sujet/description */
   subject?: string;
-
-  /** Mots-clés */
   keywords?: string;
-
-  /** Créateur (application) */
   creator?: string;
-
-  /** Producteur (bibliothèque PDF) */
   producer?: string;
-
-  /** Date de création */
   creationDate?: Date;
-
-  /** Date de modification */
   modificationDate?: Date;
-
-  /** Nombre de pages */
   pageCount: number;
-
-  /** Version PDF */
   pdfVersion?: string;
-
-  /** Taille des pages (première page) */
   pageSize?: {
     width: number;
     height: number;
     unit: string;
   };
-
-  /** Présence de formulaires interactifs */
   hasAcroForm?: boolean;
-
-  /** Document chiffré/protégé */
   encrypted?: boolean;
-
-  /** Texte extrait (échantillon) */
   textContent?: string;
-
-  /** Nombre d'images dans le document */
   imageCount?: number;
-
-  /** Taille estimée après extraction du texte */
   textLength?: number;
 }
 
@@ -155,26 +93,19 @@ export interface PdfMetadata {
  * Résultat de génération de preview PDF
  */
 export interface PdfPreview {
-  /** Succès de la génération */
   success: boolean;
-
-  /** URL du thumbnail principal */
   thumbnailUrl: string;
-
-  /** URLs des previews par page */
   pagePreview: Array<{
     pageNumber: number;
     url: string;
     dimensions: { width: number; height: number };
   }>;
 
-  /** Dimensions originales des pages */
   originalDimensions: {
     width: number;
     height: number;
   };
 
-  /** Message d'erreur si échec */
   error?: string;
 }
 
@@ -196,16 +127,9 @@ export interface PdfPreview {
  */
 @Injectable()
 export class PdfProcessorService {
-  /** Logger spécialisé pour le traitement PDF */
   private readonly logger = new Logger(PdfProcessorService.name);
-
-  /** Répertoire temporaire pour fichiers de travail */
   private readonly tempDir = path.join(os.tmpdir(), 'coders-pdf-processing');
-
-  /** Timeout par défaut pour opérations PDF (30 secondes) */
   private readonly defaultTimeout = 30000;
-
-  /** Extensions d'outils PDF requis */
   private readonly requiredTools = ['gs', 'pdftoppm', 'qpdf', 'pdfinfo'];
 
   /**
@@ -219,10 +143,7 @@ export class PdfProcessorService {
     @Inject(FILE_SYSTEM_CONFIG)
     private readonly config: FileSystemConfig,
   ) {
-    // Création répertoire temporaire si nécessaire
     this.ensureTempDirectory();
-
-    // Vérification outils PDF disponibles
     this.checkRequiredTools();
   }
 
@@ -266,7 +187,6 @@ export class PdfProcessorService {
     let tempOutputPath: string | undefined;
 
     try {
-      // Configuration optimisation avec defaults
       const config = {
         compressionLevel:
           options.compressionLevel ??
@@ -279,15 +199,12 @@ export class PdfProcessorService {
         maxImageDpi: options.maxImageDpi ?? 150,
       };
 
-      // Récupération PDF source depuis storage
       const sourceBuffer = await this.getPdfBuffer(fileId);
       const originalSize = sourceBuffer.length;
 
-      // Écriture fichier temporaire source
       tempInputPath = await this.writeTempFile(sourceBuffer, 'input.pdf');
       tempOutputPath = this.getTempFilePath('optimized.pdf');
 
-      // Extraction métadonnées avant optimisation
       const originalMetadata = await this.extractMetadata(tempInputPath);
 
       this.logger.debug(
@@ -295,11 +212,10 @@ export class PdfProcessorService {
           `${originalSize} octets, version ${originalMetadata.pdfVersion}`,
       );
 
-      // Construction commande Ghostscript avec optimisations
       const gsArgs = [
         '-sDEVICE=pdfwrite',
         '-dCompatibilityLevel=1.4',
-        '-dPDFSETTINGS=/ebook', // Optimisation taille vs qualité
+        '-dPDFSETTINGS=/ebook',
         '-dNOPAUSE',
         '-dQUIET',
         '-dBATCH',
@@ -314,7 +230,6 @@ export class PdfProcessorService {
         tempInputPath,
       ];
 
-      // Ajout options spécialisées
       if (config.grayscaleImages) {
         gsArgs.push(
           '-sColorConversionStrategy=Gray',
@@ -326,18 +241,15 @@ export class PdfProcessorService {
         gsArgs.push('-dPrinted=false');
       }
 
-      // Exécution Ghostscript avec timeout
       await this.executeCommand('gs', gsArgs, {
         timeout: this.config.processing.virusScanTimeout,
         description: `Optimisation PDF ${fileId}`,
       });
 
-      // Vérification fichier optimisé créé
       const optimizedBuffer = await this.readTempFile(tempOutputPath);
       const optimizedSize = optimizedBuffer.length;
       const compressionRatio = optimizedSize / originalSize;
 
-      // Linearisation pour web si demandé
       if (config.linearize) {
         const linearizedPath = this.getTempFilePath('linearized.pdf');
 
@@ -350,17 +262,14 @@ export class PdfProcessorService {
           },
         );
 
-        // Remplacement par version linearisée
         const linearizedBuffer = await this.readTempFile(linearizedPath);
         await fs.writeFile(tempOutputPath, linearizedBuffer);
       }
 
-      // Lecture résultat final
       const finalBuffer = await this.readTempFile(tempOutputPath);
       const finalSize = finalBuffer.length;
       const finalRatio = finalSize / originalSize;
 
-      // Sauvegarde PDF optimisé dans storage
       const optimizedKey = `${fileId}/optimized/${Date.now()}.pdf`;
       await this.storageService.uploadObject(optimizedKey, finalBuffer, {
         contentType: 'application/pdf',
@@ -376,7 +285,6 @@ export class PdfProcessorService {
 
       const processingTime = Date.now() - startTime;
 
-      // Compilation techniques appliquées
       const techniques = ['pdf_compression'];
       if (config.optimizeImages) techniques.push('image_optimization');
       if (config.removeMetadata) techniques.push('metadata_removal');
@@ -416,7 +324,6 @@ export class PdfProcessorService {
         `Erreur Ghostscript: ${error.message}`,
       );
     } finally {
-      // Nettoyage fichiers temporaires
       await this.cleanupTempFiles([tempInputPath, tempOutputPath]);
     }
   }
@@ -452,7 +359,6 @@ export class PdfProcessorService {
     let tempInputPath: string | undefined;
 
     try {
-      // Validation paramètres
       if (pageCount < 1 || pageCount > 10) {
         throw new ThumbnailGenerationException(
           fileId,
@@ -469,11 +375,9 @@ export class PdfProcessorService {
         );
       }
 
-      // Récupération PDF source
       const sourceBuffer = await this.getPdfBuffer(fileId);
       tempInputPath = await this.writeTempFile(sourceBuffer, 'source.pdf');
 
-      // Extraction métadonnées pour validation
       const metadata = await this.extractMetadata(tempInputPath);
       const actualPageCount = Math.min(pageCount, metadata.pageCount);
 
@@ -481,7 +385,6 @@ export class PdfProcessorService {
         `PDF ${fileId}: ${metadata.pageCount} pages totales, génération ${actualPageCount} previews`,
       );
 
-      // Génération images avec pdftoppm
       const outputPrefix = this.getTempFilePath('page');
 
       await this.executeCommand(
@@ -491,21 +394,20 @@ export class PdfProcessorService {
           '-r',
           dpi.toString(),
           '-f',
-          '1', // Première page
+          '1',
           '-l',
-          actualPageCount.toString(), // Dernière page
+          actualPageCount.toString(),
           '-jpegopt',
           'quality=85,progressive=y',
           tempInputPath,
           outputPrefix,
         ],
         {
-          timeout: 60000, // 1 minute pour conversion images
+          timeout: 60000,
           description: `Génération preview PDF ${fileId}`,
         },
       );
 
-      // Lecture et sauvegarde des images générées
       const pagePreview: Array<{
         pageNumber: number;
         url: string;
@@ -520,7 +422,6 @@ export class PdfProcessorService {
         try {
           const imageBuffer = await this.readTempFile(pageImagePath);
 
-          // Sauvegarde page dans storage
           const previewKey = `${fileId}/preview/page-${i}-${dpi}dpi.jpg`;
           await this.storageService.uploadObject(previewKey, imageBuffer, {
             contentType: 'image/jpeg',
@@ -533,10 +434,8 @@ export class PdfProcessorService {
             },
           });
 
-          // Génération URL CDN
           const previewUrl = await this.generateCDNUrl(previewKey);
 
-          // Première page = thumbnail principal
           if (i === 1) {
             primaryThumbnailUrl = previewUrl;
           }
@@ -544,20 +443,18 @@ export class PdfProcessorService {
           pagePreview.push({
             pageNumber: i,
             url: previewUrl,
-            dimensions: { width: 0, height: 0 }, // TODO: Extraire dimensions réelles
+            dimensions: { width: 0, height: 0 },
           });
 
           this.logger.debug(
             `Preview page ${i} généré: ${previewKey} (${imageBuffer.length} octets)`,
           );
 
-          // Nettoyage fichier temporaire de la page
           await this.cleanupTempFiles([pageImagePath]);
         } catch (pageError) {
           this.logger.warn(
             `Échec génération preview page ${i} pour ${fileId}: ${pageError.message}`,
           );
-          // Continuer avec autres pages
         }
       }
 
@@ -599,7 +496,6 @@ export class PdfProcessorService {
         error: error.message,
       };
     } finally {
-      // Nettoyage fichiers temporaires
       await this.cleanupTempFiles([tempInputPath]);
     }
   }
@@ -628,17 +524,14 @@ export class PdfProcessorService {
     let isFilePath = false;
 
     try {
-      // Détermination si c'est un chemin de fichier ou un ID
       if (fileIdOrPath.includes('/') || fileIdOrPath.endsWith('.pdf')) {
         tempInputPath = fileIdOrPath;
         isFilePath = true;
       } else {
-        // Récupération depuis storage
         const sourceBuffer = await this.getPdfBuffer(fileIdOrPath);
         tempInputPath = await this.writeTempFile(sourceBuffer, 'metadata.pdf');
       }
 
-      // Extraction métadonnées avec pdfinfo
       const metadataOutput = await this.executeCommand(
         'pdfinfo',
         [tempInputPath],
@@ -649,20 +542,12 @@ export class PdfProcessorService {
         },
       );
 
-      // Parsing sortie pdfinfo
       const metadata = this.parseMetadataOutput(metadataOutput);
 
-      // Extraction texte échantillon pour indexation
       try {
         const textOutput = await this.executeCommand(
           'pdftotext',
-          [
-            '-l',
-            '3', // 3 premières pages seulement
-            '-raw',
-            tempInputPath,
-            '-',
-          ],
+          ['-l', '3', '-raw', tempInputPath, '-'],
           {
             timeout: 10000,
             description: `Extraction texte PDF ${fileIdOrPath}`,
@@ -670,13 +555,12 @@ export class PdfProcessorService {
           },
         );
 
-        metadata.textContent = textOutput.substring(0, 1000); // Limite 1000 caractères
+        metadata.textContent = textOutput.substring(0, 1000);
         metadata.textLength = textOutput.length;
       } catch (textError) {
         this.logger.debug(
           `Échec extraction texte ${fileIdOrPath}: ${textError.message}`,
         );
-        // Non bloquant
       }
 
       this.logger.debug(
@@ -694,7 +578,6 @@ export class PdfProcessorService {
         `Extraction métadonnées échouée: ${error.message}`,
       );
     } finally {
-      // Nettoyage seulement si fichier temporaire créé
       if (!isFilePath && tempInputPath) {
         await this.cleanupTempFiles([tempInputPath]);
       }
@@ -715,7 +598,6 @@ export class PdfProcessorService {
    */
   private async getPdfBuffer(fileId: string): Promise<Buffer> {
     try {
-      // TODO: Récupérer storageKey depuis metadata repository
       const downloadResult = await this.storageService.downloadObject(fileId);
       return downloadResult.body;
     } catch (error) {
@@ -828,7 +710,6 @@ export class PdfProcessorService {
         stderr += data.toString();
       });
 
-      // Timeout handling
       const timer = setTimeout(() => {
         process.kill('SIGKILL');
         reject(
@@ -924,7 +805,6 @@ export class PdfProcessorService {
           metadata.hasAcroForm = value.toLowerCase().includes('acroform');
           break;
         case 'Page size':
-          // Parse page size: "612 x 792 pts (letter)"
           const sizeMatch = value.match(
             /(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*pts/,
           );
@@ -950,7 +830,6 @@ export class PdfProcessorService {
    * @returns URL CDN complète
    */
   private async generateCDNUrl(storageKey: string): Promise<string> {
-    // TODO: Intégration avec service CDN
     return `${this.config.cdn.baseUrl}/${storageKey}`;
   }
 

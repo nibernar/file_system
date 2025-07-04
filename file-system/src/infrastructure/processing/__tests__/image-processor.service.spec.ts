@@ -16,8 +16,6 @@ import * as sharp from 'sharp';
 import {
   ImageProcessorService,
   ImageOptimizationOptions,
-  LocalOptimizedImage,
-  LocalConversionResult,
 } from '../image-processor.service';
 import { GarageStorageService } from '../../garage/garage-storage.service';
 import { FILE_SYSTEM_CONFIG } from '../../../config/file-system.config';
@@ -27,23 +25,18 @@ import {
   VirusScanStatus,
   ProcessingStatus,
   DocumentType,
-  LocalThumbnailResult,
 } from '../../../types/file-system.types';
 import {
   FileNotFoundException,
   OptimizationException,
   ThumbnailGenerationException,
-  FormatConversionException,
 } from '../../../exceptions/file-system.exceptions';
 import {
   createTestJPEGBuffer,
   createTestPNGBuffer,
-  createTestFileBuffer,
   generateTestUUID,
-  delay,
 } from '../../../__tests__/test-setup';
 
-// Mock de Sharp pour tests isolés
 jest.mock('sharp');
 const mockSharp = sharp as jest.MockedFunction<typeof sharp>;
 
@@ -80,7 +73,6 @@ describe('ImageProcessorService', () => {
   });
 
   beforeEach(async () => {
-    // Configuration mock Sharp avec chaînage fluent
     mockSharpInstance = {
       metadata: jest.fn(),
       resize: jest.fn().mockReturnThis(),
@@ -95,12 +87,10 @@ describe('ImageProcessorService', () => {
 
     mockSharp.mockReturnValue(mockSharpInstance);
 
-    // Mock kernel pour Sharp
     (mockSharp as any).kernel = {
       lanczos3: 'lanczos3',
     };
 
-    // Mock services dépendants
     const mockStorageService = {
       downloadObject: jest.fn(),
       uploadObject: jest.fn(),
@@ -114,7 +104,6 @@ describe('ImageProcessorService', () => {
       error: jest.fn(),
     };
 
-    // Configuration module NestJS
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ImageProcessorService,
@@ -135,7 +124,6 @@ describe('ImageProcessorService', () => {
       ],
     }).compile();
 
-    // Récupération instances mockées
     service = module.get<ImageProcessorService>(ImageProcessorService);
     storageService = module.get(GarageStorageService);
     logger = module.get(Logger);
@@ -152,10 +140,8 @@ describe('ImageProcessorService', () => {
     });
 
     it('should have Sharp available for image processing', () => {
-      // Act - Création instance Sharp
       const sharpInstance = mockSharp(Buffer.from('test'));
 
-      // Assert - Sharp mockée fonctionnelle
       expect(sharpInstance).toBeDefined();
       expect(mockSharp).toHaveBeenCalled();
     });
@@ -177,7 +163,6 @@ describe('ImageProcessorService', () => {
         optimizeForWeb: true,
       };
 
-      // Configuration mocks
       storageService.downloadObject.mockResolvedValue({
         body: sourceBuffer,
         metadata: {
@@ -232,7 +217,6 @@ describe('ImageProcessorService', () => {
         optimizedBuffer.length / sourceBuffer.length,
       );
 
-      // Vérification pipeline Sharp JPEG
       expect(mockSharpInstance.resize).toHaveBeenCalledWith(1920, 1080, {
         fit: 'inside',
         withoutEnlargement: true,
@@ -248,7 +232,6 @@ describe('ImageProcessorService', () => {
         optimiseScans: true,
       });
 
-      // Vérification sauvegarde optimisée
       expect(storageService.uploadObject).toHaveBeenCalledWith(
         expect.stringContaining('/optimized/jpeg/'),
         optimizedBuffer,
@@ -260,7 +243,6 @@ describe('ImageProcessorService', () => {
     });
 
     it('should convert PNG to WebP with web optimization', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourceBuffer = createTestPNGBuffer();
       const webpBuffer = Buffer.from('optimized-webp-content');
@@ -273,7 +255,6 @@ describe('ImageProcessorService', () => {
         optimizeForWeb: true,
       };
 
-      // Configuration mocks PNG → WebP
       storageService.downloadObject.mockResolvedValue({
         body: sourceBuffer,
         metadata: {
@@ -317,16 +298,12 @@ describe('ImageProcessorService', () => {
         uploadDuration: 400,
       });
 
-      // Act
       const result = await service.optimizeImage(fileId, options);
 
-      // Assert
       expect(result.format).toBe(ImageFormat.WEBP);
       expect(result.buffer).toEqual(webpBuffer);
       expect(result.originalSize).toBe(sourceBuffer.length);
       expect(result.optimizedSize).toBe(webpBuffer.length);
-
-      // Vérification pipeline WebP
       expect(mockSharpInstance.webp).toHaveBeenCalledWith({
         quality: 85,
         effort: 6,
@@ -334,7 +311,6 @@ describe('ImageProcessorService', () => {
         preset: 'photo',
       });
 
-      // Vérification redimensionnement approprié
       expect(mockSharpInstance.resize).toHaveBeenCalledWith(1200, 800, {
         fit: 'inside',
         withoutEnlargement: true,
@@ -343,11 +319,9 @@ describe('ImageProcessorService', () => {
     });
 
     it('should handle corrupted images gracefully', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const corruptedBuffer = Buffer.from('not-a-valid-image-data');
 
-      // Configuration mock pour image corrompue
       storageService.downloadObject.mockResolvedValue({
         body: corruptedBuffer,
         metadata: {
@@ -363,7 +337,6 @@ describe('ImageProcessorService', () => {
         new Error('Input buffer contains unsupported image format'),
       );
 
-      // Act & Assert
       await expect(service.optimizeImage(fileId, {})).rejects.toThrow(
         OptimizationException,
       );
@@ -372,17 +345,14 @@ describe('ImageProcessorService', () => {
 
   describe('generateThumbnail - Génération Miniatures', () => {
     it('should generate multi-format thumbnails successfully', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourceBuffer = createTestJPEGBuffer();
       const thumbnailSize = 200;
       const formats = [ImageFormat.WEBP, ImageFormat.JPEG];
 
-      // Buffers thumbnails générés
       const webpThumbnail = Buffer.from('webp-thumbnail-content');
       const jpegThumbnail = Buffer.from('jpeg-thumbnail-content');
 
-      // Configuration mocks
       storageService.downloadObject.mockResolvedValue({
         body: sourceBuffer,
         metadata: {
@@ -394,10 +364,9 @@ describe('ImageProcessorService', () => {
         fromCache: false,
       });
 
-      // Mock pour WebP et JPEG thumbnails
       mockSharpInstance.toBuffer
-        .mockResolvedValueOnce(webpThumbnail) // Premier appel: WebP
-        .mockResolvedValueOnce(jpegThumbnail); // Second appel: JPEG
+        .mockResolvedValueOnce(webpThumbnail)
+        .mockResolvedValueOnce(jpegThumbnail);
 
       const webpMetadata = createMockFileMetadata({
         contentType: 'image/webp',
@@ -427,14 +396,12 @@ describe('ImageProcessorService', () => {
           uploadDuration: 100,
         });
 
-      // Act
       const result = await service.generateThumbnail(
         fileId,
         thumbnailSize,
         formats,
       );
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.formats).toHaveLength(2);
       expect(result.dimensions).toBeDefined();
@@ -443,7 +410,6 @@ describe('ImageProcessorService', () => {
         expect(result.dimensions.height).toBe(thumbnailSize);
       }
 
-      // Vérification formats générés
       expect(result.formats).toBeDefined();
       if (result.formats) {
         const webpFormat = result.formats.find(
@@ -457,12 +423,9 @@ describe('ImageProcessorService', () => {
         expect(webpFormat?.url).toContain('cdn.test.coders.com');
         expect(jpegFormat).toBeDefined();
         expect(jpegFormat?.url).toContain('cdn.test.coders.com');
-
-        // Vérification URL principale (premier format)
         expect(result.url).toEqual(webpFormat?.url);
       }
 
-      // Vérification pipeline redimensionnement thumbnail
       expect(mockSharpInstance.resize).toHaveBeenCalledWith(
         thumbnailSize,
         thumbnailSize,
@@ -473,16 +436,13 @@ describe('ImageProcessorService', () => {
         },
       );
 
-      // Vérification suppression métadonnées pour thumbnails
       expect(mockSharpInstance.withMetadata).toHaveBeenCalledWith({});
     });
 
     it('should validate thumbnail size limits', async () => {
-      // Arrange
       const fileId = generateTestUUID();
-      const invalidSizes = [30, 1200]; // Trop petit et trop grand
+      const invalidSizes = [30, 1200];
 
-      // Mock storage pour éviter FileNotFoundException
       const sourceBuffer = createTestJPEGBuffer();
       storageService.downloadObject.mockResolvedValue({
         body: sourceBuffer,
@@ -495,7 +455,6 @@ describe('ImageProcessorService', () => {
         fromCache: false,
       });
 
-      // Act & Assert - Le service devrait lancer une exception
       for (const size of invalidSizes) {
         await expect(service.generateThumbnail(fileId, size)).rejects.toThrow(
           ThumbnailGenerationException,
@@ -506,7 +465,6 @@ describe('ImageProcessorService', () => {
 
   describe('generateMultipleFormats - Conversion Multi-Formats', () => {
     it('should generate all modern web formats successfully', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourceBuffer = createTestJPEGBuffer();
       const targetFormats = [
@@ -515,12 +473,10 @@ describe('ImageProcessorService', () => {
         ImageFormat.JPEG,
       ];
 
-      // Buffers pour chaque format
       const webpBuffer = Buffer.from('webp-format-content');
       const avifBuffer = Buffer.from('avif-format-content');
       const jpegBuffer = Buffer.from('jpeg-format-content');
 
-      // Configuration mocks
       storageService.downloadObject.mockResolvedValue({
         body: sourceBuffer,
         metadata: {
@@ -539,11 +495,10 @@ describe('ImageProcessorService', () => {
         size: sourceBuffer.length,
       });
 
-      // Configuration conversions par format
       mockSharpInstance.toBuffer
-        .mockResolvedValueOnce(webpBuffer) // WebP
-        .mockResolvedValueOnce(avifBuffer) // AVIF
-        .mockResolvedValueOnce(jpegBuffer); // JPEG
+        .mockResolvedValueOnce(webpBuffer)
+        .mockResolvedValueOnce(avifBuffer)
+        .mockResolvedValueOnce(jpegBuffer);
 
       const webpMetadata = createMockFileMetadata({
         contentType: 'image/webp',
@@ -581,17 +536,14 @@ describe('ImageProcessorService', () => {
           uploadDuration: 100,
         });
 
-      // Act
       const results = await service.generateMultipleFormats(
         fileId,
         targetFormats,
       );
 
-      // Assert
       expect(results).toHaveLength(3);
       expect(results.every((r) => r.success)).toBe(true);
 
-      // Vérification chaque format
       const webpResult = results.find((r) => r.toFormat === ImageFormat.WEBP);
       const avifResult = results.find((r) => r.toFormat === ImageFormat.AVIF);
       const jpegResult = results.find((r) => r.toFormat === ImageFormat.JPEG);
@@ -604,40 +556,31 @@ describe('ImageProcessorService', () => {
 
       expect(avifResult).toBeDefined();
       expect(avifResult?.buffer).toEqual(avifBuffer);
-
       expect(jpegResult).toBeDefined();
       expect(jpegResult?.buffer).toEqual(jpegBuffer);
-
-      // Vérification sauvegarde tous formats
       expect(storageService.uploadObject).toHaveBeenCalledTimes(3);
     });
   });
 
   describe("Gestion d'Erreurs et Robustesse", () => {
     it('should handle missing image files gracefully', async () => {
-      // Arrange
       const nonExistentFileId = generateTestUUID();
 
-      // Configuration mock pour fichier inexistant
       storageService.downloadObject.mockRejectedValue(
         new FileNotFoundException(nonExistentFileId),
       );
 
-      // Act & Assert
       await expect(
         service.optimizeImage(nonExistentFileId, {}),
       ).rejects.toThrow(OptimizationException);
 
-      // Vérification aucun traitement Sharp tenté
       expect(mockSharp).not.toHaveBeenCalled();
     });
 
     it('should reject unsupported image formats', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const unsupportedBuffer = Buffer.from('unsupported-format-data');
 
-      // Configuration mock format non supporté
       storageService.downloadObject.mockResolvedValue({
         body: unsupportedBuffer,
         metadata: {
@@ -650,22 +593,19 @@ describe('ImageProcessorService', () => {
       });
 
       mockSharpInstance.metadata.mockResolvedValue({
-        format: 'unknown', // Format non supporté
+        format: 'unknown',
         size: unsupportedBuffer.length,
       });
 
-      // Act & Assert
       await expect(service.optimizeImage(fileId, {})).rejects.toThrow(
         OptimizationException,
       );
     });
 
     it('should recover from temporary component failures', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const sourceBuffer = createTestJPEGBuffer();
 
-      // Configuration avec retry - Premier échec
       storageService.downloadObject
         .mockRejectedValueOnce(new Error('Storage temporarily unavailable'))
         .mockResolvedValueOnce({
@@ -679,12 +619,10 @@ describe('ImageProcessorService', () => {
           fromCache: false,
         });
 
-      // Act - Premier échec
       await expect(service.optimizeImage(fileId, {})).rejects.toThrow(
         OptimizationException,
       );
 
-      // Setup pour retry réussi
       mockSharpInstance.metadata.mockResolvedValue({
         width: 1920,
         height: 1080,
@@ -717,10 +655,8 @@ describe('ImageProcessorService', () => {
         uploadDuration: 300,
       });
 
-      // Act - Second essai réussit
       const result = await service.optimizeImage(fileId, {});
 
-      // Assert
       expect(result.buffer).toEqual(optimizedBuffer);
       expect(storageService.downloadObject).toHaveBeenCalledTimes(2);
     });

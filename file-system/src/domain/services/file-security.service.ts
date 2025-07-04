@@ -6,8 +6,6 @@ import {
   SecurityThreat,
   UploadFileDto,
   VirusScanResult,
-  FormatValidation,
-  ContentValidation,
   RateLimitResult,
   SecurityScanResult,
   FileOperation,
@@ -100,14 +98,12 @@ export class FileSecurityService {
         `Starting security validation for file ${file.filename} by user ${userId}`,
       );
 
-      // Récupération config depuis votre fichier existant
       const fileSystemConfig =
         this.configService.get<FileSystemConfig>('fileSystem');
       if (!fileSystemConfig) {
         throw new Error('File system configuration not loaded');
       }
 
-      // 🔧 FIX 1: Rate limiting en PREMIER pour éviter le catch général
       const rateLimitCheck = await this.rateLimitService.checkLimit(
         userId,
         'upload',
@@ -118,7 +114,6 @@ export class FileSecurityService {
         validation.mitigations.push('TEMPORARY_BLOCK');
         this.logger.warn(`Rate limit exceeded for user ${userId}`);
 
-        // Audit avant de lancer l'exception
         await this.auditService.logSecurityValidation(userId, validation);
 
         throw new RateLimitExceededException(
@@ -128,7 +123,6 @@ export class FileSecurityService {
         );
       }
 
-      // 1. Validation format et taille
       const formatValidation = await this.fileValidator.validateFormat(file);
       if (!formatValidation.valid) {
         validation.passed = false;
@@ -139,7 +133,6 @@ export class FileSecurityService {
         );
       }
 
-      // 2. Validation contenu et structure
       const contentValidation = await this.fileValidator.validateContent(file);
       if (!contentValidation.safe) {
         validation.passed = false;
@@ -151,7 +144,6 @@ export class FileSecurityService {
         );
       }
 
-      // 3. Scan antivirus si activé
       if (fileSystemConfig.security.scanVirusEnabled) {
         const virusScan = await this.virusScanner.scanFile(file.buffer);
 
@@ -164,19 +156,15 @@ export class FileSecurityService {
             virusScan.threats,
           );
 
-          // Quarantaine immédiate
           await this.quarantineFile(file, virusScan);
         }
       }
 
-      // 5. Device fingerprinting et analyse comportementale
       await this.analyzeUploadBehavior(userId, file, validation);
 
-      // 6. Audit et logging
       await this.auditService.logSecurityValidation(userId, validation);
 
       if (validation.passed) {
-        // Incrémenter compteur rate limit seulement si validation réussie
         await this.rateLimitService.incrementCounter(userId, 'upload');
         this.logger.log(`Security validation passed for ${file.filename}`);
       } else {
@@ -188,7 +176,6 @@ export class FileSecurityService {
 
       return validation;
     } catch (error) {
-      // 🔧 FIX 1: Re-lancer les exceptions spécifiques sans les transformer
       if (error instanceof RateLimitExceededException) {
         throw error;
       }
@@ -198,7 +185,6 @@ export class FileSecurityService {
         error,
       );
 
-      // En cas d'erreur système, on rejette par sécurité
       validation.passed = false;
       validation.threats.push(SecurityThreat.SUSPICIOUS_CONTENT);
       validation.mitigations.push('SYSTEM_REJECTION');
@@ -226,7 +212,6 @@ export class FileSecurityService {
         `Checking file access: ${operation} on ${fileId} by user ${userId}`,
       );
 
-      // 1. Récupération métadonnées fichier
       const fileMetadata =
         await this.fileMetadataService.getFileMetadata(fileId);
       if (!fileMetadata) {
@@ -241,7 +226,6 @@ export class FileSecurityService {
         return false;
       }
 
-      // 🔧 FIX 2: Vérification correcte de l'ownership
       if (fileMetadata.userId === userId) {
         this.logger.log(`Access granted: user ${userId} owns file ${fileId}`);
         await this.auditService.logFileAccess(
@@ -254,7 +238,6 @@ export class FileSecurityService {
         return true;
       }
 
-      // 3. Vérification permissions projet si applicable
       if (fileMetadata.projectId) {
         const hasProjectAccess = await this.checkProjectAccess(
           userId,
@@ -276,7 +259,6 @@ export class FileSecurityService {
         }
       }
 
-      // 4. Vérification permissions spéciales (admin, etc.)
       const hasSpecialAccess = await this.checkSpecialPermissions(
         userId,
         operation,
@@ -295,7 +277,6 @@ export class FileSecurityService {
         return true;
       }
 
-      // 5. Accès refusé - audit de sécurité
       this.logger.warn(
         `Access denied: user ${userId} cannot ${operation} file ${fileId}`,
       );
@@ -334,7 +315,6 @@ export class FileSecurityService {
         `Generating secure presigned URL for file ${fileId} by user ${userId}`,
       );
 
-      // 1. Validation permissions
       const hasAccess = await this.checkFileAccess(
         fileId,
         userId,
@@ -348,23 +328,19 @@ export class FileSecurityService {
         );
       }
 
-      // 2. Récupération métadonnées fichier
       const fileMetadata =
         await this.fileMetadataService.getFileMetadata(fileId);
       if (!fileMetadata) {
         throw new FileSecurityException('File not found', ['FILE_NOT_FOUND']);
       }
 
-      // 3. Validation expiration selon politique sécurité
       const fileSystemConfig =
         this.configService.get<FileSystemConfig>('fileSystem');
       const maxExpiry = fileSystemConfig?.security.presignedUrlExpiry || 3600;
       const expiresIn = Math.min(options.expiresIn || 3600, maxExpiry);
 
-      // 4. Application restrictions sécurité
       const securityConditions = this.buildSecurityConditions(options);
 
-      // 5. Génération URL avec restrictions
       const presignedUrl = await this.storageService.generatePresignedUrl({
         key: fileMetadata.storageKey,
         operation: options.operation,
@@ -372,7 +348,6 @@ export class FileSecurityService {
         conditions: securityConditions,
       });
 
-      // 🔧 FIX 3: Vérification que presignedUrl n'est pas undefined
       if (!presignedUrl || !presignedUrl.url) {
         throw new FileSecurityException(
           'Storage service failed to generate URL',
@@ -380,7 +355,6 @@ export class FileSecurityService {
         );
       }
 
-      // 6. Construction réponse sécurisée
       const secureUrl: SecurePresignedUrl = {
         url: presignedUrl.url,
         expiresAt:
@@ -394,7 +368,6 @@ export class FileSecurityService {
         auditId: uuidv4(),
       };
 
-      // 7. Audit de génération URL
       await this.auditService.logUrlGeneration(fileId, userId, options);
 
       this.logger.log(
@@ -408,7 +381,6 @@ export class FileSecurityService {
         error,
       );
 
-      // 🔧 FIX 3: Re-lancer les exceptions spécifiques
       if (error instanceof UnauthorizedFileAccessException) {
         throw error;
       }
@@ -466,13 +438,11 @@ export class FileSecurityService {
         `Quarantining file ${file.filename} - threats: ${scanResult.threats?.join(', ')}`,
       );
 
-      // 1. Déplacement vers zone de quarantaine
       await this.storageService.moveToQuarantine(
         file.filename,
         `Malware detected: ${scanResult.threats?.join(', ')}`,
       );
 
-      // 2. Mise à jour statut sécurité
       const quarantineResult: QuarantineResult = {
         quarantineId,
         fileId: file.filename,
@@ -482,10 +452,8 @@ export class FileSecurityService {
         automaticAction: true,
       };
 
-      // 3. Notification équipe sécurité (si configuré)
       await this.notifySecurityTeam(quarantineResult);
 
-      // 4. Audit de quarantaine
       await this.auditService.logFileAccess(
         'SYSTEM',
         file.filename,
@@ -518,19 +486,16 @@ export class FileSecurityService {
         riskScore: 0,
       };
 
-      // Vérification extensions multiples
       if (this.hasSuspiciousExtensions(file.filename)) {
         behaviorAnalysis.suspiciousPatterns.push('MULTIPLE_EXTENSIONS');
         behaviorAnalysis.riskScore += 30;
       }
 
-      // Vérification taille anormale pour le type
       if (this.hasSuspiciousSize(file.contentType, file.size)) {
         behaviorAnalysis.suspiciousPatterns.push('SUSPICIOUS_SIZE');
         behaviorAnalysis.riskScore += 20;
       }
 
-      // Si score de risque élevé, ajouter à la validation
       if (behaviorAnalysis.riskScore >= 50) {
         validation.threats.push(SecurityThreat.SUSPICIOUS_CONTENT);
         validation.mitigations.push('ENHANCED_MONITORING');
@@ -550,12 +515,10 @@ export class FileSecurityService {
   private buildSecurityConditions(options: PresignedUrlOptions): any {
     const conditions: any = {};
 
-    // Restriction IP si spécifiée
     if (options.ipRestriction && options.ipRestriction.length > 0) {
       conditions.ipAddress = options.ipRestriction;
     }
 
-    // Restriction User-Agent si spécifiée
     if (options.userAgent) {
       conditions.userAgent = options.userAgent;
     }
@@ -589,7 +552,6 @@ export class FileSecurityService {
     projectId: string,
     operation: FileOperation,
   ): Promise<boolean> {
-    // TODO: Implémenter selon la logique d'autorisation des projets
     return false;
   }
 
@@ -600,7 +562,6 @@ export class FileSecurityService {
     userId: string,
     operation: FileOperation,
   ): Promise<boolean> {
-    // TODO: Implémenter selon la logique des rôles utilisateur
     return false;
   }
 
@@ -624,9 +585,9 @@ export class FileSecurityService {
    */
   private hasSuspiciousExtensions(filename: string): boolean {
     const suspiciousPatterns = [
-      /\.[^.]{1,3}\.[^.]{1,4}$/, // Double extensions
-      /\.(exe|scr|bat|cmd|com|pif)$/i, // Exécutables
-      /\.(js|vbs|ps1)$/i, // Scripts
+      /\.[^.]{1,3}\.[^.]{1,4}$/,
+      /\.(exe|scr|bat|cmd|com|pif)$/i,
+      /\.(js|vbs|ps1)$/i,
     ];
 
     return suspiciousPatterns.some((pattern) => pattern.test(filename));
@@ -637,10 +598,10 @@ export class FileSecurityService {
    */
   private hasSuspiciousSize(contentType: string, size: number): boolean {
     const sizeLimits = {
-      'text/plain': 10 * 1024 * 1024, // 10MB max pour texte
-      'application/json': 5 * 1024 * 1024, // 5MB max pour JSON
-      'image/png': 50 * 1024 * 1024, // 50MB max pour PNG
-      'image/jpeg': 50 * 1024 * 1024, // 50MB max pour JPEG
+      'text/plain': 10 * 1024 * 1024,
+      'application/json': 5 * 1024 * 1024,
+      'image/png': 50 * 1024 * 1024,
+      'image/jpeg': 50 * 1024 * 1024,
     };
 
     const limit = sizeLimits[contentType];
@@ -648,7 +609,6 @@ export class FileSecurityService {
       return true;
     }
 
-    // Fichier anormalement petit pour certains types
     if (contentType.startsWith('image/') && size < 100) {
       return true;
     }

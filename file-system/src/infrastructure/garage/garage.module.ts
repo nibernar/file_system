@@ -1,5 +1,3 @@
-// src/infrastructure/garage/garage.module.ts
-
 import { Module, DynamicModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GarageStorageService } from './garage-storage.service';
@@ -28,22 +26,17 @@ export class GarageModule {
   static forRoot(): DynamicModule {
     return {
       module: GarageModule,
-      imports: [
-        // ✅ CORRIGÉ : Utilise votre ConfigModule global (pas forFeature)
-        ConfigModule,
-      ],
+      imports: [ConfigModule],
       providers: [
-        // ✅ SIMPLIFIÉ : Le service utilise ConfigService directement
         {
           provide: GARAGE_STORAGE_SERVICE,
           useClass: GarageStorageService,
         },
 
-        // Alias pour injection directe par classe
         GarageStorageService,
       ],
       exports: [GARAGE_STORAGE_SERVICE, GarageStorageService],
-      global: false, // Module non global pour contrôler l'usage
+      global: false,
     };
   }
 

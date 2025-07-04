@@ -540,9 +540,6 @@ export class QueueStatisticsCollector {
     const counts = await queue.getJobCounts();
     const isPaused = await queue.isPaused();
 
-    // TODO: Implémenter la collecte des métriques détaillées
-    // depuis Redis ou un système de métriques externe
-
     return {
       waiting: counts.waiting || 0,
       active: counts.active || 0,
@@ -550,8 +547,6 @@ export class QueueStatisticsCollector {
       failed: counts.failed || 0,
       delayed: counts.delayed || 0,
       paused: isPaused,
-
-      // Valeurs par défaut, à implémenter avec vraies métriques
       avgProcessingTime: 0,
       avgWaitTime: 0,
       successRate: 0,

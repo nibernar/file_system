@@ -44,17 +44,13 @@ export class RateLimitService {
     options?: { endpoint?: string; method?: string; userId?: string },
   ): Promise<RateLimitResult> {
     try {
-      // Détermination du type et de la limite
       const { key, limit } = this.getRateLimitConfig(identifier, options);
 
-      // Récupération du compteur actuel
       const currentCount = await this.getCurrentCount(key);
 
-      // Calcul du temps de reset
       const now = Date.now();
-      const resetTime = new Date(now + this.WINDOW_SIZE_SECONDS * 1000); // Convertir en Date
+      const resetTime = new Date(now + this.WINDOW_SIZE_SECONDS * 1000);
 
-      // Vérification de la limite
       const allowed = currentCount < limit;
       const remaining = Math.max(0, limit - currentCount);
 
@@ -66,8 +62,8 @@ export class RateLimitService {
         allowed,
         limit,
         remaining,
-        resetTime, // Maintenant c'est un objet Date
-        resetAt: resetTime, // Utilisez resetTime au lieu de new Date(resetTime)
+        resetTime,
+        resetAt: resetTime,
         retryAfter: allowed ? 0 : this.WINDOW_SIZE_SECONDS,
       };
     } catch (error) {
@@ -76,13 +72,12 @@ export class RateLimitService {
         error.stack,
       );
 
-      // En cas d'erreur, on autorise par défaut (fail-open)
       return {
         allowed: true,
         limit: 0,
         remaining: 0,
-        resetTime: new Date(), // Objet Date
-        resetAt: new Date(), // Objet Date
+        resetTime: new Date(),
+        resetAt: new Date(),
         retryAfter: 0,
       };
     }
@@ -103,22 +98,19 @@ export class RateLimitService {
         endpoint: operation,
       });
 
-      // Récupération et incrémentation atomique
       const currentCount = await this.getCurrentCount(key);
       const newCount = currentCount + 1;
 
-      // Stockage avec TTL
       await this.cacheManager.set(
         key,
         newCount,
-        this.WINDOW_SIZE_SECONDS * 1000, // TTL en millisecondes
+        this.WINDOW_SIZE_SECONDS * 1000,
       );
 
       this.logger.debug(
         `Rate limit counter incremented for ${key}: ${newCount}`,
       );
 
-      // Alerte si proche de la limite
       const { limit } = this.getRateLimitConfig(identifier, {
         endpoint: operation,
       });
@@ -211,7 +203,6 @@ export class RateLimitService {
     identifier: string,
     options?: { endpoint?: string; method?: string; userId?: string },
   ): { key: string; limit: number } {
-    // Si c'est une IP
     if (this.isIpAddress(identifier)) {
       return {
         key: `${this.CACHE_PREFIXES.IP}${identifier}${options?.endpoint ? `:${options.endpoint}` : ''}`,
@@ -220,7 +211,6 @@ export class RateLimitService {
       };
     }
 
-    // Si c'est un userId
     return {
       key: `${this.CACHE_PREFIXES.USER}${identifier}${options?.endpoint ? `:${options.endpoint}` : ''}`,
       limit: FILE_SYSTEM_CONSTANTS.SECURITY_LIMITS.MAX_UPLOADS_PER_MINUTE,
@@ -250,9 +240,7 @@ export class RateLimitService {
    * @returns true si c'est une IP valide
    */
   private isIpAddress(value: string): boolean {
-    // Regex simple pour IPv4
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-    // Regex simple pour IPv6
     const ipv6Regex = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/;
 
     return ipv4Regex.test(value) || ipv6Regex.test(value);

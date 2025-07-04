@@ -12,29 +12,17 @@ import { v4 as uuidv4 } from 'uuid';
  * @interface FileVersion
  */
 export interface FileVersion {
-  /** Identifiant unique de la version */
   id: string;
-  /** Identifiant du fichier parent */
   fileId: string;
-  /** Numéro de version (incrémental) */
   versionNumber: number;
-  /** Date de création de la version */
   createdAt: Date;
-  /** ID de l'utilisateur qui a créé la version */
   createdBy: string;
-  /** Description des changements dans cette version */
   changeDescription?: string;
-  /** Type de changement */
   changeType: VersionChangeType;
-  /** Taille du fichier pour cette version */
   size: number;
-  /** Checksum MD5 de cette version */
   checksumMd5: string;
-  /** Checksum SHA256 de cette version */
   checksumSha256: string;
-  /** Clé de stockage unique pour cette version */
   storageKey: string;
-  /** Indique si c'est la version active */
   isActive: boolean;
 }
 
@@ -44,15 +32,10 @@ export interface FileVersion {
  * @enum VersionChangeType
  */
 export enum VersionChangeType {
-  /** Upload initial du fichier */
   INITIAL_UPLOAD = 'INITIAL_UPLOAD',
-  /** Modification manuelle par l'utilisateur */
   MANUAL_EDIT = 'MANUAL_EDIT',
-  /** Traitement automatique (optimisation, etc.) */
   AUTOMATED_PROCESSING = 'AUTOMATED_PROCESSING',
-  /** Restauration depuis une version antérieure */
   RESTORE = 'RESTORE',
-  /** Remplacement complet du fichier */
   REPLACEMENT = 'REPLACEMENT',
 }
 
@@ -62,23 +45,14 @@ export enum VersionChangeType {
  * @interface FileAccess
  */
 export interface FileAccess {
-  /** Identifiant unique de l'accès */
   id: string;
-  /** Identifiant du fichier accédé */
   fileId: string;
-  /** ID de l'utilisateur qui a accédé au fichier */
   userId: string;
-  /** Type d'opération effectuée */
   operation: FileOperation;
-  /** Date et heure de l'accès */
   accessedAt: Date;
-  /** Adresse IP de l'utilisateur */
   ipAddress?: string;
-  /** User agent du navigateur */
   userAgent?: string;
-  /** Résultat de l'opération */
   result: 'SUCCESS' | 'FAILURE';
-  /** Message d'erreur si échec */
   errorMessage?: string;
 }
 
@@ -88,17 +62,11 @@ export interface FileAccess {
  * @interface ProcessingDetails
  */
 export interface ProcessingDetails {
-  /** Type de traitement effectué */
   processingType: string;
-  /** Date de début du traitement */
   startedAt: Date;
-  /** Date de fin du traitement */
   completedAt?: Date;
-  /** Durée en millisecondes */
   duration?: number;
-  /** Message d'erreur si échec */
   errorMessage?: string;
-  /** Métadonnées additionnelles du traitement */
   metadata?: Record<string, any>;
 }
 
@@ -108,13 +76,9 @@ export interface ProcessingDetails {
  * @interface DomainEvent
  */
 export interface DomainEvent {
-  /** Type d'événement */
   type: string;
-  /** Identifiant agrégat concerné */
   aggregateId: string;
-  /** Timestamp de l'événement */
   timestamp: Date;
-  /** Données de l'événement */
   payload: any;
 }
 
@@ -128,7 +92,6 @@ export interface DomainEvent {
  * @class File
  */
 export class File {
-  /** Événements domaine émis par l'entité */
   private _domainEvents: DomainEvent[] = [];
 
   /**
@@ -147,7 +110,6 @@ export class File {
     public versions: FileVersion[] = [],
     public accessLogs: FileAccess[] = [],
   ) {
-    // Validation de l'état initial
     this.validateInitialState();
   }
 
@@ -177,7 +139,6 @@ export class File {
     changedBy: string,
     changeType: VersionChangeType = VersionChangeType.MANUAL_EDIT,
   ): FileVersion {
-    // Validation des règles métier
     if (this.metadata.processingStatus === ProcessingStatus.PROCESSING) {
       throw new Error('Cannot create version while file is being processed');
     }
@@ -186,13 +147,11 @@ export class File {
       throw new Error('Cannot create version for deleted file');
     }
 
-    // Désactiver la version actuelle
     const currentVersion = this.getCurrentVersion();
     if (currentVersion) {
       currentVersion.isActive = false;
     }
 
-    // Créer la nouvelle version
     const newVersion: FileVersion = {
       id: uuidv4(),
       fileId: this.id,
@@ -208,11 +167,9 @@ export class File {
       isActive: true,
     };
 
-    // Ajouter la version
     this.versions.push(newVersion);
     this.metadata.versionCount++;
 
-    // Émettre l'événement domaine
     this.addDomainEvent({
       type: 'FileVersionCreated',
       aggregateId: this.id,
@@ -247,27 +204,22 @@ export class File {
    * ```
    */
   canBeAccessedBy(userId: string, operation: FileOperation): boolean {
-    // Fichier supprimé : aucun accès sauf pour le propriétaire
     if (this.metadata.deletedAt) {
       return userId === this.userId && operation === FileOperation.READ;
     }
 
-    // Fichier infecté : lecture seule même pour le propriétaire
     if (this.metadata.virusScanStatus === VirusScanStatus.INFECTED) {
       return operation === FileOperation.READ;
     }
 
-    // Fichier en cours de traitement : lecture seule
     if (this.metadata.processingStatus === ProcessingStatus.PROCESSING) {
       return operation === FileOperation.READ;
     }
 
-    // Le propriétaire a tous les autres droits
     if (userId === this.userId) {
       return true;
     }
 
-    // TODO: Implémenter les permissions partagées (RBAC)
     return false;
   }
 
@@ -297,18 +249,15 @@ export class File {
   ): void {
     const currentStatus = this.metadata.processingStatus;
 
-    // Validation des transitions d'état
     if (!this.isValidStatusTransition(currentStatus, status)) {
       throw new Error(
         `Invalid status transition from ${currentStatus} to ${status}`,
       );
     }
 
-    // Mise à jour du statut
     const previousStatus = this.metadata.processingStatus;
     this.metadata.processingStatus = status;
 
-    // Émettre l'événement domaine
     this.addDomainEvent({
       type: 'FileProcessingStatusChanged',
       aggregateId: this.id,
@@ -320,7 +269,6 @@ export class File {
       },
     });
 
-    // Actions spécifiques selon le nouveau statut
     if (status === ProcessingStatus.FAILED && details?.errorMessage) {
       this.logProcessingError(details.errorMessage);
     }
@@ -347,7 +295,6 @@ export class File {
       },
     });
 
-    // Si infecté, marquer pour quarantaine
     if (status === VirusScanStatus.INFECTED) {
       this.markForQuarantine(threatDetails);
     }
@@ -379,12 +326,10 @@ export class File {
 
     this.accessLogs.push(access);
 
-    // Garder seulement les 100 derniers accès en mémoire
     if (this.accessLogs.length > 100) {
       this.accessLogs = this.accessLogs.slice(-100);
     }
 
-    // Émettre l'événement pour l'audit permanent
     this.addDomainEvent({
       type: 'FileAccessed',
       aggregateId: this.id,
@@ -484,7 +429,7 @@ export class File {
   /**
    * Valide l'état initial de l'entité
    *
-   * @throws {Error} Si l'état est invalide
+   * @throws {Error}
    */
   private validateInitialState(): void {
     if (!this.id || !this.userId || !this.metadata) {
@@ -521,15 +466,9 @@ export class File {
         ProcessingStatus.COMPLETED,
         ProcessingStatus.FAILED,
       ],
-      [ProcessingStatus.COMPLETED]: [
-        ProcessingStatus.PROCESSING, // Retraitement possible
-      ],
-      [ProcessingStatus.FAILED]: [
-        ProcessingStatus.PROCESSING, // Retry possible
-      ],
-      [ProcessingStatus.SKIPPED]: [
-        ProcessingStatus.PROCESSING, // Traitement manuel possible
-      ],
+      [ProcessingStatus.COMPLETED]: [ProcessingStatus.PROCESSING],
+      [ProcessingStatus.FAILED]: [ProcessingStatus.PROCESSING],
+      [ProcessingStatus.SKIPPED]: [ProcessingStatus.PROCESSING],
     };
 
     return validTransitions[from]?.includes(to) ?? false;

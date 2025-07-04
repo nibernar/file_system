@@ -1,5 +1,3 @@
-// src/presentation/middleware/__tests__/file-security.middleware.spec.ts
-
 /**
  * Tests unitaires pour FileSecurityMiddleware - VERSION CORRIGÉE
  *
@@ -14,7 +12,6 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { FileSecurityMiddleware } from '../file-security.middleware';
 import { RateLimitService } from '../../../infrastructure/security/rate-limit.service';
@@ -24,7 +21,6 @@ import {
   IpIntelligence,
 } from '../../../types/file-system.types';
 
-// Exception personnalisée pour les tests
 class TooManyRequestsException extends Error {
   constructor(message?: string) {
     super(message || 'Too Many Requests');
@@ -81,7 +77,6 @@ describe('FileSecurityMiddleware', () => {
    * Configuration initiale des tests
    */
   beforeEach(async () => {
-    // Arrange - Création des mocks selon AAA Pattern
     mockRateLimitService = {
       checkLimit: jest.fn(),
       incrementCounter: jest.fn(),
@@ -118,7 +113,6 @@ describe('FileSecurityMiddleware', () => {
 
     mockNext = jest.fn();
 
-    // Setup du module de test
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FileSecurityMiddleware,
@@ -148,7 +142,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Validation des requêtes avec IP sécurisée
      */
     it('should allow requests from legitimate IPs with low threat level', async () => {
-      // Arrange
       const mockIpIntelligence: IpIntelligence = {
         ip: '192.168.1.100',
         threatLevel: 'low',
@@ -175,14 +168,12 @@ describe('FileSecurityMiddleware', () => {
       mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
       mockRateLimitService.incrementCounter.mockResolvedValue();
 
-      // Act
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
         mockNext,
       );
 
-      // Assert
       expect(mockNext).toHaveBeenCalledTimes(1);
       expect(mockNext).toHaveBeenCalledWith();
       expect(mockRequest.security).toEqual({
@@ -206,7 +197,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Blocage des connexions Tor
      */
     it('should block Tor exit node connections when configured', async () => {
-      // Arrange
       const mockIpIntelligence: IpIntelligence = {
         ip: '192.168.1.100',
         threatLevel: 'medium',
@@ -222,7 +212,6 @@ describe('FileSecurityMiddleware', () => {
         mockIpIntelligence,
       );
 
-      // Act & Assert
       await expect(
         middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Access denied: Tor connections not allowed');
@@ -237,7 +226,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Blocage des IPs avec niveau de menace élevé
      */
     it('should block high threat level IPs', async () => {
-      // Arrange
       const mockIpIntelligence: IpIntelligence = {
         ip: '192.168.1.100',
         threatLevel: 'high',
@@ -253,7 +241,6 @@ describe('FileSecurityMiddleware', () => {
         mockIpIntelligence,
       );
 
-      // Act & Assert
       await expect(
         middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Access denied: IP threat level too high');
@@ -266,7 +253,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Blocage des IPs explicitement blacklistées
      */
     it('should block explicitly blacklisted IPs', async () => {
-      // Arrange
       const mockIpIntelligence: IpIntelligence = {
         ip: '192.168.1.100',
         threatLevel: 'low',
@@ -283,7 +269,6 @@ describe('FileSecurityMiddleware', () => {
       );
       mockIpIntelligenceService.isIpBlocked.mockResolvedValue(true);
 
-      // Act & Assert
       await expect(
         middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Access denied: IP address blocked');
@@ -300,7 +285,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Enforcement du rate limiting
      */
     it('should enforce rate limiting and reject excess requests', async () => {
-      // Arrange
       const mockIpIntelligence: IpIntelligence = {
         ip: '192.168.1.100',
         threatLevel: 'low',
@@ -326,7 +310,6 @@ describe('FileSecurityMiddleware', () => {
       mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);
       mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
 
-      // Act & Assert
       await expect(
         middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Rate limit exceeded');
@@ -340,7 +323,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Incrémentation du compteur pour requêtes autorisées
      */
     it('should increment rate limit counter for allowed requests', async () => {
-      // Arrange
       const mockIpIntelligence: IpIntelligence = {
         ip: '192.168.1.100',
         threatLevel: 'low',
@@ -367,14 +349,12 @@ describe('FileSecurityMiddleware', () => {
       mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
       mockRateLimitService.incrementCounter.mockResolvedValue();
 
-      // Act
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
         mockNext,
       );
 
-      // Assert
       expect(mockRateLimitService.incrementCounter).toHaveBeenCalledWith(
         'user-123',
         'POST:/api/v1/files/upload',
@@ -388,17 +368,14 @@ describe('FileSecurityMiddleware', () => {
      * Test : Exemption des endpoints de santé
      */
     it('should exempt health check endpoints from security checks', async () => {
-      // Arrange
       mockRequest.path = '/health';
 
-      // Act
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
         mockNext,
       );
 
-      // Assert
       expect(mockNext).toHaveBeenCalledTimes(1);
       expect(
         mockIpIntelligenceService.getIpIntelligence,
@@ -410,17 +387,14 @@ describe('FileSecurityMiddleware', () => {
      * Test : Exemption des endpoints de métriques
      */
     it('should exempt metrics endpoints from security checks', async () => {
-      // Arrange
       mockRequest.path = '/metrics';
 
-      // Act
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
         mockNext,
       );
 
-      // Assert
       expect(mockNext).toHaveBeenCalledTimes(1);
       expect(
         mockIpIntelligenceService.getIpIntelligence,
@@ -434,7 +408,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Gestion gracieuse des erreurs de service
      */
     it('should handle service errors gracefully in development mode', async () => {
-      // Arrange
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
 
@@ -442,14 +415,12 @@ describe('FileSecurityMiddleware', () => {
         new Error('IP Intelligence service unavailable'),
       );
 
-      // Act & Assert - En mode développement, le middleware devrait throw l'erreur
       await expect(
         middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Security check failed');
 
       expect(mockNext).not.toHaveBeenCalled();
 
-      // Cleanup
       process.env.NODE_ENV = originalEnv;
     });
 
@@ -457,7 +428,6 @@ describe('FileSecurityMiddleware', () => {
      * Test : Strict error handling en production
      */
     it('should handle service errors strictly in production mode', async () => {
-      // Arrange
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
 
@@ -465,14 +435,12 @@ describe('FileSecurityMiddleware', () => {
         new Error('IP Intelligence service unavailable'),
       );
 
-      // Act & Assert
       await expect(
         middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Security check failed');
 
       expect(mockNext).not.toHaveBeenCalled();
 
-      // Cleanup
       process.env.NODE_ENV = originalEnv;
     });
   });
@@ -482,10 +450,8 @@ describe('FileSecurityMiddleware', () => {
      * Test : Configuration par défaut valide
      */
     it('should have secure default configuration', () => {
-      // Act
       const config = middleware.getConfig();
 
-      // Assert
       expect(config.blockTor).toBe(true);
       expect(config.blockVpn).toBe(false);
       expect(config.maxThreatLevel).toBe('medium');

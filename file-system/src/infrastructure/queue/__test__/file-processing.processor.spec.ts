@@ -35,11 +35,8 @@ import { MetricsService } from '../../monitoring/metrics.service';
 import { IFileMetadataRepository } from '../../../domain/repositories/file-metadata.repository';
 import {
   ProcessingJobData,
-  ProcessingResult,
   ThumbnailJobData,
-  ThumbnailResult,
   ConversionJobData,
-  FormatConversionResult,
   ProcessingJobType,
   ProcessingStatus,
   VirusScanStatus,
@@ -48,7 +45,6 @@ import {
   ImageFormat,
   FileMetadata,
   SecurityScanResult,
-  FileOptimizations,
 } from '../../../types/file-system.types';
 import {
   FileNotFoundException,
@@ -183,7 +179,6 @@ class MockJobFactory {
       failedReason: undefined,
       attemptsMade: 0,
 
-      // Mock methods with proper Jest mock functions
       getState: jest.fn().mockResolvedValue('waiting'),
       progress: jest.fn().mockResolvedValue(undefined),
       remove: jest.fn().mockResolvedValue(undefined),
@@ -191,7 +186,6 @@ class MockJobFactory {
       log: jest.fn().mockResolvedValue(undefined),
       getPosition: jest.fn().mockResolvedValue(1),
 
-      // Additional required properties for full Job interface
       stacktrace: [],
       isCompleted: jest.fn().mockResolvedValue(false),
       isFailed: jest.fn().mockResolvedValue(false),
@@ -201,12 +195,10 @@ class MockJobFactory {
       isPaused: jest.fn().mockResolvedValue(false),
       isStuck: jest.fn().mockResolvedValue(false),
 
-      // Other properties
       queue: {} as any,
       delay: 0,
       toJSON: jest.fn().mockReturnValue({}),
 
-      // Additional methods that might be called
       moveToCompleted: jest.fn(),
       moveToFailed: jest.fn(),
       discard: jest.fn(),
@@ -464,7 +456,6 @@ describe('FileProcessingProcessor', () => {
 
   describe('processUploadedFile', () => {
     it('should process PDF file successfully with complete workflow', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('application/pdf')
         .withSize(10 * 1024 * 1024)
@@ -489,10 +480,8 @@ describe('FileProcessingProcessor', () => {
         pageCount: 10,
       });
 
-      // Act
       const result = await processor.processUploadedFile(job);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.metadata).toEqual(fileMetadata);
@@ -505,7 +494,6 @@ describe('FileProcessingProcessor', () => {
       expect(result.extractedMetadata).toBeDefined();
       expect(result.extractedMetadata!.type).toBe('pdf');
 
-      // Vérifier appels aux services
       expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(
         fileMetadata.id,
       );
@@ -525,7 +513,6 @@ describe('FileProcessingProcessor', () => {
         fileMetadata.id,
       );
 
-      // Vérifier progression du job
       expect(job.progress).toHaveBeenCalledWith(0);
       expect(job.progress).toHaveBeenCalledWith(100);
       expect(job.log).toHaveBeenCalledWith(
@@ -537,7 +524,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should process image file successfully with optimization and thumbnail', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('image/jpeg')
         .withSize(5 * 1024 * 1024)
@@ -557,10 +543,8 @@ describe('FileProcessingProcessor', () => {
         MockResultsFactory.createThumbnailResult(),
       );
 
-      // Act
       const result = await processor.processUploadedFile(job);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.optimizations).toBeDefined();
       expect(result.optimizations).toBeDefined();
@@ -583,10 +567,9 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should process document file successfully with text extraction', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('text/plain')
-        .withSize(50 * 1024) // 50KB
+        .withSize(50 * 1024)
         .build();
 
       const jobData = new ProcessingJobDataTestDataBuilder()
@@ -600,10 +583,8 @@ describe('FileProcessingProcessor', () => {
         MockResultsFactory.createDocumentProcessingResult(),
       );
 
-      // Act
       const result = await processor.processUploadedFile(job);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.extractedMetadata).toBeDefined();
       expect(result.extractedMetadata).toBeDefined();
@@ -623,7 +604,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should handle file not found error gracefully', async () => {
-      // Arrange
       const jobData = new ProcessingJobDataTestDataBuilder()
         .withFileId('non-existent-file')
         .build();
@@ -632,7 +612,6 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(null);
 
-      // Act & Assert
       await expect(processor.processUploadedFile(job)).rejects.toThrow(
         FileNotFoundException,
       );
@@ -646,7 +625,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should handle deleted file appropriately', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .asDeleted()
         .build();
@@ -659,14 +637,12 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
-      // Act & Assert
       await expect(processor.processUploadedFile(job)).rejects.toThrow(
         FileNotFoundException,
       );
     });
 
     it('should quarantine infected file and stop processing', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withVirusScanStatus(VirusScanStatus.PENDING)
         .build();
@@ -679,12 +655,10 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
-      // Mock scan sécurité qui détecte un virus
       jest
         .spyOn(processor as any, 'performSecurityScan')
         .mockResolvedValue(MockResultsFactory.createSecurityScanResult(false));
 
-      // Act & Assert
       await expect(processor.processUploadedFile(job)).rejects.toThrow(
         ProcessingException,
       );
@@ -700,7 +674,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should handle processing errors and update file status', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('application/pdf')
         .build();
@@ -715,7 +688,6 @@ describe('FileProcessingProcessor', () => {
         new Error('Database connection failed'),
       );
 
-      // Act & Assert
       await expect(processor.processUploadedFile(job)).rejects.toThrow();
 
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
@@ -733,7 +705,6 @@ describe('FileProcessingProcessor', () => {
 
   describe('generateThumbnail', () => {
     it('should generate thumbnail successfully for image file', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('image/jpeg')
         .build();
@@ -752,10 +723,8 @@ describe('FileProcessingProcessor', () => {
         MockResultsFactory.createThumbnailResult(),
       );
 
-      // Act
       const result = await processor.generateThumbnail(job);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.url).toBe(
         'https://cdn.coders.com/thumbnails/test-file-123/thumbnail.webp',
@@ -774,7 +743,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should reject thumbnail generation for non-image file', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('application/pdf')
         .build();
@@ -788,7 +756,6 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
-      // Act & Assert
       await expect(processor.generateThumbnail(job)).rejects.toThrow(
         ThumbnailGenerationException,
       );
@@ -797,7 +764,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should handle multiple thumbnail sizes correctly', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('image/png')
         .build();
@@ -815,14 +781,12 @@ describe('FileProcessingProcessor', () => {
         MockResultsFactory.createThumbnailResult(),
       );
 
-      // Act
       const result = await processor.generateThumbnail(job);
 
-      // Assert
       expect(result).toBeDefined();
       expect(mockImageProcessor.generateThumbnail).toHaveBeenCalledWith(
         fileMetadata.id,
-        150, // Premier de la liste
+        150,
         [ImageFormat.JPEG],
       );
     });
@@ -834,7 +798,6 @@ describe('FileProcessingProcessor', () => {
 
   describe('optimizePdf', () => {
     it('should optimize PDF successfully with compression', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('application/pdf')
         .withSize(10 * 1024 * 1024)
@@ -852,16 +815,13 @@ describe('FileProcessingProcessor', () => {
         MockResultsFactory.createOptimizedPdfResult(),
       );
 
-      // Act
       const result = await processor.optimizePdf(job);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.optimizations).toBeDefined();
       expect(result.optimizations).toBeDefined();
       expect(result.optimizations!.compressionRatio).toBe(0.7);
       expect(result.optimizations!.techniques).toContain('compression');
-
       expect(mockPdfProcessor.optimizePdf).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
@@ -882,7 +842,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should reject PDF optimization for non-PDF file', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('image/jpeg')
         .build();
@@ -895,7 +854,6 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
-      // Act & Assert
       await expect(processor.optimizePdf(job)).rejects.toThrow(
         OptimizationException,
       );
@@ -904,7 +862,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should handle PDF optimization errors gracefully', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('application/pdf')
         .build();
@@ -920,7 +877,6 @@ describe('FileProcessingProcessor', () => {
         new Error('Corrupted PDF'),
       );
 
-      // Act & Assert
       await expect(processor.optimizePdf(job)).rejects.toThrow('Corrupted PDF');
 
       expect(job.log).toHaveBeenCalledWith('PDF validation completed');
@@ -933,7 +889,6 @@ describe('FileProcessingProcessor', () => {
 
   describe('convertFormat', () => {
     it('should convert image format successfully', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('image/png')
         .build();
@@ -954,17 +909,14 @@ describe('FileProcessingProcessor', () => {
         mockConversionResult,
       ]);
 
-      // Act
       const result = await processor.convertFormat(job);
 
-      // Assert
       expect(result).toBeDefined();
       expect(result.fromFormat).toBe('png');
       expect(result.toFormat).toBe('webp');
       expect(result.success).toBe(true);
       expect(result.originalSize).toBe(2 * 1024 * 1024);
       expect(result.convertedSize).toBe(1.2 * 1024 * 1024);
-
       expect(mockImageProcessor.generateMultipleFormats).toHaveBeenCalledWith(
         fileMetadata.id,
         [ImageFormat.WEBP],
@@ -972,7 +924,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should handle conversion failure appropriately', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('image/jpeg')
         .build();
@@ -992,14 +943,12 @@ describe('FileProcessingProcessor', () => {
         mockFailedConversion,
       ]);
 
-      // Act & Assert
       await expect(processor.convertFormat(job)).rejects.toThrow(
         'Conversion failed due to corrupted image',
       );
     });
 
     it('should reject conversion for unsupported file type', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withContentType('application/pdf')
         .build();
@@ -1013,7 +962,6 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
-      // Act & Assert
       await expect(processor.convertFormat(job)).rejects.toThrow(
         'Format conversion not supported',
       );
@@ -1026,7 +974,6 @@ describe('FileProcessingProcessor', () => {
 
   describe('rescanVirus', () => {
     it('should perform virus rescan successfully and confirm clean file', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withVirusScanStatus(VirusScanStatus.PENDING)
         .build();
@@ -1043,14 +990,11 @@ describe('FileProcessingProcessor', () => {
         .spyOn(processor as any, 'performSecurityScan')
         .mockResolvedValue(MockResultsFactory.createSecurityScanResult(true));
 
-      // Act
       const result = await processor.rescanVirus(job);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.securityScan).toBeDefined();
       expect(result.securityScan!.safe).toBe(true);
-
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
@@ -1062,7 +1006,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should detect virus during rescan and quarantine file', async () => {
-      // Arrange
       const fileMetadata = new FileMetadataTestDataBuilder()
         .withVirusScanStatus(VirusScanStatus.CLEAN)
         .build();
@@ -1083,14 +1026,11 @@ describe('FileProcessingProcessor', () => {
         .spyOn(processor as any, 'quarantineFile')
         .mockResolvedValue(undefined);
 
-      // Act
       const result = await processor.rescanVirus(job);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.securityScan).toBeDefined();
       expect(result.securityScan!.safe).toBe(false);
-
       expect(job.log).toHaveBeenCalledWith(
         'SECURITY ALERT: Threats detected in file test-file-123',
       );
@@ -1104,7 +1044,6 @@ describe('FileProcessingProcessor', () => {
 
   describe('processText', () => {
     it('should process text content successfully with analysis', async () => {
-      // Arrange
       const textJobData = {
         text: 'Ceci est un texte de test en français avec des MAJUSCULES et des chiffres 123.',
         timestamp: Date.now(),
@@ -1114,10 +1053,8 @@ describe('FileProcessingProcessor', () => {
 
       const job = createMockJob(textJobData);
 
-      // Act
       const result = await processor.processText(job);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.analysis).toBeDefined();
       expect(result.analysis.wordCount).toBeGreaterThan(0);
@@ -1126,7 +1063,6 @@ describe('FileProcessingProcessor', () => {
       expect(result.analysis.hasNumbers).toBe(true);
       expect(result.analysis.language).toBe('fr');
       expect(result.analysis.sentiment).toBe('neutral');
-
       expect(job.progress).toHaveBeenCalledWith(0);
       expect(job.progress).toHaveBeenCalledWith(100);
       expect(job.log).toHaveBeenCalledWith(
@@ -1135,7 +1071,6 @@ describe('FileProcessingProcessor', () => {
     });
 
     it('should detect English language correctly', async () => {
-      // Arrange
       const textJobData = {
         text: 'This is a great English text with excellent content and good quality.',
         timestamp: Date.now(),
@@ -1145,16 +1080,13 @@ describe('FileProcessingProcessor', () => {
 
       const job = createMockJob(textJobData);
 
-      // Act
       const result = await processor.processText(job);
 
-      // Assert
       expect(result.analysis.language).toBe('en');
       expect(result.analysis.sentiment).toBe('positive');
     });
 
     it('should detect negative sentiment correctly', async () => {
-      // Arrange
       const textJobData = {
         text: 'This is a terrible and awful document with bad content.',
         timestamp: Date.now(),
@@ -1164,17 +1096,14 @@ describe('FileProcessingProcessor', () => {
 
       const job = createMockJob(textJobData);
 
-      // Act
       const result = await processor.processText(job);
 
-      // Assert
       expect(result.analysis.sentiment).toBe('negative');
     });
 
     it('should handle text processing errors gracefully', async () => {
-      // Arrange
       const textJobData = {
-        text: '', // Texte vide
+        text: '',
         timestamp: Date.now(),
         type: 'analysis',
         source: 'empty',
@@ -1182,7 +1111,6 @@ describe('FileProcessingProcessor', () => {
 
       const job = createMockJob(textJobData);
 
-      // Act & Assert - Ne devrait pas lancer d'erreur mais gérer le cas gracieusement
       const result = await processor.processText(job);
 
       expect(result.analysis.wordCount).toBeLessThanOrEqual(1);
@@ -1197,14 +1125,11 @@ describe('FileProcessingProcessor', () => {
   describe('Event Handlers', () => {
     describe('onActive', () => {
       it('should log job activation and update metrics', () => {
-        // Arrange
         const jobData = new ProcessingJobDataTestDataBuilder().build();
         const job = createMockJob(jobData);
 
-        // Act
         processor.onActive(job);
 
-        // Assert
         expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
           'file_processing_jobs_started',
           { jobType: 'process-uploaded-file' },
@@ -1214,17 +1139,14 @@ describe('FileProcessingProcessor', () => {
 
     describe('onCompleted', () => {
       it('should log completion and record metrics', () => {
-        // Arrange
         const jobData = new ProcessingJobDataTestDataBuilder().build();
         const job = createMockJob(jobData);
-        job.timestamp = Date.now() - 5000; // Simuler 5 secondes d'exécution
+        job.timestamp = Date.now() - 5000;
 
         const result = { success: true };
 
-        // Act
         processor.onCompleted(job, result);
 
-        // Assert
         expect(mockMetricsService.recordHistogram).toHaveBeenCalledWith(
           'file_processing_duration',
           expect.any(Number),
@@ -1238,19 +1160,16 @@ describe('FileProcessingProcessor', () => {
 
     describe('onFailed', () => {
       it('should log failure and record error metrics', () => {
-        // Arrange
         const jobData = new ProcessingJobDataTestDataBuilder()
-          .withPriority(8) // Haute priorité pour tester notification critique
+          .withPriority(8)
           .build();
         const job = createMockJob(jobData);
         job.attemptsMade = 3;
 
         const error = new Error('Processing failed');
 
-        // Act
         processor.onFailed(job, error);
 
-        // Assert
         expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
           'file_processing_jobs_failed',
           expect.objectContaining({
@@ -1263,15 +1182,12 @@ describe('FileProcessingProcessor', () => {
 
     describe('onProgress', () => {
       it('should update progress metrics', () => {
-        // Arrange
         const jobData = new ProcessingJobDataTestDataBuilder().build();
         const job = createMockJob(jobData);
         const progress = 45;
 
-        // Act
         processor.onProgress(job, progress);
 
-        // Assert
         expect(mockMetricsService.updateGauge).toHaveBeenCalledWith(
           'file_processing_progress',
           45,
@@ -1285,15 +1201,12 @@ describe('FileProcessingProcessor', () => {
 
     describe('onStalled', () => {
       it('should log stalled job and record metrics', () => {
-        // Arrange
         const jobData = new ProcessingJobDataTestDataBuilder().build();
         const job = createMockJob(jobData);
         job.attemptsMade = 2;
 
-        // Act
         processor.onStalled(job);
 
-        // Assert
         expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
           'file_processing_jobs_stalled',
           { jobType: 'process-uploaded-file' },
@@ -1303,13 +1216,10 @@ describe('FileProcessingProcessor', () => {
 
     describe('onError', () => {
       it('should log queue error and record metrics', () => {
-        // Arrange
         const error = new Error('Queue connection failed');
 
-        // Act
         processor.onError(error);
 
-        // Assert
         expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
           'file_processing_queue_errors',
           { errorType: 'Error' },
@@ -1325,7 +1235,6 @@ describe('FileProcessingProcessor', () => {
   describe('Utility Methods', () => {
     describe('Type Detection', () => {
       it('should correctly identify image files', () => {
-        // Test des méthodes privées via réflection
         const isImageFile = (processor as any).isImageFile;
 
         expect(isImageFile('image/jpeg')).toBe(true);

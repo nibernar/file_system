@@ -2,7 +2,6 @@
 import {
   Controller,
   Get,
-  Inject,
   Post,
   Body,
   BadRequestException,
@@ -11,8 +10,6 @@ import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { AppService } from './app.service';
-import { IFileMetadataRepository } from './domain/repositories/file-metadata.repository';
 import { FILE_PROCESSING_QUEUE_NAME } from './infrastructure/queue/file-processing.queue';
 
 class TestDocumentDto {
@@ -47,7 +44,6 @@ export class AppController {
   @ApiResponse({ status: 400, description: 'Champ text manquant' })
   async handlePost(@Body() body: TestDocumentDto) {
     try {
-      // Ajouter une tâche à la queue Bull
       const job = await this.fileProcessingQueue.add('process-text', {
         text: body.text,
         timestamp: new Date().toISOString(),
@@ -55,7 +51,6 @@ export class AppController {
         source: 'app-controller',
       });
 
-      // Récupérer les statistiques de la queue
       const [waiting, active, completed, failed] = await Promise.all([
         this.fileProcessingQueue.getWaiting().then((jobs) => jobs.length),
         this.fileProcessingQueue.getActive().then((jobs) => jobs.length),
@@ -98,7 +93,6 @@ export class AppController {
 
     for (let i = 1; i <= 5; i++) {
       const job = await this.fileProcessingQueue.add('process-text', {
-        // ← Changez ici
         text: `Document de test automatique numéro ${i}`,
         timestamp: new Date().toISOString(),
         type: 'bulk-test',

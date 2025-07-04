@@ -1,5 +1,3 @@
-// src/infrastructure/garage/garage-storage.interface.ts
-
 import {
   ObjectMetadata,
   UploadResult,
@@ -11,7 +9,7 @@ import {
   CompletedPart,
   CopyResult,
   PresignedUrlOptions,
-  PresignedUrl, // ✅ CHANGÉ : PresignedUrlResult → PresignedUrl
+  PresignedUrl,
   BucketInfo,
 } from '../../types/file-system.types';
 
@@ -126,7 +124,7 @@ export interface IGarageStorageService {
    * Génère une URL pré-signée pour accès temporaire
    * @param options Configuration de l'URL
    */
-  generatePresignedUrl(options: PresignedUrlOptions): Promise<PresignedUrl>; // ✅ CORRIGÉ
+  generatePresignedUrl(options: PresignedUrlOptions): Promise<PresignedUrl>;
 
   // ================================
   // SANTÉ ET GESTION

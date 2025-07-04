@@ -18,9 +18,6 @@ import * as chardet from 'chardet';
 import {
   DocumentProcessorService,
   DocumentProcessingOptions,
-  ProcessedDocument,
-  DocumentStructureValidation,
-  LanguageDetectionResult,
 } from '../document-processor.service';
 import { GarageStorageService } from '../../garage/garage-storage.service';
 import { FILE_SYSTEM_CONFIG } from '../../../config/file-system.config';
@@ -30,10 +27,7 @@ import {
   ProcessingStatus,
   DocumentType,
 } from '../../../types/file-system.types';
-import {
-  ProcessingException,
-  FileNotFoundException,
-} from '../../../exceptions/file-system.exceptions';
+import { FileNotFoundException } from '../../../exceptions/file-system.exceptions';
 import {
   createTestFileBuffer,
   createTestJSONBuffer,
@@ -41,7 +35,6 @@ import {
   delay,
 } from '../../../__tests__/test-setup';
 
-// Mock des bibliothèques externes pour tests isolés
 jest.mock('iconv-lite');
 jest.mock('chardet');
 
@@ -81,10 +74,9 @@ describe('DocumentProcessorService', () => {
   });
 
   beforeEach(async () => {
-    // Configuration mock
     mockConfig = {
       processing: {
-        maxSizeForSummary: 1024 * 1024, // 1MB
+        maxSizeForSummary: 1024 * 1024,
         targetEncoding: 'utf8',
       },
       cdn: {
@@ -92,7 +84,6 @@ describe('DocumentProcessorService', () => {
       },
     };
 
-    // Mock services dépendants
     const mockStorageService = {
       downloadObject: jest.fn(),
       uploadObject: jest.fn(),
@@ -107,7 +98,6 @@ describe('DocumentProcessorService', () => {
       error: jest.fn(),
     };
 
-    // ✅ Configuration mocks bibliothèques SYNCHRONES
     mockChardet.detect.mockReturnValue('utf8');
     mockIconv.encodingExists.mockReturnValue(true);
     mockIconv.decode.mockImplementation((buffer, encoding) => {
@@ -117,7 +107,6 @@ describe('DocumentProcessorService', () => {
       return Buffer.from(text, encoding as BufferEncoding);
     });
 
-    // Configuration module NestJS
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DocumentProcessorService,
@@ -127,7 +116,6 @@ describe('DocumentProcessorService', () => {
       ],
     }).compile();
 
-    // Récupération instances
     service = module.get<DocumentProcessorService>(DocumentProcessorService);
     storageService = module.get(GarageStorageService);
     logger = module.get(Logger);
@@ -146,7 +134,6 @@ describe('DocumentProcessorService', () => {
 
   describe('processDocument - Traitement Principal', () => {
     it('should process French text document with complete analysis', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const frenchContent = `Ceci est un document de test en français.
 Il contient plusieurs lignes de texte pour tester l'analyse linguistique.
@@ -166,9 +153,8 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         targetEncoding: 'utf8',
       };
 
-      // Configuration mocks avec délais
       storageService.downloadObject.mockImplementation(async () => {
-        await delay(5); // Délai pour assurer processingTime > 0
+        await delay(5);
         return {
           body: sourceBuffer,
           metadata: {
@@ -184,10 +170,8 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(frenchContent);
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert - Analyse complète
       expect(result.success).toBe(true);
       expect(result.textContent).toBe(frenchContent);
       expect(result.encoding).toBe('utf8');
@@ -199,19 +183,14 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
       );
       expect(result.detectedLanguage).toBe('fr');
       expect(result.processingTime).toBeGreaterThan(0);
-
-      // Vérification structure validation
       expect(result.structureValidation).toBeDefined();
       expect(result.structureValidation?.valid).toBe(true);
       expect(result.structureValidation?.detectedFormat).toBe('text/plain');
-
-      // Vérification métadonnées spécialisées
       expect(result.specializedMetadata).toBeDefined();
       expect(result.specializedMetadata?.textStructure).toBeDefined();
     });
 
     it('should process JSON document with structure validation', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const jsonData = {
         name: 'Test Configuration',
@@ -237,7 +216,6 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         detectLanguage: false,
       };
 
-      // Configuration mocks
       storageService.downloadObject.mockImplementation(async () => {
         await delay(3);
         return {
@@ -255,15 +233,11 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(jsonContent);
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.textContent).toBe(jsonContent);
       expect(result.processingTime).toBeGreaterThan(0);
-
-      // Vérification validation structure JSON
       expect(result.structureValidation?.valid).toBe(true);
       expect(result.structureValidation?.detectedFormat).toBe(
         'application/json',
@@ -275,8 +249,6 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
       expect(
         result.structureValidation?.structureMetadata?.keyCount,
       ).toBeGreaterThan(0);
-
-      // Vérification métadonnées spécialisées JSON
       expect(result.specializedMetadata?.jsonStructure).toBeDefined();
       expect(result.specializedMetadata?.jsonStructure?.depth).toBeGreaterThan(
         1,
@@ -290,7 +262,6 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
     });
 
     it('should optimize encoding from Latin-1 to UTF-8', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const latin1Content =
         'Texte avec caractères accentués: café, naïve, résumé';
@@ -304,7 +275,6 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         targetEncoding: 'utf8',
       };
 
-      // Configuration mocks
       storageService.downloadObject.mockImplementation(async () => {
         await delay(2);
         return {
@@ -338,16 +308,12 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         uploadDuration: 200,
       });
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.encoding).toBe('ISO-8859-1');
       expect(result.optimizedEncoding).toBe('utf8');
       expect(result.processingTime).toBeGreaterThan(0);
-
-      // Vérification sauvegarde version optimisée
       expect(storageService.uploadObject).toHaveBeenCalledWith(
         expect.stringContaining('/optimized/utf8/'),
         expect.any(Buffer),
@@ -365,7 +331,6 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
     });
 
     it('should generate intelligent automatic summary', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const longContent = `L'intelligence artificielle représente une révolution technologique majeure.
 Cette technologie transforme notre façon de travailler et de vivre.
@@ -388,7 +353,6 @@ Nous devons nous préparer à ces changements technologiques majeurs.`;
         detectLanguage: true,
       };
 
-      // Configuration mocks
       storageService.downloadObject.mockImplementation(async () => {
         await delay(3);
         return {
@@ -406,10 +370,8 @@ Nous devons nous préparer à ces changements technologiques majeurs.`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(longContent);
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.summary).toBeDefined();
       expect(result.summary!.length).toBeGreaterThan(50);
@@ -417,13 +379,10 @@ Nous devons nous préparer à ces changements technologiques majeurs.`;
       expect(result.summary).toContain('intelligence artificielle');
       expect(result.detectedLanguage).toBe('fr');
       expect(result.processingTime).toBeGreaterThan(0);
-
-      // Vérification qualité résumé
       expect(result.summary).toMatch(/intelligence|IA|technologie|données/);
     });
 
     it('should detect English language with specific patterns', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const englishContent = `This is a comprehensive test document written in English.
 The document processing service should detect the English language patterns.
@@ -439,7 +398,6 @@ Features include automatic language detection and content analysis.`;
         generateSummary: true,
       };
 
-      // Configuration mocks
       storageService.downloadObject.mockImplementation(async () => {
         await delay(2);
         return {
@@ -457,10 +415,8 @@ Features include automatic language detection and content analysis.`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(englishContent);
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.detectedLanguage).toBe('en');
       expect(result.textContent).toBe(englishContent);
@@ -474,14 +430,12 @@ Features include automatic language detection and content analysis.`;
 
   describe("Gestion d'Erreurs et Robustesse", () => {
     it('should handle missing document files gracefully', async () => {
-      // Arrange
       const nonExistentFileId = generateTestUUID();
 
       storageService.downloadObject.mockRejectedValue(
         new FileNotFoundException(nonExistentFileId),
       );
 
-      // Act & Assert
       await expect(
         service.processDocument(nonExistentFileId, {}),
       ).rejects.toThrow(FileNotFoundException);
@@ -491,7 +445,6 @@ Features include automatic language detection and content analysis.`;
     });
 
     it('should handle unsupported encodings with fallback', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const content = 'Contenu avec encodage non supporté';
       const sourceBuffer = createTestFileBuffer(content, 'utf8');
@@ -513,27 +466,20 @@ Features include automatic language detection and content analysis.`;
       mockChardet.detect.mockReturnValue('UNKNOWN-ENCODING');
       mockIconv.encodingExists.mockReturnValue(false);
 
-      // ✅ SPY sur la vraie instance du service
       const warnSpy = jest.spyOn(service['logger'], 'warn');
 
-      // Act
       const result = await service.processDocument(fileId, {});
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.encoding).toBe('UNKNOWN-ENCODING');
-
-      // ✅ Vérifier le spy sur la vraie instance
       expect(warnSpy).toHaveBeenCalledWith(
         'Encodage UNKNOWN-ENCODING non supporté, fallback UTF-8',
       );
 
-      // Nettoyage
       warnSpy.mockRestore();
     });
 
     it('should handle corrupted documents gracefully', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const corruptedBuffer = Buffer.from([0x00, 0x01, 0x02, 0xff, 0xfe]);
 
@@ -554,36 +500,30 @@ Features include automatic language detection and content analysis.`;
       mockChardet.detect.mockReturnValue(null);
       mockIconv.decode.mockImplementation(() => {
         const error = new Error('Invalid character sequence');
-        // Le service loggera avec le message complet
         logger.error(
           `Échec traitement document ${fileId} après 5ms: ${error.message}`,
         );
         throw error;
       });
 
-      // Act
       const result = await service.processDocument(fileId, {});
 
-      // Assert
       expect(result.processingTime).toBeGreaterThanOrEqual(0);
 
       if (!result.success) {
         expect(result.error).toContain('Invalid character sequence');
       }
 
-      // ✅ Vérification log d'erreur - Le service log avec un seul paramètre
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Échec traitement document ' + fileId),
       );
     });
 
     it('should recover from temporary storage failures', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const content = 'Document pour test récupération';
       const sourceBuffer = createTestFileBuffer(content, 'utf8');
 
-      // Premier échec puis succès
       storageService.downloadObject
         .mockRejectedValueOnce(new Error('Storage temporarily unavailable'))
         .mockImplementation(async () => {
@@ -603,15 +543,12 @@ Features include automatic language detection and content analysis.`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(content);
 
-      // Act - Premier échec
       await expect(service.processDocument(fileId, {})).rejects.toThrow(
         FileNotFoundException,
       );
 
-      // Second essai réussit
       const result = await service.processDocument(fileId, {});
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.textContent).toBe(content);
       expect(result.processingTime).toBeGreaterThan(0);
@@ -621,7 +558,6 @@ Features include automatic language detection and content analysis.`;
 
   describe('Validation Structure Avancée', () => {
     it('should validate CSV structure with column analysis', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const csvContent = `nom,age,ville,pays
 Jean Dupont,25,Paris,France
@@ -654,10 +590,8 @@ Anna Mueller,35,Berlin,Germany`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(csvContent);
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.processingTime).toBeGreaterThan(0);
       expect(result.structureValidation?.valid).toBe(true);
@@ -668,7 +602,6 @@ Anna Mueller,35,Berlin,Germany`;
         4,
       );
 
-      // Vérification métadonnées CSV spécialisées
       expect(result.specializedMetadata?.csvStructure).toBeDefined();
       expect(result.specializedMetadata?.csvStructure?.delimiter).toBe(',');
       expect(result.specializedMetadata?.csvStructure?.hasQuotedFields).toBe(
@@ -677,7 +610,6 @@ Anna Mueller,35,Berlin,Germany`;
     });
 
     it('should validate Markdown structure with element counting', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const markdownContent = `# Titre Principal
 
@@ -729,16 +661,12 @@ Autre contenu avec \`code inline\`.`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(markdownContent);
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.processingTime).toBeGreaterThan(0);
       expect(result.structureValidation?.valid).toBe(true);
       expect(result.structureValidation?.detectedFormat).toBe('text/markdown');
-
-      // Vérification métadonnées Markdown spécialisées
       expect(result.specializedMetadata?.markdownStructure).toBeDefined();
       expect(result.specializedMetadata?.markdownStructure?.h1Count).toBe(1);
       expect(result.specializedMetadata?.markdownStructure?.h2Count).toBe(2);
@@ -751,7 +679,6 @@ Autre contenu avec \`code inline\`.`;
 
   describe('Performance Documents Volumineux', () => {
     it('should handle large documents efficiently', async () => {
-      // Arrange
       const fileId = generateTestUUID();
       const largeSections = Array.from(
         { length: 1000 },
@@ -771,7 +698,7 @@ Autre contenu avec \`code inline\`.`;
       };
 
       storageService.downloadObject.mockImplementation(async () => {
-        await delay(8); // Délai plus long pour gros document
+        await delay(8);
         return {
           body: sourceBuffer,
           metadata: {
@@ -789,37 +716,30 @@ Autre contenu avec \`code inline\`.`;
 
       const startTime = Date.now();
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
       const processingTime = Date.now() - startTime;
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.textContent).toBe(largeContent);
       expect(result.wordCount).toBeGreaterThan(10000);
       expect(result.lineCount).toBeGreaterThan(1000);
       expect(result.processingTime).toBeGreaterThan(0);
       expect(processingTime).toBeLessThan(10000);
-
-      // Vérification résumé généré
       expect(result.summary).toBeDefined();
       expect(result.summary!.length).toBeLessThan(500);
-
-      // Vérification détection de langage
       expect(result.detectedLanguage).toBe('en');
     });
 
     it('should skip summary generation for oversized documents', async () => {
-      // Arrange
       const fileId = generateTestUUID();
-      const oversizedContent = 'x'.repeat(2 * 1024 * 1024); // 2MB
+      const oversizedContent = 'x'.repeat(2 * 1024 * 1024);
       const sourceBuffer = createTestFileBuffer(oversizedContent, 'utf8');
 
       const options: DocumentProcessingOptions = {
         extractText: true,
         generateSummary: true,
-        maxSizeForSummary: 1024 * 1024, // 1MB max
+        maxSizeForSummary: 1024 * 1024,
       };
 
       storageService.downloadObject.mockImplementation(async () => {
@@ -839,10 +759,8 @@ Autre contenu avec \`code inline\`.`;
       mockChardet.detect.mockReturnValue('utf8');
       mockIconv.decode.mockReturnValue(oversizedContent);
 
-      // Act
       const result = await service.processDocument(fileId, options);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(result.textContent).toBe(oversizedContent);
       expect(result.summary).toBeUndefined();

@@ -26,28 +26,13 @@ import {
  * Options pour le traitement de documents
  */
 export interface DocumentProcessingOptions {
-  /** Extraire le contenu textuel complet */
   extractText?: boolean;
-
-  /** Valider la structure du document selon son type */
   validateStructure?: boolean;
-
-  /** Optimiser l'encodage pour compatibilité */
   optimizeEncoding?: boolean;
-
-  /** Générer un résumé automatique */
   generateSummary?: boolean;
-
-  /** Détecter automatiquement le langage */
   detectLanguage?: boolean;
-
-  /** Extraire les métadonnées spécialisées */
   extractSpecializedMetadata?: boolean;
-
-  /** Taille maximale pour génération résumé (octets) */
   maxSizeForSummary?: number;
-
-  /** Encodage cible pour optimisation */
   targetEncoding?: string;
 }
 
@@ -55,49 +40,20 @@ export interface DocumentProcessingOptions {
  * Résultat du traitement de document
  */
 export interface ProcessedDocument {
-  /** Succès du traitement */
   success: boolean;
-
-  /** Contenu textuel extrait */
   textContent?: string;
-
-  /** Encodage détecté du document source */
   encoding: string;
-
-  /** Encodage optimisé (si différent) */
   optimizedEncoding?: string;
-
-  /** Nombre de lignes dans le document */
   lineCount: number;
-
-  /** Nombre de mots estimé */
   wordCount: number;
-
-  /** Nombre de caractères (avec espaces) */
   characterCount: number;
-
-  /** Nombre de caractères (sans espaces) */
   characterCountNoSpaces: number;
-
-  /** Langage détecté du contenu */
   detectedLanguage?: string;
-
-  /** Résumé automatique généré */
   summary?: string;
-
-  /** Métadonnées spécialisées selon le type */
   specializedMetadata?: Record<string, any>;
-
-  /** Validation de structure */
   structureValidation?: DocumentStructureValidation;
-
-  /** Durée de traitement en millisecondes */
   processingTime: number;
-
-  /** Messages d'avertissement */
   warnings?: string[];
-
-  /** Message d'erreur si échec */
   error?: string;
 }
 
@@ -105,19 +61,10 @@ export interface ProcessedDocument {
  * Résultat de validation de structure
  */
 export interface DocumentStructureValidation {
-  /** Structure valide selon le format */
   valid: boolean;
-
-  /** Type de format détecté */
   detectedFormat: string;
-
-  /** Erreurs de structure trouvées */
   errors: string[];
-
-  /** Avertissements de structure */
   warnings: string[];
-
-  /** Métadonnées de structure spécialisées */
   structureMetadata?: Record<string, any>;
 }
 
@@ -125,16 +72,9 @@ export interface DocumentStructureValidation {
  * Résultat de détection de langage
  */
 export interface LanguageDetectionResult {
-  /** Langage détecté (code ISO 639-1) */
   language: string;
-
-  /** Nom complet du langage */
   languageName: string;
-
-  /** Score de confiance (0-1) */
   confidence: number;
-
-  /** Langages alternatifs possibles */
   alternatives?: Array<{
     language: string;
     languageName: string;
@@ -150,12 +90,8 @@ export interface LanguageDetectionResult {
  */
 @Injectable()
 export class DocumentProcessorService {
-  /** Logger spécialisé pour le traitement de documents */
   private readonly logger = new Logger(DocumentProcessorService.name);
-
-  /** Mots vides courants pour analyse (français et anglais) */
   private readonly stopWords = new Set([
-    // Français
     'le',
     'de',
     'et',
@@ -260,7 +196,6 @@ export class DocumentProcessorService {
     this.logger.debug(`Traitement document ${fileId} avec options:`, options);
 
     try {
-      // Configuration avec defaults intelligents
       const config = {
         extractText: options.extractText !== false,
         validateStructure: options.validateStructure !== false,
@@ -273,18 +208,15 @@ export class DocumentProcessorService {
         targetEncoding: options.targetEncoding || 'utf8',
       };
 
-      // Récupération document source depuis storage
       const sourceBuffer = await this.getDocumentBuffer(fileId);
 
       this.logger.debug(
         `Document source ${fileId}: ${sourceBuffer.length} octets`,
       );
 
-      // 1. Détection d'encodage automatique
       const detectedEncoding = chardet.detect(sourceBuffer) || 'utf8';
       this.logger.debug(`Encodage détecté pour ${fileId}: ${detectedEncoding}`);
 
-      // 2. Conversion en texte avec encodage approprié
       let textContent = '';
       try {
         if (iconv.encodingExists(detectedEncoding)) {
@@ -302,13 +234,11 @@ export class DocumentProcessorService {
         textContent = sourceBuffer.toString('utf8');
       }
 
-      // 3. Calcul métadonnées basiques
       const lineCount = textContent.split(/\r?\n/).length;
       const characterCount = textContent.length;
       const characterCountNoSpaces = textContent.replace(/\s/g, '').length;
       const wordCount = this.countWords(textContent);
 
-      // Initialisation résultat
       const result: ProcessedDocument = {
         success: true,
         encoding: detectedEncoding,
@@ -320,12 +250,10 @@ export class DocumentProcessorService {
         warnings: [],
       };
 
-      // 4. Extraction texte si demandé
       if (config.extractText) {
         result.textContent = textContent;
       }
 
-      // 5. Détection de langage si demandé
       if (config.detectLanguage && textContent.length > 50) {
         try {
           const languageResult = await this.detectLanguage(textContent);
@@ -338,7 +266,6 @@ export class DocumentProcessorService {
         }
       }
 
-      // 6. Validation de structure si demandé
       if (config.validateStructure) {
         try {
           result.structureValidation = await this.validateDocumentStructure(
@@ -353,7 +280,6 @@ export class DocumentProcessorService {
         }
       }
 
-      // 7. Génération résumé si demandé et applicable
       if (
         config.generateSummary &&
         sourceBuffer.length <= config.maxSizeForSummary &&
@@ -369,7 +295,6 @@ export class DocumentProcessorService {
         }
       }
 
-      // 8. Métadonnées spécialisées si demandé
       if (config.extractSpecializedMetadata) {
         try {
           result.specializedMetadata = await this.extractSpecializedMetadata(
@@ -384,7 +309,6 @@ export class DocumentProcessorService {
         }
       }
 
-      // 9. Optimisation encodage si demandé et nécessaire
       if (
         config.optimizeEncoding &&
         detectedEncoding !== config.targetEncoding
@@ -396,7 +320,6 @@ export class DocumentProcessorService {
           );
           result.optimizedEncoding = config.targetEncoding;
 
-          // Sauvegarde version optimisée
           const optimizedKey = `${fileId}/optimized/${config.targetEncoding}/${Date.now()}`;
           await this.storageService.uploadObject(
             optimizedKey,
@@ -424,7 +347,6 @@ export class DocumentProcessorService {
         }
       }
 
-      // Finalisation
       result.processingTime = Date.now() - startTime;
 
       this.logger.log(
@@ -470,12 +392,8 @@ export class DocumentProcessorService {
    * Détecte le langage d'un texte
    */
   private async detectLanguage(text: string): Promise<LanguageDetectionResult> {
-    // Implémentation basique de détection de langage
-    // TODO: Intégrer une vraie bibliothèque de détection (franc, langdetect, etc.)
-
     const sampleText = text.substring(0, 1000).toLowerCase();
 
-    // Patterns basiques pour français/anglais
     const frenchPatterns = [
       'le ',
       'la ',
@@ -570,9 +488,7 @@ export class DocumentProcessorService {
     };
 
     try {
-      // Détection de format basée sur le contenu
       if (content.trim().startsWith('{') && content.trim().endsWith('}')) {
-        // Probable JSON
         result.detectedFormat = 'application/json';
         try {
           const parsed = JSON.parse(content);
@@ -587,7 +503,6 @@ export class DocumentProcessorService {
           result.errors.push(`JSON invalide: ${jsonError.message}`);
         }
       } else if (content.includes('---') || content.match(/^#+\s/m)) {
-        // Probable Markdown
         result.detectedFormat = 'text/markdown';
         const headings = (content.match(/^#+\s.+$/gm) || []).length;
         const codeBlocks = (content.match(/```[\s\S]*?```/g) || []).length;
@@ -600,7 +515,6 @@ export class DocumentProcessorService {
           linkCount: links,
         };
       } else if (content.includes(',') && content.split('\n').length > 1) {
-        // Probable CSV
         result.detectedFormat = 'text/csv';
         const lines = content
           .split('\n')
@@ -611,10 +525,9 @@ export class DocumentProcessorService {
           type: 'csv',
           rowCount: lines.length,
           columnCount: headers,
-          hasHeaders: true, // Assumption basique
+          hasHeaders: true,
         };
 
-        // Validation cohérence colonnes
         const inconsistentRows = lines
           .slice(1)
           .filter((line) => line.split(',').length !== headers).length;
@@ -625,7 +538,6 @@ export class DocumentProcessorService {
           );
         }
       } else if (content.includes('<') && content.includes('>')) {
-        // Probable XML/HTML
         result.detectedFormat = content.includes('<!DOCTYPE html')
           ? 'text/html'
           : 'application/xml';
@@ -640,7 +552,6 @@ export class DocumentProcessorService {
         };
 
         if (tags !== closingTags * 2) {
-          // Approximation
           result.warnings.push(
             'Possible déséquilibre dans les balises XML/HTML',
           );
@@ -665,9 +576,6 @@ export class DocumentProcessorService {
    * Génère un résumé automatique du texte
    */
   private async generateSummary(text: string): Promise<string> {
-    // Implémentation basique de résumé extractif
-    // TODO: Intégrer une vraie bibliothèque NLP (compromise, natural, etc.)
-
     const sentences = text
       .split(/[.!?]+/)
       .map((s) => s.trim())
@@ -677,16 +585,13 @@ export class DocumentProcessorService {
       return sentences.join('. ') + '.';
     }
 
-    // Scoring basique des phrases (longueur + mots clés)
     const scoredSentences = sentences.map((sentence) => {
       let score = 0;
 
-      // Bonus pour longueur optimale
       if (sentence.length >= 50 && sentence.length <= 120) {
         score += 2;
       }
 
-      // Bonus pour position (début/fin de paragraphes)
       if (
         sentences.indexOf(sentence) < 3 ||
         sentences.indexOf(sentence) >= sentences.length - 3
@@ -694,7 +599,6 @@ export class DocumentProcessorService {
         score += 1;
       }
 
-      // Malus pour mots vides excessifs
       const words = sentence.toLowerCase().split(/\s+/);
       const stopWordCount = words.filter((word) =>
         this.stopWords.has(word),
@@ -706,7 +610,6 @@ export class DocumentProcessorService {
       return { sentence, score };
     });
 
-    // Sélection des 3 meilleures phrases
     const topSentences = scoredSentences
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
@@ -735,9 +638,7 @@ export class DocumentProcessorService {
               objectCount: this.countObjects(parsed),
               nullCount: this.countNulls(parsed),
             };
-          } catch {
-            // JSON invalide, pas de métadonnées spécialisées
-          }
+          } catch {}
           break;
 
         case 'text/markdown':
@@ -761,7 +662,6 @@ export class DocumentProcessorService {
           break;
 
         default:
-          // Métadonnées génériques pour texte plain
           metadata.textStructure = {
             paragraphCount: content.split(/\n\s*\n/).length,
             avgWordsPerLine:
@@ -790,7 +690,6 @@ export class DocumentProcessorService {
    */
   private async getDocumentBuffer(fileId: string): Promise<Buffer> {
     try {
-      // TODO: Récupérer storageKey depuis metadata repository
       const downloadResult = await this.storageService.downloadObject(fileId);
       return downloadResult.body;
     } catch (error) {
@@ -809,7 +708,7 @@ export class DocumentProcessorService {
    */
   private countWords(text: string): number {
     return text
-      .replace(/[^\w\s\u00C0-\u017F\u0400-\u04FF]/g, '') // Préserver accents et cyrillique
+      .replace(/[^\w\s\u00C0-\u017F\u0400-\u04FF]/g, '')
       .split(/\s+/)
       .filter((word) => word.length > 0).length;
   }

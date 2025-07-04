@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -20,7 +19,6 @@ import { PresentationModule } from './presentation/presentation.module';
 
 @Module({
   imports: [
-    // Configuration globale
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '.env.local'],
@@ -29,18 +27,16 @@ import { PresentationModule } from './presentation/presentation.module';
       expandVariables: true,
     }),
 
-    // Cache global avec Redis
     CacheModule.register({
       isGlobal: true,
       store: redisStore as any,
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_CACHE_DB || '1'), // DB 1 pour le cache
-      ttl: 3600, // 1 heure par défaut
+      db: parseInt(process.env.REDIS_CACHE_DB || '1'),
+      ttl: 3600,
     }),
 
-    // Modules Infrastructure
     PrismaModule,
     PersistenceModule,
     GarageModule.forRoot(),
@@ -48,12 +44,8 @@ import { PresentationModule } from './presentation/presentation.module';
     ProcessingModule,
     SecurityModule,
     MonitoringModule,
-
-    // Modules Application
     ApplicationModule,
     DomainModule,
-
-    // Module Presentation (Controllers)
     PresentationModule,
   ],
   controllers: [AppController],

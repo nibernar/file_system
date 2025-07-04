@@ -8,7 +8,7 @@ export class CacheService {
 
   async get<T>(key: string): Promise<T | null> {
     const value = await this.cacheManager.get<T>(key);
-    return value ?? null; // Convertir undefined en null
+    return value ?? null;
   }
 
   async set(key: string, value: any, ttl?: number): Promise<void> {

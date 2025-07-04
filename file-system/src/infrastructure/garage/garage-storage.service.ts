@@ -568,11 +568,9 @@ export class GarageStorageService implements IGarageStorageService {
     buffer: Buffer,
   ): Promise<PartUploadResult> {
     try {
-      // Note: Il faut stocker la clé associée à l'uploadId pour cette méthode
-      // Ceci est une limitation de cette implémentation simplifiée
       const command = new UploadPartCommand({
         Bucket: this.defaultBucket,
-        Key: uploadId, // Limitation: utilisé comme clé temporairement
+        Key: uploadId,
         UploadId: uploadId,
         PartNumber: partNumber,
         Body: buffer,
@@ -631,10 +629,9 @@ export class GarageStorageService implements IGarageStorageService {
     parts: CompletedPart[],
   ): Promise<UploadResult> {
     try {
-      // Note: Même limitation que uploadPart - il faudrait améliorer le tracking des clés
       const command = new CompleteMultipartUploadCommand({
         Bucket: this.defaultBucket,
-        Key: uploadId, // Limitation: utilisé comme clé temporairement
+        Key: uploadId,
         UploadId: uploadId,
         MultipartUpload: {
           Parts: parts.map((part) => ({
@@ -663,14 +660,13 @@ export class GarageStorageService implements IGarageStorageService {
         `Multipart upload completed successfully for uploadId: ${uploadId}`,
       );
 
-      // Créer les métadonnées pour votre format UploadResult
       const fileMetadata: FileMetadata = {
         id: uuidv4(),
-        userId: 'multipart-user', // À améliorer avec le tracking des métadonnées
+        userId: 'multipart-user',
         projectId: undefined,
         filename: this.extractFilenameFromKey(key),
         originalName: this.extractFilenameFromKey(key),
-        contentType: 'application/octet-stream', // À améliorer avec le tracking
+        contentType: 'application/octet-stream',
         size: totalSize,
         storageKey: key,
         cdnUrl: undefined,
@@ -693,7 +689,7 @@ export class GarageStorageService implements IGarageStorageService {
           response.Location ||
           `${config.garage.endpoint}/${this.defaultBucket}/${key}`,
         metadata: fileMetadata,
-        uploadDuration: 0, // À calculer si nécessaire
+        uploadDuration: 0,
       };
     } catch (error) {
       this.logger.error(
@@ -723,7 +719,7 @@ export class GarageStorageService implements IGarageStorageService {
     try {
       const command = new AbortMultipartUploadCommand({
         Bucket: this.defaultBucket,
-        Key: uploadId, // Même limitation que les autres méthodes multipart
+        Key: uploadId,
         UploadId: uploadId,
       });
 
@@ -833,8 +829,6 @@ export class GarageStorageService implements IGarageStorageService {
     options: PresignedUrlOptions,
   ): Promise<PresignedUrl> {
     try {
-      // IMPORTANT: Votre interface PresignedUrlOptions doit avoir un champ 'key'
-      // Si ce n'est pas le cas, ajoutez-le : key: string;
       const key = (options as any).key;
       if (!key) {
         throw new Error('Key is required in PresignedUrlOptions');
@@ -862,8 +856,6 @@ export class GarageStorageService implements IGarageStorageService {
 
       const url = await getSignedUrl(this.s3Client, command, {
         expiresIn,
-        // Note: Conditions comme IP et User-Agent nécessitent une configuration CDN
-        // ou un proxy pour être vraiment appliquées
       });
 
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
@@ -874,7 +866,6 @@ export class GarageStorageService implements IGarageStorageService {
           `expires: ${expiresAt.toISOString()}`,
       );
 
-      // Retourner votre format PresignedUrl
       return {
         url,
         expiresAt,
@@ -883,7 +874,7 @@ export class GarageStorageService implements IGarageStorageService {
           userAgent: options.userAgent,
           operations: [operation],
         },
-        securityToken: undefined, // À implémenter si nécessaire
+        securityToken: undefined,
       };
     } catch (error) {
       this.logger.error(`Generate presigned URL failed`, error);
@@ -909,7 +900,6 @@ export class GarageStorageService implements IGarageStorageService {
    */
   async checkConnection(): Promise<boolean> {
     try {
-      // Test simple avec une requête HEAD sur le bucket
       const command = new ListObjectsV2Command({
         Bucket: this.defaultBucket,
         MaxKeys: 1,
@@ -944,28 +934,23 @@ export class GarageStorageService implements IGarageStorageService {
     try {
       const config = this.configService.get<FileSystemConfig>('fileSystem')!;
 
-      // Note: Garage S3 peut ne pas supporter toutes les opérations de métadonnées AWS
-      // Cette implémentation retourne les informations de base disponibles
-
       return {
         name: this.defaultBucket,
         region: config.garage.region,
-        creationDate: new Date(), // Placeholder - à ajuster selon les capacités Garage
+        creationDate: new Date(),
         usage: {
-          objectCount: 0, // Note: Garage peut ne pas fournir ces informations détaillées
+          objectCount: 0,
           totalSize: 0,
           lastModified: new Date(),
         },
-        versioning: false, // À déterminer selon la configuration Garage
-        lifecycle: [], // À implémenter si supporté par Garage
+        versioning: false,
+        lifecycle: [],
       };
     } catch (error) {
       this.logger.error('Get bucket info failed', error);
       throw new Error(`Failed to get bucket info: ${error.message}`);
     }
   }
-
-  // Méthodes utilitaires privées
 
   /**
    * Upload optimisé pour les gros fichiers utilisant multipart upload
@@ -1000,9 +985,8 @@ export class GarageStorageService implements IGarageStorageService {
             ...metadata.customMetadata,
           },
         },
-        // Configuration multipart
-        partSize: 50 * 1024 * 1024, // 50MB par partie
-        queueSize: 4, // 4 uploads parallèles max
+        partSize: 50 * 1024 * 1024,
+        queueSize: 4,
       });
 
       const response = await upload.done();
@@ -1016,7 +1000,6 @@ export class GarageStorageService implements IGarageStorageService {
           `Duration: ${duration}ms`,
       );
 
-      // Créer les métadonnées du fichier
       const fileMetadata: FileMetadata = {
         id: uuidv4(),
         userId: metadata.userId,
@@ -1130,9 +1113,8 @@ export class GarageStorageService implements IGarageStorageService {
       throw new Error('Invalid metadata: contentType and userId are required');
     }
 
-    // Validation taille selon configuration
     const config = this.configService.get<FileSystemConfig>('fileSystem')!;
-    const maxSize = config.processing?.maxFileSize || 100 * 1024 * 1024; // 100MB default
+    const maxSize = config.processing?.maxFileSize || 100 * 1024 * 1024;
     if (buffer.length > maxSize) {
       throw new Error(
         `File too large: ${buffer.length} bytes exceeds maximum ${maxSize} bytes`,

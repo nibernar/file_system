@@ -7,7 +7,6 @@ import {
 } from './file-processing.queue';
 import { FileProcessingProcessor } from './file-processing.processor';
 
-// Imports des modules nécessaires
 import { DomainModule } from '../../domain/domain.module';
 import { ProcessingModule } from '../processing/processing.module';
 import { MonitoringModule } from '../monitoring/monitoring.module';

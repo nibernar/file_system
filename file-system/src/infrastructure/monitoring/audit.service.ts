@@ -8,10 +8,9 @@ export class AuditService {
   async logFileAccess(
     fileId: string,
     userId: string,
-    operation: FileOperation, // Utiliser l'enum au lieu de string
+    operation: FileOperation,
     metadata?: Record<string, any>,
   ): Promise<void> {
-    // Implémentation temporaire
     this.logger.log('File access logged', { fileId, userId, operation });
   }
 

@@ -1,4 +1,3 @@
-// src/domain/repositories/file-metadata.repository.ts
 import { FileMetadata, DocumentType } from '../../types/file-system.types';
 
 /**
@@ -6,23 +5,14 @@ import { FileMetadata, DocumentType } from '../../types/file-system.types';
  * @interface FindOptions
  */
 export interface FindOptions {
-  /** Nombre maximum de résultats à retourner */
   limit?: number;
-  /** Nombre de résultats à ignorer (pour la pagination) */
   offset?: number;
-  /** Champ sur lequel trier les résultats */
   sortBy?: 'createdAt' | 'updatedAt' | 'size' | 'filename';
-  /** Ordre de tri */
   sortOrder?: 'asc' | 'desc';
-  /** Inclure les fichiers supprimés (soft delete) */
   includeDeleted?: boolean;
-  /** Filtrer par type de contenu */
   contentType?: string;
-  /** Filtrer par statut de traitement */
   processingStatus?: string;
-  /** Filtrer par type de document */
   documentType?: DocumentType;
-  /** Filtrer par tags */
   tags?: string[];
 }
 
@@ -31,31 +21,18 @@ export interface FindOptions {
  * @interface CreateFileMetadataDto
  */
 export interface CreateFileMetadataDto {
-  /** ID de l'utilisateur propriétaire du fichier */
   userId: string;
-  /** ID du projet associé (optionnel) */
   projectId?: string;
-  /** Nom du fichier stocké */
   filename: string;
-  /** Nom original du fichier uploadé */
   originalName: string;
-  /** Type MIME du fichier */
   contentType: string;
-  /** Taille du fichier en octets */
   size: number;
-  /** Clé de stockage unique dans Garage S3 */
   storageKey: string;
-  /** URL CDN si distribué */
   cdnUrl?: string;
-  /** Checksum MD5 du fichier */
   checksumMd5: string;
-  /** Checksum SHA256 du fichier */
   checksumSha256: string;
-  /** Type de document */
   documentType?: DocumentType;
-  /** Tags pour l'organisation */
   tags?: string[];
-  /** Métadonnées additionnelles */
   metadata?: Record<string, any>;
 }
 
@@ -64,23 +41,14 @@ export interface CreateFileMetadataDto {
  * @interface UpdateFileMetadataDto
  */
 export interface UpdateFileMetadataDto {
-  /** Nouveau nom de fichier */
   filename?: string;
-  /** URL CDN mise à jour */
   cdnUrl?: string;
-  /** Statut de scan antivirus */
   virusScanStatus?: string;
-  /** Statut de traitement */
   processingStatus?: string;
-  /** Type de document mis à jour */
   documentType?: DocumentType;
-  /** Tags mis à jour */
   tags?: string[];
-  /** Métadonnées additionnelles à mettre à jour */
   metadata?: Record<string, any>;
-  /** Date de suppression (soft delete) */
   deletedAt?: Date;
-  /** Compteur de versions */
   versionCount?: number;
 }
 
@@ -89,33 +57,26 @@ export interface UpdateFileMetadataDto {
  * @interface StorageUsage
  */
 export interface StorageUsage {
-  /** Espace total utilisé en octets */
   totalSize: number;
-  /** Nombre total de fichiers */
   fileCount: number;
-  /** Répartition par type de contenu */
   byContentType: Array<{
     contentType: string;
     size: number;
     count: number;
   }>;
-  /** Répartition par type de document */
   byDocumentType: Array<{
     documentType: string;
     size: number;
     count: number;
   }>;
-  /** Répartition par statut de traitement */
   byProcessingStatus: Array<{
     status: string;
     count: number;
   }>;
-  /** Tags les plus utilisés */
   topTags: Array<{
     tag: string;
     count: number;
   }>;
-  /** Date du calcul */
   calculatedAt: Date;
 }
 

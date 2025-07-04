@@ -1,4 +1,3 @@
-// src/presentation/controllers/test-files.controller.ts
 import {
   Controller,
   Get,

@@ -3,7 +3,6 @@ import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { firstValueFrom } from 'rxjs';
-import { FILE_SYSTEM_CONSTANTS } from '../../constants/file-system.constants';
 
 /**
  * Interface pour les informations d'intelligence IP
@@ -99,7 +98,6 @@ export class IpIntelligenceService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly httpService: HttpService,
   ) {
-    // Initialisation de la liste des noeuds Tor au démarrage
     this.updateTorExitNodes().catch((err) =>
       this.logger.error('Failed to update Tor exit nodes:', err),
     );
@@ -113,7 +111,6 @@ export class IpIntelligenceService {
    */
   async getIpIntelligence(ip: string): Promise<IpIntelligence> {
     try {
-      // Vérification du cache
       const cacheKey = `${this.CACHE_PREFIX}${ip}`;
       const cached = await this.cacheManager.get<IpIntelligence>(cacheKey);
       if (cached) {
@@ -121,7 +118,6 @@ export class IpIntelligenceService {
         return cached;
       }
 
-      // IPs locales/privées
       if (this.isPrivateIp(ip)) {
         const localResult: IpIntelligence = {
           ip,
@@ -139,10 +135,8 @@ export class IpIntelligenceService {
         return localResult;
       }
 
-      // Analyse de l'IP
       const intelligence = await this.analyzeIp(ip);
 
-      // Mise en cache du résultat
       await this.cacheManager.set(cacheKey, intelligence, this.CACHE_TTL);
 
       this.logger.log(
@@ -158,7 +152,6 @@ export class IpIntelligenceService {
     } catch (error) {
       this.logger.error(`Error getting IP intelligence for ${ip}:`, error);
 
-      // Retour d'une réponse par défaut en cas d'erreur
       return {
         ip,
         country: 'Unknown',
@@ -182,15 +175,13 @@ export class IpIntelligenceService {
     try {
       const intelligence = await this.getIpIntelligence(ip);
 
-      // Blocage si niveau de menace élevé
       if (intelligence.threatLevel === 'high') {
         return true;
       }
 
-      // Blocage optionnel pour Tor (selon configuration)
       if (intelligence.isTor) {
         this.logger.warn(`Tor exit node detected: ${ip}`);
-        return true; // Peut être configuré
+        return true;
       }
 
       return false;
@@ -212,7 +203,6 @@ export class IpIntelligenceService {
       const count = (await this.cacheManager.get<number>(key)) || 0;
       await this.cacheManager.set(key, count + 1, 3600 * 1000); // 1 heure
 
-      // Détection d'activité suspecte
       if (count > 100) {
         this.logger.warn(
           `High activity detected from IP ${ip}: ${count} ${event} events`,
@@ -231,17 +221,13 @@ export class IpIntelligenceService {
    */
   private async analyzeIp(ip: string): Promise<IpIntelligence> {
     try {
-      // Utilisation d'un service de géolocalisation gratuit (ip-api.com)
-      // Note: En production, utiliser un service payant plus fiable
       const geoData = await this.getGeoData(ip);
 
-      // Détection VPN/Proxy/Tor
       const isVpn = this.isVpnAsn(geoData.as || '');
       const isTor = this.TOR_EXIT_NODES.has(ip);
       const isProxy = await this.checkProxy(ip);
       const isHosting = this.isHostingProvider(geoData.as || '');
 
-      // Calcul du niveau de menace
       const threatLevel = this.calculateThreatLevel({
         isVpn,
         isTor,
@@ -282,7 +268,6 @@ export class IpIntelligenceService {
    */
   private async getGeoData(ip: string): Promise<any> {
     try {
-      // Utilisation de ip-api.com (gratuit, limite 45 req/min)
       const response = await firstValueFrom(
         this.httpService.get<GeoApiResponse>(
           `http://ip-api.com/json/${ip}?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query`,
@@ -308,8 +293,6 @@ export class IpIntelligenceService {
    * @returns true si c'est un proxy
    */
   private async checkProxy(ip: string): Promise<boolean> {
-    // Simple vérification basée sur les ports ouverts communs des proxies
-    // En production, utiliser un service spécialisé
     return false;
   }
 
@@ -318,14 +301,7 @@ export class IpIntelligenceService {
    */
   private async updateTorExitNodes(): Promise<void> {
     try {
-      // En production, télécharger depuis https://check.torproject.org/exit-addresses
-      // Pour l'instant, liste statique d'exemple
-      const torExitNodes = [
-        '198.96.155.3',
-        '199.87.154.255',
-        '192.42.116.16',
-        // ... plus de noeuds
-      ];
+      const torExitNodes = ['198.96.155.3', '199.87.154.255', '192.42.116.16'];
 
       this.TOR_EXIT_NODES.clear();
       torExitNodes.forEach((ip) => this.TOR_EXIT_NODES.add(ip));
@@ -346,15 +322,15 @@ export class IpIntelligenceService {
    */
   private isPrivateIp(ip: string): boolean {
     const privateRanges = [
-      /^10\./, // 10.0.0.0/8
-      /^172\.(1[6-9]|2[0-9]|3[0-1])\./, // 172.16.0.0/12
-      /^192\.168\./, // 192.168.0.0/16
-      /^127\./, // 127.0.0.0/8 (loopback)
-      /^169\.254\./, // 169.254.0.0/16 (link-local)
-      /^::1$/, // IPv6 loopback
-      /^fe80:/, // IPv6 link-local
-      /^fc00:/, // IPv6 unique local
-      /^fd00:/, // IPv6 unique local
+      /^10\./,
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+      /^192\.168\./,
+      /^127\./,
+      /^169\.254\./,
+      /^::1$/,
+      /^fe80:/,
+      /^fc00:/,
+      /^fd00:/,
     ];
 
     return privateRanges.some((range) => range.test(ip));
@@ -402,7 +378,6 @@ export class IpIntelligenceService {
     if (factors.isVpn) score += 20;
     if (factors.isHosting) score += 10;
 
-    // Pays à risque (exemple simplifié)
     const highRiskCountries = ['XX', 'T1'];
     if (highRiskCountries.includes(factors.country)) {
       score += 20;

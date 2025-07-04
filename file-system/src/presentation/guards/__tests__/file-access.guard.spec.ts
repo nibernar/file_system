@@ -22,7 +22,6 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
 import { FileAccessGuard } from '../file-access.guard';
 import { FileSecurityService } from '../../../domain/services/file-security.service';
 import { FileOperation } from '../../../types/file-system.types';
@@ -82,7 +81,6 @@ describe('FileAccessGuard', () => {
    * Configuration initiale des tests
    */
   beforeEach(async () => {
-    // Arrange - Création des mocks selon AAA Pattern
     mockReflector = {
       get: jest.fn(),
     };
@@ -125,7 +123,6 @@ describe('FileAccessGuard', () => {
       }),
     };
 
-    // Setup du module de test
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FileAccessGuard,
@@ -155,10 +152,8 @@ describe('FileAccessGuard', () => {
      * Test : Rejet des requêtes non authentifiées
      */
     it('should reject requests without authenticated user', async () => {
-      // Arrange
       mockRequest.user = undefined;
 
-      // Act & Assert
       await expect(
         guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(UnauthorizedException);
@@ -170,7 +165,6 @@ describe('FileAccessGuard', () => {
      * Test : Rejet des utilisateurs sans ID
      */
     it('should reject requests from users without valid ID', async () => {
-      // Arrange
       mockRequest.user = {
         id: '',
         email: 'test@coders.com',
@@ -178,7 +172,6 @@ describe('FileAccessGuard', () => {
         isAdmin: false,
       };
 
-      // Act & Assert
       await expect(
         guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(UnauthorizedException);
@@ -192,15 +185,12 @@ describe('FileAccessGuard', () => {
      * Test : Autorisation sans opération requise
      */
     it('should allow access when no file operation is required', async () => {
-      // Arrange
-      mockReflector.get.mockReturnValue(undefined); // Pas d'opération requise
+      mockReflector.get.mockReturnValue(undefined);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();
     });
@@ -209,17 +199,14 @@ describe('FileAccessGuard', () => {
      * Test : Validation avec opération READ requise
      */
     it('should validate file access for READ operation', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'file-123' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-123',
@@ -232,17 +219,14 @@ describe('FileAccessGuard', () => {
      * Test : Validation avec opération WRITE requise
      */
     it('should validate file access for WRITE operation', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'file-456' };
       mockReflector.get.mockReturnValue(FileOperation.WRITE);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-456',
@@ -255,17 +239,14 @@ describe('FileAccessGuard', () => {
      * Test : Validation avec opération DELETE requise
      */
     it('should validate file access for DELETE operation', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'file-789' };
       mockReflector.get.mockReturnValue(FileOperation.DELETE);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-789',
@@ -278,17 +259,14 @@ describe('FileAccessGuard', () => {
      * Test : Validation avec opération SHARE requise
      */
     it('should validate file access for SHARE operation', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'file-share-123' };
       mockReflector.get.mockReturnValue(FileOperation.SHARE);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-share-123',
@@ -303,17 +281,14 @@ describe('FileAccessGuard', () => {
      * Test : Extraction fileId depuis paramètres de route
      */
     it('should extract fileId from route parameters', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'extracted-file-123' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'extracted-file-123',
@@ -326,17 +301,14 @@ describe('FileAccessGuard', () => {
      * Test : Extraction ID générique depuis paramètres
      */
     it('should extract ID from generic id parameter', async () => {
-      // Arrange
       mockRequest.params = { id: 'generic-id-456' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'generic-id-456',
@@ -349,17 +321,14 @@ describe('FileAccessGuard', () => {
      * Test : Extraction depuis query parameters
      */
     it('should extract fileId from query parameters as fallback', async () => {
-      // Arrange
       mockRequest.query = { fileId: 'query-file-789' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'query-file-789',
@@ -372,18 +341,15 @@ describe('FileAccessGuard', () => {
      * Test : Extraction depuis le corps de la requête
      */
     it('should extract fileId from request body for POST/PUT requests', async () => {
-      // Arrange
       mockRequest.method = 'POST';
       mockRequest.body = { fileId: 'body-file-101' };
       mockReflector.get.mockReturnValue(FileOperation.WRITE);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'body-file-101',
@@ -396,7 +362,6 @@ describe('FileAccessGuard', () => {
      * Test : Extraction depuis headers personnalisés
      */
     it('should extract fileId from custom headers', async () => {
-      // Arrange
       mockRequest.headers = {
         ...mockRequest.headers,
         'x-file-id': 'header-file-202',
@@ -404,12 +369,10 @@ describe('FileAccessGuard', () => {
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'header-file-202',
@@ -422,14 +385,12 @@ describe('FileAccessGuard', () => {
      * Test : Erreur si aucun fileId trouvé
      */
     it('should throw BadRequestException when no fileId is found', async () => {
-      // Arrange
       mockRequest.params = {};
       mockRequest.query = {};
       mockRequest.body = {};
       mockRequest.headers = { 'user-agent': 'Test Browser' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
 
-      // Act & Assert
       await expect(
         guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(BadRequestException);
@@ -443,18 +404,15 @@ describe('FileAccessGuard', () => {
      * Test : Validation format UUID v4
      */
     it('should accept valid UUID v4 format file IDs', async () => {
-      // Arrange
       const validUuid = '123e4567-e89b-12d3-a456-426614174000';
       mockRequest.params = { fileId: validUuid };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         validUuid,
@@ -467,18 +425,15 @@ describe('FileAccessGuard', () => {
      * Test : Validation format ID personnalisé préfixé
      */
     it('should accept custom prefixed file IDs', async () => {
-      // Arrange
       const customId = 'file-abc123def456';
       mockRequest.params = { fileId: customId };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         customId,
@@ -491,18 +446,15 @@ describe('FileAccessGuard', () => {
      * Test : Validation IDs alphanumériques simples
      */
     it('should accept simple alphanumeric file IDs', async () => {
-      // Arrange
       const simpleId = 'abcd1234efgh5678';
       mockRequest.params = { fileId: simpleId };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         simpleId,
@@ -515,7 +467,6 @@ describe('FileAccessGuard', () => {
      * Test : Rejet des IDs avec caractères interdits
      */
     it('should reject file IDs with dangerous characters', async () => {
-      // Arrange
       const dangerousIds = [
         '../../../etc/passwd',
         'file<script>alert(1)</script>',
@@ -527,7 +478,6 @@ describe('FileAccessGuard', () => {
         mockRequest.params = { fileId: dangerousId };
         mockReflector.get.mockReturnValue(FileOperation.READ);
 
-        // Act & Assert
         await expect(
           guard.canActivate(mockExecutionContext as ExecutionContext),
         ).rejects.toThrow(BadRequestException);
@@ -540,14 +490,12 @@ describe('FileAccessGuard', () => {
      * Test : Rejet des IDs trop courts
      */
     it('should reject file IDs that are too short', async () => {
-      // Arrange
-      const shortIds = ['', 'a', 'ab', 'abc123']; // < 8 caractères
+      const shortIds = ['', 'a', 'ab', 'abc123'];
 
       for (const shortId of shortIds) {
         mockRequest.params = { fileId: shortId };
         mockReflector.get.mockReturnValue(FileOperation.READ);
 
-        // Act & Assert
         await expect(
           guard.canActivate(mockExecutionContext as ExecutionContext),
         ).rejects.toThrow(BadRequestException);
@@ -562,17 +510,14 @@ describe('FileAccessGuard', () => {
      * Test : Autorisation d'accès valide
      */
     it('should allow access when user has valid permissions', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'accessible-file-123' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'accessible-file-123',
@@ -585,12 +530,10 @@ describe('FileAccessGuard', () => {
      * Test : Refus d'accès non autorisé
      */
     it('should deny access when user lacks permissions', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'protected-file-456' };
       mockReflector.get.mockReturnValue(FileOperation.WRITE);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(false);
 
-      // Act & Assert
       await expect(
         guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(ForbiddenException);
@@ -606,14 +549,12 @@ describe('FileAccessGuard', () => {
      * Test : Gestion des erreurs de service de sécurité
      */
     it('should handle security service errors gracefully', async () => {
-      // Arrange
       mockRequest.params = { fileId: 'error-file-789' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockRejectedValue(
         new Error('Security service unavailable'),
       );
 
-      // Act & Assert
       await expect(
         guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(ForbiddenException);
@@ -631,19 +572,16 @@ describe('FileAccessGuard', () => {
      * Test : Logging des accès autorisés
      */
     it('should log successful access attempts', async () => {
-      // Arrange
       const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
 
       mockRequest.params = { fileId: 'logged-file-123' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
-      // Act
       const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
-      // Assert
       expect(result).toBe(true);
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('File access granted'),
@@ -656,14 +594,12 @@ describe('FileAccessGuard', () => {
      * Test : Logging des tentatives d'accès refusées
      */
     it('should log failed access attempts with security context', async () => {
-      // Arrange
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
       mockRequest.params = { fileId: 'denied-file-456' };
       mockReflector.get.mockReturnValue(FileOperation.DELETE);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(false);
 
-      // Act & Assert
       await expect(
         guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(ForbiddenException);

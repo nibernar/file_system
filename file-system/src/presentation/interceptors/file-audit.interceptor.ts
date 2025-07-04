@@ -1,4 +1,3 @@
-// src/presentation/interceptors/file-audit.interceptor.ts
 import {
   Injectable,
   NestInterceptor,
@@ -10,7 +9,6 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Request, Response } from 'express';
-import { FileOperation } from '../../types/file-system.types';
 
 /**
  * Interface pour l'utilisateur authentifié dans la requête
@@ -23,7 +21,6 @@ interface AuthenticatedRequest extends Request {
     isAdmin?: boolean;
   };
 
-  // Métadonnées de sécurité ajoutées par le middleware
   security?: {
     clientIp: string;
     threatLevel: 'low' | 'medium' | 'high';
@@ -129,10 +126,8 @@ export class FileAuditInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
 
-    // Génération d'un ID unique pour cet événement d'audit
     const auditEventId = this.generateAuditEventId();
 
-    // Extraction des métadonnées de base de la requête
     const baseAuditEvent = this.extractBaseAuditData(
       request,
       response,
@@ -152,7 +147,6 @@ export class FileAuditInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap({
         next: (responseData) => {
-          // Log succès de l'opération
           this.logSuccessfulOperation(
             baseAuditEvent,
             startTime,
@@ -162,10 +156,8 @@ export class FileAuditInterceptor implements NestInterceptor {
         },
       }),
       catchError((error) => {
-        // Log échec de l'opération
         this.logFailedOperation(baseAuditEvent, startTime, response, error);
 
-        // Re-throw l'erreur pour ne pas interrompre le flux
         return throwError(() => error);
       }),
     );
@@ -194,13 +186,10 @@ export class FileAuditInterceptor implements NestInterceptor {
     context: ExecutionContext,
     auditEventId: string,
   ): Omit<FileAuditEvent, 'duration' | 'success' | 'statusCode'> {
-    // Extraction de l'ID du fichier depuis différents emplacements
     const fileId = this.extractFileId(request);
 
-    // Extraction de l'action/opération depuis la route
     const action = this.extractActionFromContext(context);
 
-    // Extraction des informations de sécurité
     const securityContext = this.extractSecurityContext(request);
 
     return {
@@ -219,7 +208,6 @@ export class FileAuditInterceptor implements NestInterceptor {
         isAdmin: request.user?.isAdmin,
         userRoles: request.user?.roles,
         query: request.query,
-        // Ne pas logger les données sensibles du body
         hasBody: !!request.body && Object.keys(request.body).length > 0,
       },
     };
@@ -259,7 +247,6 @@ export class FileAuditInterceptor implements NestInterceptor {
         responseSize: this.calculateResponseSize(responseData),
       };
 
-      // Logging structuré pour debugging
       this.logger.log(`File operation successful: ${baseEvent.action}`, {
         auditEventId: baseEvent.id,
         userId: baseEvent.userId,
@@ -269,19 +256,15 @@ export class FileAuditInterceptor implements NestInterceptor {
         endpoint: baseEvent.endpoint,
       });
 
-      // Envoi vers le service d'audit
       await this.auditService.logFileOperation(auditEvent);
 
-      // Métriques de performance
       await this.auditService.logPerformanceMetric({
         operation: baseEvent.action,
         duration,
         success: true,
       });
 
-      // Détection d'activité suspecte si opération très lente
       if (duration > 10000) {
-        // > 10 secondes
         this.logger.warn(`Slow file operation detected`, {
           auditEventId: baseEvent.id,
           operation: baseEvent.action,
@@ -335,7 +318,6 @@ export class FileAuditInterceptor implements NestInterceptor {
         responseSize: 0,
       };
 
-      // Logging d'erreur avec niveau approprié
       const logLevel = this.determineErrorLogLevel(error);
       this.logger[logLevel](`File operation failed: ${baseEvent.action}`, {
         auditEventId: baseEvent.id,
@@ -345,21 +327,17 @@ export class FileAuditInterceptor implements NestInterceptor {
         statusCode,
         error: error.message,
         endpoint: baseEvent.endpoint,
-        // Stack trace seulement en développement
         ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
       });
 
-      // Envoi vers le service d'audit
       await this.auditService.logFileOperation(auditEvent);
 
-      // Métriques d'erreur
       await this.auditService.logPerformanceMetric({
         operation: baseEvent.action,
         duration,
         success: false,
       });
 
-      // Détection d'attaques potentielles
       if (this.isSuspiciousError(error, baseEvent)) {
         await this.auditService.logSecurityEvent({
           ...baseEvent,
@@ -402,7 +380,6 @@ export class FileAuditInterceptor implements NestInterceptor {
    * @private
    */
   private extractFileId(request: AuthenticatedRequest): string | undefined {
-    // Priorité 1: Paramètres de route
     if (request.params?.fileId) {
       return request.params.fileId;
     }
@@ -411,18 +388,15 @@ export class FileAuditInterceptor implements NestInterceptor {
       return request.params.id;
     }
 
-    // Priorité 2: Query parameters
     if (request.query?.fileId && typeof request.query.fileId === 'string') {
       return request.query.fileId;
     }
 
-    // Priorité 3: Headers personnalisés
     const headerFileId = request.headers['x-file-id'];
     if (headerFileId && typeof headerFileId === 'string') {
       return headerFileId;
     }
 
-    // Priorité 4: Corps de la requête (pour POST/PUT)
     if (request.body?.fileId) {
       return request.body.fileId;
     }
@@ -448,7 +422,6 @@ export class FileAuditInterceptor implements NestInterceptor {
     const className = context.getClass().name;
     const methodName = handler.name;
 
-    // Mapping des méthodes vers actions métier
     const actionMap: Record<string, string> = {
       uploadFile: 'FILE_UPLOAD',
       downloadFile: 'FILE_DOWNLOAD',
@@ -511,12 +484,10 @@ export class FileAuditInterceptor implements NestInterceptor {
    * @private
    */
   private extractClientIp(request: AuthenticatedRequest): string {
-    // Utiliser l'IP du contexte sécurité si disponible
     if (request.security?.clientIp) {
       return request.security.clientIp;
     }
 
-    // Headers de proxy dans l'ordre de priorité
     const forwardedFor = request.headers['x-forwarded-for'] as string;
     if (forwardedFor) {
       return forwardedFor.split(',')[0].trim();
@@ -532,7 +503,6 @@ export class FileAuditInterceptor implements NestInterceptor {
       return clientIp.trim();
     }
 
-    // Fallback sur l'adresse de connexion
     return (
       request.connection?.remoteAddress ||
       request.socket?.remoteAddress ||
@@ -557,7 +527,6 @@ export class FileAuditInterceptor implements NestInterceptor {
       return parseInt(contentLength, 10);
     }
 
-    // Estimation basée sur le body si pas de content-length
     if (request.body) {
       try {
         return Buffer.byteLength(JSON.stringify(request.body), 'utf8');
@@ -610,14 +579,12 @@ export class FileAuditInterceptor implements NestInterceptor {
       return 'Unknown error';
     }
 
-    // Suppression d'informations potentiellement sensibles
     let sanitized = errorMessage
       .replace(/password[=:]\s*[^\s]+/gi, 'password=***')
       .replace(/token[=:]\s*[^\s]+/gi, 'token=***')
       .replace(/key[=:]\s*[^\s]+/gi, 'key=***')
       .replace(/secret[=:]\s*[^\s]+/gi, 'secret=***');
 
-    // Limitation de la longueur pour éviter les logs trop longs
     if (sanitized.length > 500) {
       sanitized = sanitized.substring(0, 497) + '...';
     }
@@ -634,7 +601,6 @@ export class FileAuditInterceptor implements NestInterceptor {
    * @private
    */
   private determineErrorLogLevel(error: any): 'error' | 'warn' | 'log' {
-    // Erreurs de sécurité : level error
     if (
       error.name?.includes('Security') ||
       error.name?.includes('Unauthorized')
@@ -642,12 +608,10 @@ export class FileAuditInterceptor implements NestInterceptor {
       return 'error';
     }
 
-    // Erreurs client (4xx) : level warn
     if (error.status >= 400 && error.status < 500) {
       return 'warn';
     }
 
-    // Erreurs serveur (5xx) : level error
     if (error.status >= 500) {
       return 'error';
     }
@@ -668,17 +632,14 @@ export class FileAuditInterceptor implements NestInterceptor {
     error: any,
     auditEvent: Omit<FileAuditEvent, 'duration' | 'success' | 'statusCode'>,
   ): boolean {
-    // Tentatives d'accès non autorisé répétées
     if (error.name?.includes('Unauthorized') && auditEvent.fileId) {
       return true;
     }
 
-    // Tentatives d'injection dans les paramètres
     if (auditEvent.fileId && /[<>'"&]/.test(auditEvent.fileId)) {
       return true;
     }
 
-    // Requêtes avec User-Agent suspect
     if (
       auditEvent.userAgent === 'Unknown' ||
       auditEvent.userAgent.includes('bot')
@@ -686,7 +647,6 @@ export class FileAuditInterceptor implements NestInterceptor {
       return true;
     }
 
-    // IP avec niveau de menace élevé
     if (auditEvent.securityContext?.threatLevel === 'high') {
       return true;
     }

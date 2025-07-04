@@ -5,20 +5,7 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { randomBytes } from 'crypto';
 
 import { GarageStorageService } from '../garage-storage.service';
-import {
-  ObjectMetadata,
-  UploadResult,
-  DownloadResult,
-  ObjectInfo,
-  ObjectList,
-  MultipartUpload,
-  PartUploadResult,
-  CompletedPart,
-  CopyResult,
-  PresignedUrlOptions,
-  PresignedUrl,
-  BucketInfo,
-} from '../../../types/file-system.types';
+import { ObjectMetadata, UploadResult } from '../../../types/file-system.types';
 import { FileSystemConfig } from '../../../config/file-system.config';
 
 /**
@@ -32,7 +19,6 @@ describe('GarageStorageService Integration', () => {
   let testBucketName: string;
   let createdObjects: string[] = [];
 
-  // ✅ CORRIGÉ : Configuration complète avec tous les champs requis
   const integrationConfig: FileSystemConfig = {
     garage: {
       endpoint: process.env.GARAGE_TEST_ENDPOINT || 'http://localhost:3900',
@@ -54,7 +40,6 @@ describe('GarageStorageService Integration', () => {
       cacheControl: 'public, max-age=3600',
       invalidationToken: 'test-token',
       edgeLocations: ['eu-west-1'],
-      // ✅ AJOUTÉ : Propriétés manquantes
       defaultTtl: 3600,
       maxTtl: 86400,
     },
@@ -64,7 +49,6 @@ describe('GarageStorageService Integration', () => {
       virusScanTimeout: 30000,
       imageOptimizationQuality: 85,
       thumbnailSize: 200,
-      // ✅ AJOUTÉ : Propriétés manquantes
       pdfCompressionLevel: 6,
       maxWorkers: 4,
       chunkSize: 1024 * 1024,
@@ -74,7 +58,6 @@ describe('GarageStorageService Integration', () => {
       maxPresignedUrls: 100,
       ipRestrictionEnabled: false,
       scanVirusEnabled: false,
-      // ✅ AJOUTÉ : Propriétés manquantes
       rateLimitUploadsPerMinute: 20,
       abuseBlockDuration: 60,
       deviceFingerprintingEnabled: false,
@@ -179,7 +162,6 @@ describe('GarageStorageService Integration', () => {
 
       console.log(`🧪 Testing CRUD operations with object: ${objectKey}`);
 
-      // CREATE - Upload de l'objet
       const uploadResult = await service.uploadObject(
         objectKey,
         testContent,
@@ -198,7 +180,6 @@ describe('GarageStorageService Integration', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // READ - Récupération des métadonnées
       const objectInfo = await service.getObjectInfo(objectKey);
 
       expect(objectInfo).toBeDefined();
@@ -212,7 +193,6 @@ describe('GarageStorageService Integration', () => {
         `✅ Metadata retrieval successful - Size: ${objectInfo.size} bytes`,
       );
 
-      // READ - Download du contenu
       const downloadResult = await service.downloadObject(objectKey);
 
       expect(downloadResult).toBeDefined();
@@ -229,7 +209,6 @@ describe('GarageStorageService Integration', () => {
 
       console.log(`✅ Download successful - Integrity verified`);
 
-      // UPDATE - Copie vers nouveau nom
       const copyKey = generateTestKey('crud-copy', 'bin');
       const copyResult = await service.copyObject(objectKey, copyKey);
 
@@ -244,7 +223,6 @@ describe('GarageStorageService Integration', () => {
 
       console.log(`✅ Copy successful - Destination: ${copyKey}`);
 
-      // DELETE - Suppression des objets
       await service.deleteObject(objectKey);
       await service.deleteObject(copyKey);
 
@@ -441,7 +419,6 @@ describe('GarageStorageService Integration', () => {
 
   describe('Data Integrity and Reliability', () => {
     it('should maintain data integrity across operations', async () => {
-      // ✅ CORRIGÉ : Types explicites pour éviter les erreurs TypeScript
       interface TestFile {
         name: string;
         content: Buffer;
@@ -509,7 +486,7 @@ describe('GarageStorageService Integration', () => {
           customMetadata: {
             originalMd5: file.md5,
             originalSha256: file.sha256,
-            fileType: file.name.split('.').pop() || 'unknown', // ✅ CORRIGÉ : Gestion undefined
+            fileType: file.name.split('.').pop() || 'unknown',
           },
         };
 
