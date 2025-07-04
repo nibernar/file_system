@@ -1,10 +1,10 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  SecurityValidation, 
+import {
+  SecurityValidation,
   SecurityThreat,
-  UploadFileDto, 
+  UploadFileDto,
   VirusScanResult,
   FormatValidation,
   ContentValidation,
@@ -13,22 +13,35 @@ import {
   FileOperation,
   PresignedUrlOptions,
   SecurePresignedUrl,
-  QuarantineResult
+  QuarantineResult,
 } from '../../types/file-system.types';
-import { 
-  FileSecurityException, 
+import {
+  FileSecurityException,
   RateLimitExceededException,
   UnauthorizedFileAccessException,
-  QuarantineException 
+  QuarantineException,
 } from '../../exceptions/file-system.exceptions';
 import { VirusScannerService } from '../../infrastructure/security/virus-scanner.service';
 import { FileValidatorService } from '../../infrastructure/security/file-validator.service';
 import { FileSystemConfig } from '../../config/file-system.config';
 
 export interface IAuditService {
-  logSecurityValidation(userId: string, validation: SecurityValidation): Promise<void>;
-  logFileAccess(userId: string, fileId: string, operation: FileOperation, result: 'SUCCESS' | 'FAILURE', details?: any): Promise<void>;
-  logUrlGeneration(fileId: string, userId: string, options: PresignedUrlOptions): Promise<void>;
+  logSecurityValidation(
+    userId: string,
+    validation: SecurityValidation,
+  ): Promise<void>;
+  logFileAccess(
+    userId: string,
+    fileId: string,
+    operation: FileOperation,
+    result: 'SUCCESS' | 'FAILURE',
+    details?: any,
+  ): Promise<void>;
+  logUrlGeneration(
+    fileId: string,
+    userId: string,
+    options: PresignedUrlOptions,
+  ): Promise<void>;
 }
 
 export interface IRateLimitService {
@@ -59,48 +72,59 @@ export class FileSecurityService {
     private readonly fileValidator: FileValidatorService,
     private readonly configService: ConfigService,
     @Inject('IAuditService') private readonly auditService: IAuditService,
-    @Inject('IRateLimitService') private readonly rateLimitService: IRateLimitService,
-    @Inject('IFileMetadataService') private readonly fileMetadataService: IFileMetadataService,
-    @Inject('IStorageService') private readonly storageService: IStorageService
+    @Inject('IRateLimitService')
+    private readonly rateLimitService: IRateLimitService,
+    @Inject('IFileMetadataService')
+    private readonly fileMetadataService: IFileMetadataService,
+    @Inject('IStorageService') private readonly storageService: IStorageService,
   ) {}
 
   /**
    * Validation sécurité complète d'un fichier uploadé
    * Couvre : format, contenu, virus, rate limiting
    */
-  async validateFileUpload(file: UploadFileDto, userId: string): Promise<SecurityValidation> {
+  async validateFileUpload(
+    file: UploadFileDto,
+    userId: string,
+  ): Promise<SecurityValidation> {
     const validation: SecurityValidation = {
       passed: true,
       threats: [],
       mitigations: [],
       scanId: uuidv4(),
-      confidenceScore: 100
+      confidenceScore: 100,
     };
 
     try {
-      this.logger.log(`Starting security validation for file ${file.filename} by user ${userId}`);
+      this.logger.log(
+        `Starting security validation for file ${file.filename} by user ${userId}`,
+      );
 
       // Récupération config depuis votre fichier existant
-      const fileSystemConfig = this.configService.get<FileSystemConfig>('fileSystem');
+      const fileSystemConfig =
+        this.configService.get<FileSystemConfig>('fileSystem');
       if (!fileSystemConfig) {
         throw new Error('File system configuration not loaded');
       }
 
       // 🔧 FIX 1: Rate limiting en PREMIER pour éviter le catch général
-      const rateLimitCheck = await this.rateLimitService.checkLimit(userId, 'upload');
+      const rateLimitCheck = await this.rateLimitService.checkLimit(
+        userId,
+        'upload',
+      );
       if (!rateLimitCheck.allowed) {
         validation.passed = false;
         validation.threats.push(SecurityThreat.RATE_LIMIT_EXCEEDED);
         validation.mitigations.push('TEMPORARY_BLOCK');
         this.logger.warn(`Rate limit exceeded for user ${userId}`);
-        
+
         // Audit avant de lancer l'exception
         await this.auditService.logSecurityValidation(userId, validation);
-        
+
         throw new RateLimitExceededException(
-          userId, 
-          rateLimitCheck.limit, 
-          rateLimitCheck.resetTime
+          userId,
+          rateLimitCheck.limit,
+          rateLimitCheck.resetTime,
         );
       }
 
@@ -110,7 +134,9 @@ export class FileSecurityService {
         validation.passed = false;
         validation.threats.push(SecurityThreat.INVALID_FORMAT);
         validation.mitigations.push('FORMAT_REJECTION');
-        this.logger.warn(`Format validation failed for ${file.filename}: ${formatValidation.errors.join(', ')}`);
+        this.logger.warn(
+          `Format validation failed for ${file.filename}: ${formatValidation.errors.join(', ')}`,
+        );
       }
 
       // 2. Validation contenu et structure
@@ -119,19 +145,25 @@ export class FileSecurityService {
         validation.passed = false;
         validation.threats.push(SecurityThreat.SUSPICIOUS_CONTENT);
         validation.mitigations.push('CONTENT_SANITIZATION');
-        this.logger.warn(`Content validation failed for ${file.filename}:`, contentValidation.threats);
+        this.logger.warn(
+          `Content validation failed for ${file.filename}:`,
+          contentValidation.threats,
+        );
       }
 
       // 3. Scan antivirus si activé
       if (fileSystemConfig.security.scanVirusEnabled) {
         const virusScan = await this.virusScanner.scanFile(file.buffer);
-        
+
         if (!virusScan.clean) {
           validation.passed = false;
           validation.threats.push(SecurityThreat.MALWARE_DETECTED);
           validation.mitigations.push('QUARANTINE');
-          this.logger.error(`Malware detected in ${file.filename}:`, virusScan.threats);
-          
+          this.logger.error(
+            `Malware detected in ${file.filename}:`,
+            virusScan.threats,
+          );
+
           // Quarantaine immédiate
           await this.quarantineFile(file, virusScan);
         }
@@ -148,19 +180,24 @@ export class FileSecurityService {
         await this.rateLimitService.incrementCounter(userId, 'upload');
         this.logger.log(`Security validation passed for ${file.filename}`);
       } else {
-        this.logger.error(`Security validation failed for ${file.filename}:`, validation.threats);
+        this.logger.error(
+          `Security validation failed for ${file.filename}:`,
+          validation.threats,
+        );
       }
 
       return validation;
-
     } catch (error) {
       // 🔧 FIX 1: Re-lancer les exceptions spécifiques sans les transformer
       if (error instanceof RateLimitExceededException) {
         throw error;
       }
 
-      this.logger.error(`Security validation error for ${file.filename}:`, error);
-      
+      this.logger.error(
+        `Security validation error for ${file.filename}:`,
+        error,
+      );
+
       // En cas d'erreur système, on rejette par sécurité
       validation.passed = false;
       validation.threats.push(SecurityThreat.SUSPICIOUS_CONTENT);
@@ -168,60 +205,118 @@ export class FileSecurityService {
       validation.details = { error: error.message };
 
       await this.auditService.logSecurityValidation(userId, validation);
-      
-      throw new FileSecurityException('Security validation system error', validation.threats.map(t => t.toString()));
+
+      throw new FileSecurityException(
+        'Security validation system error',
+        validation.threats.map((t) => t.toString()),
+      );
     }
   }
 
   /**
    * Vérification des permissions d'accès à un fichier
    */
-  async checkFileAccess(fileId: string, userId: string, operation: FileOperation): Promise<boolean> {
+  async checkFileAccess(
+    fileId: string,
+    userId: string,
+    operation: FileOperation,
+  ): Promise<boolean> {
     try {
-      this.logger.log(`Checking file access: ${operation} on ${fileId} by user ${userId}`);
+      this.logger.log(
+        `Checking file access: ${operation} on ${fileId} by user ${userId}`,
+      );
 
       // 1. Récupération métadonnées fichier
-      const fileMetadata = await this.fileMetadataService.getFileMetadata(fileId);
+      const fileMetadata =
+        await this.fileMetadataService.getFileMetadata(fileId);
       if (!fileMetadata) {
         this.logger.warn(`File not found: ${fileId}`);
-        await this.auditService.logFileAccess(userId, fileId, operation, 'FAILURE', { reason: 'FILE_NOT_FOUND' });
+        await this.auditService.logFileAccess(
+          userId,
+          fileId,
+          operation,
+          'FAILURE',
+          { reason: 'FILE_NOT_FOUND' },
+        );
         return false;
       }
 
       // 🔧 FIX 2: Vérification correcte de l'ownership
       if (fileMetadata.userId === userId) {
         this.logger.log(`Access granted: user ${userId} owns file ${fileId}`);
-        await this.auditService.logFileAccess(userId, fileId, operation, 'SUCCESS', { reason: 'OWNER_ACCESS' });
+        await this.auditService.logFileAccess(
+          userId,
+          fileId,
+          operation,
+          'SUCCESS',
+          { reason: 'OWNER_ACCESS' },
+        );
         return true;
       }
 
       // 3. Vérification permissions projet si applicable
       if (fileMetadata.projectId) {
-        const hasProjectAccess = await this.checkProjectAccess(userId, fileMetadata.projectId, operation);
+        const hasProjectAccess = await this.checkProjectAccess(
+          userId,
+          fileMetadata.projectId,
+          operation,
+        );
         if (hasProjectAccess) {
-          this.logger.log(`Access granted: user ${userId} has project access to file ${fileId}`);
-          await this.auditService.logFileAccess(userId, fileId, operation, 'SUCCESS', { reason: 'PROJECT_ACCESS' });
+          this.logger.log(
+            `Access granted: user ${userId} has project access to file ${fileId}`,
+          );
+          await this.auditService.logFileAccess(
+            userId,
+            fileId,
+            operation,
+            'SUCCESS',
+            { reason: 'PROJECT_ACCESS' },
+          );
           return true;
         }
       }
 
       // 4. Vérification permissions spéciales (admin, etc.)
-      const hasSpecialAccess = await this.checkSpecialPermissions(userId, operation);
+      const hasSpecialAccess = await this.checkSpecialPermissions(
+        userId,
+        operation,
+      );
       if (hasSpecialAccess) {
-        this.logger.log(`Access granted: user ${userId} has special permissions for file ${fileId}`);
-        await this.auditService.logFileAccess(userId, fileId, operation, 'SUCCESS', { reason: 'SPECIAL_PERMISSIONS' });
+        this.logger.log(
+          `Access granted: user ${userId} has special permissions for file ${fileId}`,
+        );
+        await this.auditService.logFileAccess(
+          userId,
+          fileId,
+          operation,
+          'SUCCESS',
+          { reason: 'SPECIAL_PERMISSIONS' },
+        );
         return true;
       }
 
       // 5. Accès refusé - audit de sécurité
-      this.logger.warn(`Access denied: user ${userId} cannot ${operation} file ${fileId}`);
-      await this.auditService.logFileAccess(userId, fileId, operation, 'FAILURE', { reason: 'INSUFFICIENT_PERMISSIONS' });
+      this.logger.warn(
+        `Access denied: user ${userId} cannot ${operation} file ${fileId}`,
+      );
+      await this.auditService.logFileAccess(
+        userId,
+        fileId,
+        operation,
+        'FAILURE',
+        { reason: 'INSUFFICIENT_PERMISSIONS' },
+      );
 
       return false;
-
     } catch (error) {
       this.logger.error(`Error checking file access for ${fileId}:`, error);
-      await this.auditService.logFileAccess(userId, fileId, operation, 'FAILURE', { reason: 'SYSTEM_ERROR', error: error.message });
+      await this.auditService.logFileAccess(
+        userId,
+        fileId,
+        operation,
+        'FAILURE',
+        { reason: 'SYSTEM_ERROR', error: error.message },
+      );
       return false;
     }
   }
@@ -230,27 +325,39 @@ export class FileSecurityService {
    * Génération d'URL pré-signée sécurisée avec restrictions
    */
   async generateSecurePresignedUrl(
-    fileId: string, 
-    userId: string, 
-    options: PresignedUrlOptions
+    fileId: string,
+    userId: string,
+    options: PresignedUrlOptions,
   ): Promise<SecurePresignedUrl> {
     try {
-      this.logger.log(`Generating secure presigned URL for file ${fileId} by user ${userId}`);
+      this.logger.log(
+        `Generating secure presigned URL for file ${fileId} by user ${userId}`,
+      );
 
       // 1. Validation permissions
-      const hasAccess = await this.checkFileAccess(fileId, userId, FileOperation.READ);
+      const hasAccess = await this.checkFileAccess(
+        fileId,
+        userId,
+        FileOperation.READ,
+      );
       if (!hasAccess) {
-        throw new UnauthorizedFileAccessException(fileId, userId, FileOperation.READ.toString());
+        throw new UnauthorizedFileAccessException(
+          fileId,
+          userId,
+          FileOperation.READ.toString(),
+        );
       }
 
       // 2. Récupération métadonnées fichier
-      const fileMetadata = await this.fileMetadataService.getFileMetadata(fileId);
+      const fileMetadata =
+        await this.fileMetadataService.getFileMetadata(fileId);
       if (!fileMetadata) {
         throw new FileSecurityException('File not found', ['FILE_NOT_FOUND']);
       }
 
       // 3. Validation expiration selon politique sécurité
-      const fileSystemConfig = this.configService.get<FileSystemConfig>('fileSystem');
+      const fileSystemConfig =
+        this.configService.get<FileSystemConfig>('fileSystem');
       const maxExpiry = fileSystemConfig?.security.presignedUrlExpiry || 3600;
       const expiresIn = Math.min(options.expiresIn || 3600, maxExpiry);
 
@@ -262,47 +369,58 @@ export class FileSecurityService {
         key: fileMetadata.storageKey,
         operation: options.operation,
         expiresIn,
-        conditions: securityConditions
+        conditions: securityConditions,
       });
 
       // 🔧 FIX 3: Vérification que presignedUrl n'est pas undefined
       if (!presignedUrl || !presignedUrl.url) {
-        throw new FileSecurityException('Storage service failed to generate URL', ['STORAGE_ERROR']);
+        throw new FileSecurityException(
+          'Storage service failed to generate URL',
+          ['STORAGE_ERROR'],
+        );
       }
 
       // 6. Construction réponse sécurisée
       const secureUrl: SecurePresignedUrl = {
         url: presignedUrl.url,
-        expiresAt: presignedUrl.expiresAt || new Date(Date.now() + expiresIn * 1000),
+        expiresAt:
+          presignedUrl.expiresAt || new Date(Date.now() + expiresIn * 1000),
         restrictions: {
           operations: [options.operation],
           ipAddress: options.ipRestriction,
-          userAgent: options.userAgent
+          userAgent: options.userAgent,
         },
         securityToken: this.generateSecurityToken(fileId, userId, options),
-        auditId: uuidv4()
+        auditId: uuidv4(),
       };
 
       // 7. Audit de génération URL
       await this.auditService.logUrlGeneration(fileId, userId, options);
 
-      this.logger.log(`Secure presigned URL generated for file ${fileId}, expires in ${expiresIn}s`);
+      this.logger.log(
+        `Secure presigned URL generated for file ${fileId}, expires in ${expiresIn}s`,
+      );
 
       return secureUrl;
-
     } catch (error) {
-      this.logger.error(`Error generating secure presigned URL for ${fileId}:`, error);
-      
+      this.logger.error(
+        `Error generating secure presigned URL for ${fileId}:`,
+        error,
+      );
+
       // 🔧 FIX 3: Re-lancer les exceptions spécifiques
       if (error instanceof UnauthorizedFileAccessException) {
         throw error;
       }
-      
+
       if (error instanceof FileSecurityException) {
         throw error;
       }
-      
-      throw new FileSecurityException('Failed to generate secure presigned URL', ['URL_GENERATION_ERROR']);
+
+      throw new FileSecurityException(
+        'Failed to generate secure presigned URL',
+        ['URL_GENERATION_ERROR'],
+      );
     }
   }
 
@@ -311,8 +429,9 @@ export class FileSecurityService {
    */
   async getLatestScanResult(fileId: string): Promise<SecurityScanResult> {
     try {
-      const fileMetadata = await this.fileMetadataService.getFileMetadata(fileId);
-      
+      const fileMetadata =
+        await this.fileMetadataService.getFileMetadata(fileId);
+
       return {
         safe: fileMetadata.virusScanStatus === 'CLEAN',
         threatsFound: fileMetadata.detectedThreats || [],
@@ -322,26 +441,36 @@ export class FileSecurityService {
         scannedAt: fileMetadata.lastScanDate || fileMetadata.createdAt,
         scanDetails: {
           scanId: fileMetadata.lastScanId || 'unknown',
-          status: fileMetadata.virusScanStatus
-        }
+          status: fileMetadata.virusScanStatus,
+        },
       };
     } catch (error) {
       this.logger.error(`Error getting scan result for ${fileId}:`, error);
-      throw new FileSecurityException('Failed to get security scan result', ['SCAN_RESULT_ERROR']);
+      throw new FileSecurityException('Failed to get security scan result', [
+        'SCAN_RESULT_ERROR',
+      ]);
     }
   }
 
   /**
    * Mise en quarantaine d'un fichier infecté ou suspect
    */
-  private async quarantineFile(file: UploadFileDto, scanResult: VirusScanResult): Promise<QuarantineResult> {
+  private async quarantineFile(
+    file: UploadFileDto,
+    scanResult: VirusScanResult,
+  ): Promise<QuarantineResult> {
     try {
       const quarantineId = uuidv4();
-      
-      this.logger.error(`Quarantining file ${file.filename} - threats: ${scanResult.threats?.join(', ')}`);
+
+      this.logger.error(
+        `Quarantining file ${file.filename} - threats: ${scanResult.threats?.join(', ')}`,
+      );
 
       // 1. Déplacement vers zone de quarantaine
-      await this.storageService.moveToQuarantine(file.filename, `Malware detected: ${scanResult.threats?.join(', ')}`);
+      await this.storageService.moveToQuarantine(
+        file.filename,
+        `Malware detected: ${scanResult.threats?.join(', ')}`,
+      );
 
       // 2. Mise à jour statut sécurité
       const quarantineResult: QuarantineResult = {
@@ -350,7 +479,7 @@ export class FileSecurityService {
         reason: 'MALWARE_DETECTED',
         threats: scanResult.threats || [],
         quarantineDate: new Date(),
-        automaticAction: true
+        automaticAction: true,
       };
 
       // 3. Notification équipe sécurité (si configuré)
@@ -358,15 +487,14 @@ export class FileSecurityService {
 
       // 4. Audit de quarantaine
       await this.auditService.logFileAccess(
-        'SYSTEM', 
-        file.filename, 
+        'SYSTEM',
+        file.filename,
         FileOperation.DELETE,
-        'SUCCESS', 
-        quarantineResult
+        'SUCCESS',
+        quarantineResult,
       );
 
       return quarantineResult;
-
     } catch (error) {
       this.logger.error(`Error quarantining file ${file.filename}:`, error);
       throw new QuarantineException(file.filename, error.message);
@@ -377,9 +505,9 @@ export class FileSecurityService {
    * Analyse comportementale des uploads pour détection d'anomalies
    */
   private async analyzeUploadBehavior(
-    userId: string, 
-    file: UploadFileDto, 
-    validation: SecurityValidation
+    userId: string,
+    file: UploadFileDto,
+    validation: SecurityValidation,
   ): Promise<void> {
     try {
       const behaviorAnalysis: {
@@ -387,7 +515,7 @@ export class FileSecurityService {
         riskScore: number;
       } = {
         suspiciousPatterns: [],
-        riskScore: 0
+        riskScore: 0,
       };
 
       // Vérification extensions multiples
@@ -406,9 +534,11 @@ export class FileSecurityService {
       if (behaviorAnalysis.riskScore >= 50) {
         validation.threats.push(SecurityThreat.SUSPICIOUS_CONTENT);
         validation.mitigations.push('ENHANCED_MONITORING');
-        this.logger.warn(`Suspicious upload behavior detected for user ${userId}:`, behaviorAnalysis);
+        this.logger.warn(
+          `Suspicious upload behavior detected for user ${userId}:`,
+          behaviorAnalysis,
+        );
       }
-
     } catch (error) {
       this.logger.error('Error analyzing upload behavior:', error);
     }
@@ -436,12 +566,16 @@ export class FileSecurityService {
   /**
    * Génération d'un token de sécurité pour l'URL pré-signée
    */
-  private generateSecurityToken(fileId: string, userId: string, options: PresignedUrlOptions): string {
+  private generateSecurityToken(
+    fileId: string,
+    userId: string,
+    options: PresignedUrlOptions,
+  ): string {
     const tokenData = {
       fileId,
       userId,
       operation: options.operation,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     return Buffer.from(JSON.stringify(tokenData)).toString('base64');
@@ -450,7 +584,11 @@ export class FileSecurityService {
   /**
    * Vérification d'accès projet (à implémenter selon logique métier)
    */
-  private async checkProjectAccess(userId: string, projectId: string, operation: FileOperation): Promise<boolean> {
+  private async checkProjectAccess(
+    userId: string,
+    projectId: string,
+    operation: FileOperation,
+  ): Promise<boolean> {
     // TODO: Implémenter selon la logique d'autorisation des projets
     return false;
   }
@@ -458,7 +596,10 @@ export class FileSecurityService {
   /**
    * Vérification permissions spéciales (admin, etc.)
    */
-  private async checkSpecialPermissions(userId: string, operation: FileOperation): Promise<boolean> {
+  private async checkSpecialPermissions(
+    userId: string,
+    operation: FileOperation,
+  ): Promise<boolean> {
     // TODO: Implémenter selon la logique des rôles utilisateur
     return false;
   }
@@ -466,9 +607,13 @@ export class FileSecurityService {
   /**
    * Notification équipe sécurité pour quarantaine
    */
-  private async notifySecurityTeam(quarantineResult: QuarantineResult): Promise<void> {
+  private async notifySecurityTeam(
+    quarantineResult: QuarantineResult,
+  ): Promise<void> {
     try {
-      this.logger.warn(`Security team notification needed for quarantine ${quarantineResult.quarantineId}`);
+      this.logger.warn(
+        `Security team notification needed for quarantine ${quarantineResult.quarantineId}`,
+      );
     } catch (error) {
       this.logger.error('Error notifying security team:', error);
     }
@@ -481,10 +626,10 @@ export class FileSecurityService {
     const suspiciousPatterns = [
       /\.[^.]{1,3}\.[^.]{1,4}$/, // Double extensions
       /\.(exe|scr|bat|cmd|com|pif)$/i, // Exécutables
-      /\.(js|vbs|ps1)$/i // Scripts
+      /\.(js|vbs|ps1)$/i, // Scripts
     ];
 
-    return suspiciousPatterns.some(pattern => pattern.test(filename));
+    return suspiciousPatterns.some((pattern) => pattern.test(filename));
   }
 
   /**
@@ -495,7 +640,7 @@ export class FileSecurityService {
       'text/plain': 10 * 1024 * 1024, // 10MB max pour texte
       'application/json': 5 * 1024 * 1024, // 5MB max pour JSON
       'image/png': 50 * 1024 * 1024, // 50MB max pour PNG
-      'image/jpeg': 50 * 1024 * 1024 // 50MB max pour JPEG
+      'image/jpeg': 50 * 1024 * 1024, // 50MB max pour JPEG
     };
 
     const limit = sizeLimits[contentType];

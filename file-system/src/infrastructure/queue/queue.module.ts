@@ -1,7 +1,10 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { FILE_PROCESSING_QUEUE_NAME, FileProcessingQueueConfigFactory } from './file-processing.queue';
+import {
+  FILE_PROCESSING_QUEUE_NAME,
+  FileProcessingQueueConfigFactory,
+} from './file-processing.queue';
 import { FileProcessingProcessor } from './file-processing.processor';
 
 // Imports des modules nécessaires
@@ -17,7 +20,7 @@ import { PersistenceModule } from '../persistence/persistence.module';
     ProcessingModule,
     MonitoringModule,
     PersistenceModule,
-    
+
     BullModule.registerQueueAsync({
       name: FILE_PROCESSING_QUEUE_NAME,
       imports: [ConfigModule],
@@ -39,13 +42,7 @@ import { PersistenceModule } from '../persistence/persistence.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [
-    FileProcessingProcessor,
-    FileProcessingQueueConfigFactory,
-  ],
-  exports: [
-    BullModule,
-    FileProcessingProcessor,
-  ],
+  providers: [FileProcessingProcessor, FileProcessingQueueConfigFactory],
+  exports: [BullModule, FileProcessingProcessor],
 })
 export class QueueModule {}

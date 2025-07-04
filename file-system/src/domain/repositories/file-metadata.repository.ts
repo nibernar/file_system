@@ -121,22 +121,22 @@ export interface StorageUsage {
 
 /**
  * Interface du repository pour la gestion des métadonnées de fichiers
- * 
+ *
  * Ce repository gère toutes les opérations liées aux métadonnées des fichiers
  * stockés dans le système. Il sert d'abstraction entre la logique métier
  * et la couche de persistance (base de données).
- * 
+ *
  * @interface IFileMetadataRepository
  */
 export interface IFileMetadataRepository {
   /**
    * Crée une nouvelle entrée de métadonnées de fichier
-   * 
+   *
    * @param metadata - Les données du fichier à créer
    * @returns Une promesse contenant les métadonnées créées avec l'ID généré
    * @throws {ValidationError} Si les données sont invalides
    * @throws {DatabaseError} Si l'insertion échoue
-   * 
+   *
    * @example
    * ```typescript
    * const metadata = await repository.create({
@@ -157,11 +157,11 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche des métadonnées de fichier par ID
-   * 
+   *
    * @param id - L'identifiant unique du fichier
    * @returns Une promesse contenant les métadonnées ou null si non trouvé
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const file = await repository.findById('file-123');
@@ -176,12 +176,12 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche tous les fichiers d'un utilisateur
-   * 
+   *
    * @param userId - L'identifiant de l'utilisateur
    * @param options - Options de recherche et pagination
    * @returns Une promesse contenant la liste des métadonnées
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const userFiles = await repository.findByUserId('user-123', {
@@ -198,12 +198,12 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche tous les fichiers d'un projet
-   * 
+   *
    * @param projectId - L'identifiant du projet
    * @param options - Options de recherche et pagination
    * @returns Une promesse contenant la liste des métadonnées
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const projectFiles = await repository.findByProjectId('project-456', {
@@ -213,18 +213,21 @@ export interface IFileMetadataRepository {
    * });
    * ```
    */
-  findByProjectId(projectId: string, options?: FindOptions): Promise<FileMetadata[]>;
+  findByProjectId(
+    projectId: string,
+    options?: FindOptions,
+  ): Promise<FileMetadata[]>;
 
   /**
    * Met à jour les métadonnées d'un fichier
-   * 
+   *
    * @param id - L'identifiant du fichier à mettre à jour
    * @param updates - Les champs à mettre à jour
    * @returns Une promesse contenant les métadonnées mises à jour
    * @throws {NotFoundError} Si le fichier n'existe pas
    * @throws {ValidationError} Si les données sont invalides
    * @throws {DatabaseError} Si la mise à jour échoue
-   * 
+   *
    * @example
    * ```typescript
    * const updated = await repository.update('file-123', {
@@ -240,15 +243,15 @@ export interface IFileMetadataRepository {
 
   /**
    * Supprime les métadonnées d'un fichier (hard delete)
-   * 
+   *
    * Note: Dans la plupart des cas, préférer un soft delete via update()
    * avec deletedAt pour conserver l'historique.
-   * 
+   *
    * @param id - L'identifiant du fichier à supprimer
    * @returns Une promesse void
    * @throws {NotFoundError} Si le fichier n'existe pas
    * @throws {DatabaseError} Si la suppression échoue
-   * 
+   *
    * @example
    * ```typescript
    * await repository.delete('file-123');
@@ -258,14 +261,14 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche un fichier par sa clé de stockage
-   * 
+   *
    * Utile pour vérifier l'unicité ou retrouver un fichier
    * à partir de sa localisation dans le storage.
-   * 
+   *
    * @param storageKey - La clé unique de stockage dans Garage S3
    * @returns Une promesse contenant les métadonnées ou null
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const file = await repository.findByStorageKey('files/user-123/document.pdf');
@@ -275,14 +278,14 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche des fichiers par checksum
-   * 
+   *
    * Permet de détecter les doublons ou de retrouver des fichiers
    * identiques dans le système.
-   * 
+   *
    * @param checksum - Le checksum MD5 ou SHA256 à rechercher
    * @returns Une promesse contenant la liste des fichiers correspondants
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const duplicates = await repository.findByChecksum('abc123...');
@@ -295,12 +298,12 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche des fichiers par tags
-   * 
+   *
    * @param tags - Liste des tags à rechercher
    * @param matchAll - Si true, tous les tags doivent être présents
    * @returns Une promesse contenant la liste des fichiers correspondants
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const urgentFiles = await repository.findByTags(['urgent', 'project-alpha'], false);
@@ -311,13 +314,13 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche les fichiers en attente de traitement
-   * 
+   *
    * Utilisé par les workers de traitement pour récupérer
    * les fichiers à traiter de manière asynchrone.
-   * 
+   *
    * @returns Une promesse contenant la liste des fichiers à traiter
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const pendingFiles = await repository.findPendingProcessing();
@@ -330,14 +333,14 @@ export interface IFileMetadataRepository {
 
   /**
    * Recherche les fichiers expirés
-   * 
+   *
    * Identifie les fichiers qui doivent être archivés ou supprimés
    * selon les politiques de rétention.
-   * 
+   *
    * @param olderThan - Date limite pour considérer un fichier comme expiré
    * @returns Une promesse contenant la liste des fichiers expirés
    * @throws {DatabaseError} Si la requête échoue
-   * 
+   *
    * @example
    * ```typescript
    * const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -348,14 +351,14 @@ export interface IFileMetadataRepository {
 
   /**
    * Calcule l'utilisation du stockage pour un utilisateur
-   * 
+   *
    * Fournit des statistiques détaillées sur l'utilisation
    * du stockage par un utilisateur spécifique.
-   * 
+   *
    * @param userId - L'identifiant de l'utilisateur
    * @returns Une promesse contenant les statistiques d'utilisation
    * @throws {DatabaseError} Si le calcul échoue
-   * 
+   *
    * @example
    * ```typescript
    * const usage = await repository.getUserStorageUsage('user-123');
@@ -368,14 +371,14 @@ export interface IFileMetadataRepository {
 
   /**
    * Calcule l'utilisation du stockage pour un projet
-   * 
+   *
    * Fournit des statistiques détaillées sur l'utilisation
    * du stockage par un projet spécifique.
-   * 
+   *
    * @param projectId - L'identifiant du projet
    * @returns Une promesse contenant les statistiques d'utilisation
    * @throws {DatabaseError} Si le calcul échoue
-   * 
+   *
    * @example
    * ```typescript
    * const usage = await repository.getProjectStorageUsage('project-456');

@@ -2,20 +2,25 @@
 
 /**
  * Tests unitaires pour FileAccessGuard - VERSION CORRIGÉE
- * 
+ *
  * Corrections apportées :
  * - Jest mocking properly typed
  * - Interface issues resolved
  * - Mock implementations fixed
  * - FileOperation enum values corrected to match actual enum (READ, WRITE, DELETE, SHARE)
- * 
+ *
  * @author Backend Team
  * @version 1.4 - Fixed all FileOperation enum values
  * @since Phase 2.2 - Middleware Sécurité et Guards
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { FileAccessGuard } from '../file-access.guard';
@@ -155,9 +160,9 @@ describe('FileAccessGuard', () => {
 
       // Act & Assert
       await expect(
-        guard.canActivate(mockExecutionContext as ExecutionContext)
+        guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(UnauthorizedException);
-      
+
       expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();
     });
 
@@ -175,9 +180,9 @@ describe('FileAccessGuard', () => {
 
       // Act & Assert
       await expect(
-        guard.canActivate(mockExecutionContext as ExecutionContext)
+        guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(UnauthorizedException);
-      
+
       expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();
     });
   });
@@ -191,7 +196,9 @@ describe('FileAccessGuard', () => {
       mockReflector.get.mockReturnValue(undefined); // Pas d'opération requise
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
@@ -208,14 +215,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-123',
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -229,14 +238,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-456',
         'user-123',
-        FileOperation.WRITE
+        FileOperation.WRITE,
       );
     });
 
@@ -250,14 +261,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-789',
         'user-123',
-        FileOperation.DELETE
+        FileOperation.DELETE,
       );
     });
 
@@ -271,14 +284,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'file-share-123',
         'user-123',
-        FileOperation.SHARE
+        FileOperation.SHARE,
       );
     });
   });
@@ -294,14 +309,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'extracted-file-123',
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -315,14 +332,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'generic-id-456',
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -336,14 +355,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'query-file-789',
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -358,14 +379,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'body-file-101',
         'user-123',
-        FileOperation.WRITE
+        FileOperation.WRITE,
       );
     });
 
@@ -382,14 +405,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'header-file-202',
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -406,9 +431,9 @@ describe('FileAccessGuard', () => {
 
       // Act & Assert
       await expect(
-        guard.canActivate(mockExecutionContext as ExecutionContext)
+        guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(BadRequestException);
-      
+
       expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();
     });
   });
@@ -425,14 +450,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         validUuid,
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -447,14 +474,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         customId,
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -469,14 +498,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         simpleId,
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -498,10 +529,10 @@ describe('FileAccessGuard', () => {
 
         // Act & Assert
         await expect(
-          guard.canActivate(mockExecutionContext as ExecutionContext)
+          guard.canActivate(mockExecutionContext as ExecutionContext),
         ).rejects.toThrow(BadRequestException);
       }
-      
+
       expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();
     });
 
@@ -518,10 +549,10 @@ describe('FileAccessGuard', () => {
 
         // Act & Assert
         await expect(
-          guard.canActivate(mockExecutionContext as ExecutionContext)
+          guard.canActivate(mockExecutionContext as ExecutionContext),
         ).rejects.toThrow(BadRequestException);
       }
-      
+
       expect(mockFileSecurityService.checkFileAccess).not.toHaveBeenCalled();
     });
   });
@@ -537,14 +568,16 @@ describe('FileAccessGuard', () => {
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'accessible-file-123',
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
 
@@ -559,13 +592,13 @@ describe('FileAccessGuard', () => {
 
       // Act & Assert
       await expect(
-        guard.canActivate(mockExecutionContext as ExecutionContext)
+        guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(ForbiddenException);
-      
+
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'protected-file-456',
         'user-123',
-        FileOperation.WRITE
+        FileOperation.WRITE,
       );
     });
 
@@ -577,18 +610,18 @@ describe('FileAccessGuard', () => {
       mockRequest.params = { fileId: 'error-file-789' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockRejectedValue(
-        new Error('Security service unavailable')
+        new Error('Security service unavailable'),
       );
 
       // Act & Assert
       await expect(
-        guard.canActivate(mockExecutionContext as ExecutionContext)
+        guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(ForbiddenException);
-      
+
       expect(mockFileSecurityService.checkFileAccess).toHaveBeenCalledWith(
         'error-file-789',
         'user-123',
-        FileOperation.READ
+        FileOperation.READ,
       );
     });
   });
@@ -600,20 +633,22 @@ describe('FileAccessGuard', () => {
     it('should log successful access attempts', async () => {
       // Arrange
       const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       mockRequest.params = { fileId: 'logged-file-123' };
       mockReflector.get.mockReturnValue(FileOperation.READ);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(true);
 
       // Act
-      const result = await guard.canActivate(mockExecutionContext as ExecutionContext);
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
 
       // Assert
       expect(result).toBe(true);
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('File access granted')
+        expect.stringContaining('File access granted'),
       );
-      
+
       consoleLogSpy.mockRestore();
     });
 
@@ -623,16 +658,16 @@ describe('FileAccessGuard', () => {
     it('should log failed access attempts with security context', async () => {
       // Arrange
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
+
       mockRequest.params = { fileId: 'denied-file-456' };
       mockReflector.get.mockReturnValue(FileOperation.DELETE);
       mockFileSecurityService.checkFileAccess.mockResolvedValue(false);
 
       // Act & Assert
       await expect(
-        guard.canActivate(mockExecutionContext as ExecutionContext)
+        guard.canActivate(mockExecutionContext as ExecutionContext),
       ).rejects.toThrow(ForbiddenException);
-      
+
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('File access denied'),
         expect.objectContaining({
@@ -640,9 +675,9 @@ describe('FileAccessGuard', () => {
           fileId: 'denied-file-456',
           operation: FileOperation.DELETE,
           ipAddress: '192.168.1.100',
-        })
+        }),
       );
-      
+
       consoleWarnSpy.mockRestore();
     });
   });

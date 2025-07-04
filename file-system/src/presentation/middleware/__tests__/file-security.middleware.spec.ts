@@ -2,12 +2,12 @@
 
 /**
  * Tests unitaires pour FileSecurityMiddleware - VERSION CORRIGÉE
- * 
+ *
  * Corrections apportées :
  * - Types Jest correctly mocked
  * - Interface compatibility issues fixed
  * - Proper mock implementations
- * 
+ *
  * @author Backend Team
  * @version 1.2 - Fixed compilation issues
  * @since Phase 2.2 - Middleware Sécurité et Guards
@@ -19,7 +19,10 @@ import { Request, Response, NextFunction } from 'express';
 import { FileSecurityMiddleware } from '../file-security.middleware';
 import { RateLimitService } from '../../../infrastructure/security/rate-limit.service';
 import { IpIntelligenceService } from '../../../infrastructure/security/ip-intelligence.service';
-import { RateLimitResult, IpIntelligence } from '../../../types/file-system.types';
+import {
+  RateLimitResult,
+  IpIntelligence,
+} from '../../../types/file-system.types';
 
 // Exception personnalisée pour les tests
 class TooManyRequestsException extends Error {
@@ -165,7 +168,9 @@ describe('FileSecurityMiddleware', () => {
         resetAt: new Date(Date.now() + 3600000),
       };
 
-      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(
+        mockIpIntelligence,
+      );
       mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);
       mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
       mockRateLimitService.incrementCounter.mockResolvedValue();
@@ -174,7 +179,7 @@ describe('FileSecurityMiddleware', () => {
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       // Assert
@@ -187,8 +192,14 @@ describe('FileSecurityMiddleware', () => {
         isTor: false,
         country: 'FR',
       });
-      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Limit', 100);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Remaining', 95);
+      expect(mockResponse.setHeader).toHaveBeenCalledWith(
+        'X-RateLimit-Limit',
+        100,
+      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        95,
+      );
     });
 
     /**
@@ -207,19 +218,19 @@ describe('FileSecurityMiddleware', () => {
         country: 'United States',
       };
 
-      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(
+        mockIpIntelligence,
+      );
 
       // Act & Assert
       await expect(
-        middleware.use(
-          mockRequest as any,
-          mockResponse as Response,
-          mockNext
-        )
+        middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Access denied: Tor connections not allowed');
 
       expect(mockNext).not.toHaveBeenCalled();
-      expect(mockIpIntelligenceService.getIpIntelligence).toHaveBeenCalledWith('192.168.1.100');
+      expect(mockIpIntelligenceService.getIpIntelligence).toHaveBeenCalledWith(
+        '192.168.1.100',
+      );
     });
 
     /**
@@ -238,15 +249,13 @@ describe('FileSecurityMiddleware', () => {
         country: 'China',
       };
 
-      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(
+        mockIpIntelligence,
+      );
 
       // Act & Assert
       await expect(
-        middleware.use(
-          mockRequest as any,
-          mockResponse as Response,
-          mockNext
-        )
+        middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Access denied: IP threat level too high');
 
       expect(mockNext).not.toHaveBeenCalled();
@@ -269,20 +278,20 @@ describe('FileSecurityMiddleware', () => {
         country: 'United States',
       };
 
-      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(
+        mockIpIntelligence,
+      );
       mockIpIntelligenceService.isIpBlocked.mockResolvedValue(true);
 
       // Act & Assert
       await expect(
-        middleware.use(
-          mockRequest as any,
-          mockResponse as Response,
-          mockNext
-        )
+        middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Access denied: IP address blocked');
 
       expect(mockNext).not.toHaveBeenCalled();
-      expect(mockIpIntelligenceService.isIpBlocked).toHaveBeenCalledWith('192.168.1.100');
+      expect(mockIpIntelligenceService.isIpBlocked).toHaveBeenCalledWith(
+        '192.168.1.100',
+      );
     });
   });
 
@@ -311,17 +320,15 @@ describe('FileSecurityMiddleware', () => {
         resetAt: new Date(Date.now() + 3600000),
       };
 
-      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(
+        mockIpIntelligence,
+      );
       mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);
       mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
 
       // Act & Assert
       await expect(
-        middleware.use(
-          mockRequest as any,
-          mockResponse as Response,
-          mockNext
-        )
+        middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Rate limit exceeded');
 
       expect(mockNext).not.toHaveBeenCalled();
@@ -353,7 +360,9 @@ describe('FileSecurityMiddleware', () => {
         resetAt: new Date(Date.now() + 3600000),
       };
 
-      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(mockIpIntelligence);
+      mockIpIntelligenceService.getIpIntelligence.mockResolvedValue(
+        mockIpIntelligence,
+      );
       mockIpIntelligenceService.isIpBlocked.mockResolvedValue(false);
       mockRateLimitService.checkLimit.mockResolvedValue(mockRateLimitResult);
       mockRateLimitService.incrementCounter.mockResolvedValue();
@@ -362,13 +371,13 @@ describe('FileSecurityMiddleware', () => {
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       // Assert
       expect(mockRateLimitService.incrementCounter).toHaveBeenCalledWith(
         'user-123',
-        'POST:/api/v1/files/upload'
+        'POST:/api/v1/files/upload',
       );
       expect(mockNext).toHaveBeenCalled();
     });
@@ -386,12 +395,14 @@ describe('FileSecurityMiddleware', () => {
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       // Assert
       expect(mockNext).toHaveBeenCalledTimes(1);
-      expect(mockIpIntelligenceService.getIpIntelligence).not.toHaveBeenCalled();
+      expect(
+        mockIpIntelligenceService.getIpIntelligence,
+      ).not.toHaveBeenCalled();
       expect(mockRateLimitService.checkLimit).not.toHaveBeenCalled();
     });
 
@@ -406,12 +417,14 @@ describe('FileSecurityMiddleware', () => {
       await middleware.use(
         mockRequest as any,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       // Assert
       expect(mockNext).toHaveBeenCalledTimes(1);
-      expect(mockIpIntelligenceService.getIpIntelligence).not.toHaveBeenCalled();
+      expect(
+        mockIpIntelligenceService.getIpIntelligence,
+      ).not.toHaveBeenCalled();
       expect(mockRateLimitService.checkLimit).not.toHaveBeenCalled();
     });
   });
@@ -424,22 +437,18 @@ describe('FileSecurityMiddleware', () => {
       // Arrange
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
-      
+
       mockIpIntelligenceService.getIpIntelligence.mockRejectedValue(
-        new Error('IP Intelligence service unavailable')
+        new Error('IP Intelligence service unavailable'),
       );
 
       // Act & Assert - En mode développement, le middleware devrait throw l'erreur
       await expect(
-        middleware.use(
-          mockRequest as any,
-          mockResponse as Response,
-          mockNext
-        )
+        middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Security check failed');
 
       expect(mockNext).not.toHaveBeenCalled();
-      
+
       // Cleanup
       process.env.NODE_ENV = originalEnv;
     });
@@ -451,22 +460,18 @@ describe('FileSecurityMiddleware', () => {
       // Arrange
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
-      
+
       mockIpIntelligenceService.getIpIntelligence.mockRejectedValue(
-        new Error('IP Intelligence service unavailable')
+        new Error('IP Intelligence service unavailable'),
       );
 
       // Act & Assert
       await expect(
-        middleware.use(
-          mockRequest as any,
-          mockResponse as Response,
-          mockNext
-        )
+        middleware.use(mockRequest as any, mockResponse as Response, mockNext),
       ).rejects.toThrow('Security check failed');
 
       expect(mockNext).not.toHaveBeenCalled();
-      
+
       // Cleanup
       process.env.NODE_ENV = originalEnv;
     });

@@ -1,13 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { 
-  UploadFileDto, 
-  FormatValidation, 
+import {
+  UploadFileDto,
+  FormatValidation,
   ContentValidation,
-  MimeTypeValidation 
+  MimeTypeValidation,
 } from '../../types/file-system.types';
-import { FILE_SYSTEM_CONSTANTS, FILE_SIZE_LIMITS, SUPPORTED_MIME_TYPES } from '../../constants/file-system.constants';
+import {
+  FILE_SYSTEM_CONSTANTS,
+  FILE_SIZE_LIMITS,
+  SUPPORTED_MIME_TYPES,
+} from '../../constants/file-system.constants';
 
 /**
  * Service de validation des formats et contenus de fichiers
@@ -29,52 +33,72 @@ export class FileValidatorService {
     ['image/webp', ['52494646', '57454250']], // RIFF + WEBP
     ['image/bmp', ['424D']],
     ['image/tiff', ['49492A00', '4D4D002A']],
-    
+
     // Documents
     ['application/pdf', ['255044462D']],
     ['application/zip', ['504B0304', '504B0506', '504B0708']],
     ['application/x-rar-compressed', ['526172211A0700']],
     ['application/x-7z-compressed', ['377ABCAF271C']],
-    
+
     // Office documents (ZIP-based)
-    ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', ['504B0304']], // .docx
-    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', ['504B0304']], // .xlsx
-    ['application/vnd.openxmlformats-officedocument.presentationml.presentation', ['504B0304']], // .pptx
-    
+    [
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ['504B0304'],
+    ], // .docx
+    [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ['504B0304'],
+    ], // .xlsx
+    [
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      ['504B0304'],
+    ], // .pptx
+
     // Texte
     ['text/plain', []], // Pas de magic number spécifique
     ['text/html', ['3C21444F43545950452068746D6C', '3C68746D6C']], // <!DOCTYPE html, <html
     ['text/xml', ['3C3F786D6C']], // <?xml
     ['application/json', []], // Validation par parsing JSON
-    
+
     // Audio/Vidéo
     ['audio/mpeg', ['494433', 'FFFB', 'FFF3', 'FFF2']], // MP3
     ['audio/wav', ['52494646']], // RIFF
     ['video/mp4', ['66747970']], // ftyp
     ['video/avi', ['52494646']], // RIFF
-    
+
     // Exécutables (interdits)
     ['application/x-executable', ['7F454C46', '4D5A']], // ELF, PE
     ['application/x-msdos-program', ['4D5A']], // PE/EXE
-    ['application/x-msdownload', ['4D5A']] // PE/EXE
+    ['application/x-msdownload', ['4D5A']], // PE/EXE
   ]);
 
   constructor(private readonly configService: ConfigService) {
-    this.maxFileSize = this.configService.get<number>('MAX_FILE_SIZE', FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT);
-    this.allowedMimeTypes = this.configService.get<string[]>('ALLOWED_MIME_TYPES', [
-      ...SUPPORTED_MIME_TYPES.IMAGES,
-      ...SUPPORTED_MIME_TYPES.DOCUMENTS,
-      ...SUPPORTED_MIME_TYPES.TEXT,
-      ...SUPPORTED_MIME_TYPES.CODE
-    ]);
-    this.strictValidation = this.configService.get<boolean>('STRICT_FILE_VALIDATION', true);
+    this.maxFileSize = this.configService.get<number>(
+      'MAX_FILE_SIZE',
+      FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT,
+    );
+    this.allowedMimeTypes = this.configService.get<string[]>(
+      'ALLOWED_MIME_TYPES',
+      [
+        ...SUPPORTED_MIME_TYPES.IMAGES,
+        ...SUPPORTED_MIME_TYPES.DOCUMENTS,
+        ...SUPPORTED_MIME_TYPES.TEXT,
+        ...SUPPORTED_MIME_TYPES.CODE,
+      ],
+    );
+    this.strictValidation = this.configService.get<boolean>(
+      'STRICT_FILE_VALIDATION',
+      true,
+    );
   }
 
   /**
    * Validation complète du format de fichier
    */
   async validateFormat(file: UploadFileDto): Promise<FormatValidation> {
-    this.logger.log(`Validating format for file: ${file.filename} (${file.contentType}, ${file.size} bytes)`);
+    this.logger.log(
+      `Validating format for file: ${file.filename} (${file.contentType}, ${file.size} bytes)`,
+    );
 
     const validation: FormatValidation = {
       valid: true,
@@ -82,7 +106,7 @@ export class FileValidatorService {
       warnings: [],
       detectedMimeType: file.contentType,
       actualMimeType: null,
-      fileSignature: null
+      fileSignature: null,
     };
 
     try {
@@ -114,14 +138,18 @@ export class FileValidatorService {
         await this.validateSpecificFormat(file, validation);
       }
 
-      this.logger.log(`Format validation completed for ${file.filename}: ${validation.valid ? 'VALID' : 'INVALID'}`);
-      
+      this.logger.log(
+        `Format validation completed for ${file.filename}: ${validation.valid ? 'VALID' : 'INVALID'}`,
+      );
+
       if (!validation.valid) {
-        this.logger.warn(`Format validation errors for ${file.filename}:`, validation.errors);
+        this.logger.warn(
+          `Format validation errors for ${file.filename}:`,
+          validation.errors,
+        );
       }
 
       return validation;
-
     } catch (error) {
       this.logger.error(`Error validating format for ${file.filename}:`, error);
       validation.valid = false;
@@ -141,7 +169,7 @@ export class FileValidatorService {
       threats: [],
       warnings: [],
       metadata: {},
-      analysis: {}
+      analysis: {},
     };
 
     try {
@@ -165,16 +193,23 @@ export class FileValidatorService {
       // 5. Analyse entropie (détection chiffrement/compression suspecte)
       this.analyzeEntropy(file, validation);
 
-      this.logger.log(`Content validation completed for ${file.filename}: ${validation.safe ? 'SAFE' : 'UNSAFE'}`);
-      
+      this.logger.log(
+        `Content validation completed for ${file.filename}: ${validation.safe ? 'SAFE' : 'UNSAFE'}`,
+      );
+
       if (!validation.safe) {
-        this.logger.warn(`Content validation threats for ${file.filename}:`, validation.threats);
+        this.logger.warn(
+          `Content validation threats for ${file.filename}:`,
+          validation.threats,
+        );
       }
 
       return validation;
-
     } catch (error) {
-      this.logger.error(`Error validating content for ${file.filename}:`, error);
+      this.logger.error(
+        `Error validating content for ${file.filename}:`,
+        error,
+      );
       validation.safe = false;
       validation.threats.push(`Content validation error: ${error.message}`);
       return validation;
@@ -184,7 +219,10 @@ export class FileValidatorService {
   /**
    * Validation taille fichier
    */
-  private validateFileSize(size: number, validation: FormatValidation): boolean {
+  private validateFileSize(
+    size: number,
+    validation: FormatValidation,
+  ): boolean {
     if (size <= 0) {
       validation.valid = false;
       validation.errors.push('File size must be greater than 0');
@@ -193,7 +231,9 @@ export class FileValidatorService {
 
     if (size > this.maxFileSize) {
       validation.valid = false;
-      validation.errors.push(`File size ${size} exceeds maximum allowed size ${this.maxFileSize}`);
+      validation.errors.push(
+        `File size ${size} exceeds maximum allowed size ${this.maxFileSize}`,
+      );
       return false;
     }
 
@@ -203,20 +243,25 @@ export class FileValidatorService {
   /**
    * Validation nom de fichier sécurisé
    */
-  private validateFilename(filename: string, validation: FormatValidation): boolean {
+  private validateFilename(
+    filename: string,
+    validation: FormatValidation,
+  ): boolean {
     // Patterns dangereux
     const dangerousPatterns = [
-      /\.\./,                    // Path traversal
-      /[<>:"|?*]/,              // Caractères interdits Windows
+      /\.\./, // Path traversal
+      /[<>:"|?*]/, // Caractères interdits Windows
       /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, // Noms réservés Windows
-      /^\.+$/,                  // Seulement des points
-      /\.(exe|scr|bat|cmd|com|pif|vbs|js|jar|app|deb|rpm)$/i // Extensions dangereuses
+      /^\.+$/, // Seulement des points
+      /\.(exe|scr|bat|cmd|com|pif|vbs|js|jar|app|deb|rpm)$/i, // Extensions dangereuses
     ];
 
     for (const pattern of dangerousPatterns) {
       if (pattern.test(filename)) {
         validation.valid = false;
-        validation.errors.push(`Filename contains dangerous pattern: ${pattern.source}`);
+        validation.errors.push(
+          `Filename contains dangerous pattern: ${pattern.source}`,
+        );
         return false;
       }
     }
@@ -241,7 +286,10 @@ export class FileValidatorService {
   /**
    * Validation MIME type déclaré
    */
-  private validateDeclaredMimeType(mimeType: string, validation: FormatValidation): boolean {
+  private validateDeclaredMimeType(
+    mimeType: string,
+    validation: FormatValidation,
+  ): boolean {
     if (!mimeType || mimeType.trim() === '') {
       validation.valid = false;
       validation.errors.push('MIME type is required');
@@ -249,14 +297,18 @@ export class FileValidatorService {
     }
 
     // Format MIME type
-    if (!/^[a-zA-Z][a-zA-Z0-9][a-zA-Z0-9\!\#\$\&\-\^]*\/[a-zA-Z0-9][a-zA-Z0-9\!\#\$\&\-\^]*$/.test(mimeType)) {
+    if (
+      !/^[a-zA-Z][a-zA-Z0-9][a-zA-Z0-9\!\#\$\&\-\^]*\/[a-zA-Z0-9][a-zA-Z0-9\!\#\$\&\-\^]*$/.test(
+        mimeType,
+      )
+    ) {
       validation.valid = false;
       validation.errors.push('Invalid MIME type format');
       return false;
     }
 
     // Vérification liste autorisée
-    const isAllowed = this.allowedMimeTypes.some(allowed => {
+    const isAllowed = this.allowedMimeTypes.some((allowed) => {
       if (allowed.endsWith('/*')) {
         return mimeType.startsWith(allowed.slice(0, -1));
       }
@@ -275,17 +327,22 @@ export class FileValidatorService {
   /**
    * Validation magic numbers
    */
-  private async validateMagicNumbers(file: UploadFileDto, validation: FormatValidation): Promise<void> {
-    const buffer = file.buffer!;
-    const fileSignature = buffer.toString('hex', 0, Math.min(16, buffer.length)).toUpperCase();
+  private async validateMagicNumbers(
+    file: UploadFileDto,
+    validation: FormatValidation,
+  ): Promise<void> {
+    const buffer = file.buffer;
+    const fileSignature = buffer
+      .toString('hex', 0, Math.min(16, buffer.length))
+      .toUpperCase();
     validation.fileSignature = fileSignature;
 
     // Vérification magic numbers
     const expectedMagics = this.magicNumbers.get(file.contentType) || [];
-    
+
     if (expectedMagics.length > 0) {
-      const signatureMatch = expectedMagics.some(magic => 
-        fileSignature.startsWith(magic.toUpperCase())
+      const signatureMatch = expectedMagics.some((magic) =>
+        fileSignature.startsWith(magic.toUpperCase()),
       );
 
       if (!signatureMatch) {
@@ -295,9 +352,13 @@ export class FileValidatorService {
 
         if (this.strictValidation) {
           validation.valid = false;
-          validation.errors.push(`File signature ${fileSignature} does not match declared MIME type ${file.contentType}`);
+          validation.errors.push(
+            `File signature ${fileSignature} does not match declared MIME type ${file.contentType}`,
+          );
         } else {
-          validation.warnings.push(`File signature mismatch. Declared: ${file.contentType}, Detected: ${detectedType || 'unknown'}`);
+          validation.warnings.push(
+            `File signature mismatch. Declared: ${file.contentType}, Detected: ${detectedType || 'unknown'}`,
+          );
         }
       }
     }
@@ -320,21 +381,28 @@ export class FileValidatorService {
   /**
    * Validation cohérence extension/MIME
    */
-  private validateExtensionMimeConsistency(file: UploadFileDto, validation: FormatValidation): void {
+  private validateExtensionMimeConsistency(
+    file: UploadFileDto,
+    validation: FormatValidation,
+  ): void {
     const extension = this.extractFileExtension(file.filename);
     if (!extension) return;
 
     const expectedMimeTypes = this.getExpectedMimeTypesForExtension(extension);
-    
+
     if (expectedMimeTypes.length > 0) {
       const mimeMatch = expectedMimeTypes.includes(file.contentType);
-      
+
       if (!mimeMatch) {
         if (this.strictValidation) {
           validation.valid = false;
-          validation.errors.push(`Extension .${extension} does not match MIME type ${file.contentType}`);
+          validation.errors.push(
+            `Extension .${extension} does not match MIME type ${file.contentType}`,
+          );
         } else {
-          validation.warnings.push(`Extension/MIME type mismatch: .${extension} vs ${file.contentType}`);
+          validation.warnings.push(
+            `Extension/MIME type mismatch: .${extension} vs ${file.contentType}`,
+          );
         }
       }
     }
@@ -343,8 +411,11 @@ export class FileValidatorService {
   /**
    * Validation spécifique par format
    */
-  private async validateSpecificFormat(file: UploadFileDto, validation: FormatValidation): Promise<void> {
-    const buffer = file.buffer!;
+  private async validateSpecificFormat(
+    file: UploadFileDto,
+    validation: FormatValidation,
+  ): Promise<void> {
+    const buffer = file.buffer;
 
     switch (file.contentType) {
       case 'application/pdf':
@@ -367,9 +438,12 @@ export class FileValidatorService {
   /**
    * Analyse heuristique du contenu
    */
-  private async performHeuristicAnalysis(file: UploadFileDto, validation: ContentValidation): Promise<void> {
-    const buffer = file.buffer!;
-    
+  private async performHeuristicAnalysis(
+    file: UploadFileDto,
+    validation: ContentValidation,
+  ): Promise<void> {
+    const buffer = file.buffer;
+
     // Vérification patterns suspects
     const suspiciousPatterns = [
       /javascript:/gi,
@@ -381,14 +455,16 @@ export class FileValidatorService {
       /\bexec\s*\(/gi,
       /system\s*\(/gi,
       /\$_GET|\$_POST|\$_REQUEST/gi,
-      /base64_decode/gi
+      /base64_decode/gi,
     ];
 
     const content = buffer.toString('utf8', 0, Math.min(buffer.length, 8192));
-    
+
     for (const pattern of suspiciousPatterns) {
       if (pattern.test(content)) {
-        validation.threats.push(`Suspicious pattern detected: ${pattern.source}`);
+        validation.threats.push(
+          `Suspicious pattern detected: ${pattern.source}`,
+        );
         validation.safe = false;
       }
     }
@@ -397,8 +473,11 @@ export class FileValidatorService {
   /**
    * Validation contenu par type
    */
-  private async validateContentByType(file: UploadFileDto, validation: ContentValidation): Promise<void> {
-    const buffer = file.buffer!;
+  private async validateContentByType(
+    file: UploadFileDto,
+    validation: ContentValidation,
+  ): Promise<void> {
+    const buffer = file.buffer;
 
     if (file.contentType.startsWith('text/')) {
       // Validation encodage texte
@@ -425,8 +504,11 @@ export class FileValidatorService {
   /**
    * Détection scripts malveillants
    */
-  private async detectMaliciousScripts(file: UploadFileDto, validation: ContentValidation): Promise<void> {
-    const buffer = file.buffer!;
+  private async detectMaliciousScripts(
+    file: UploadFileDto,
+    validation: ContentValidation,
+  ): Promise<void> {
+    const buffer = file.buffer;
     const content = buffer.toString('ascii', 0, Math.min(buffer.length, 16384));
 
     // Scripts shell
@@ -444,7 +526,7 @@ export class FileValidatorService {
       'dd if=',
       'chmod 777',
       'sudo rm',
-      '>/dev/null'
+      '>/dev/null',
     ];
 
     for (const cmd of dangerousCommands) {
@@ -458,7 +540,10 @@ export class FileValidatorService {
   /**
    * Validation métadonnées intégrées
    */
-  private async validateEmbeddedMetadata(file: UploadFileDto, validation: ContentValidation): Promise<void> {
+  private async validateEmbeddedMetadata(
+    file: UploadFileDto,
+    validation: ContentValidation,
+  ): Promise<void> {
     // TODO: Implémenter extraction et validation métadonnées EXIF, XMP, etc.
     // Vérifier absence de données sensibles dans métadonnées
     validation.analysis.metadataExtracted = false;
@@ -467,15 +552,20 @@ export class FileValidatorService {
   /**
    * Analyse entropie
    */
-  private analyzeEntropy(file: UploadFileDto, validation: ContentValidation): void {
-    const buffer = file.buffer!;
+  private analyzeEntropy(
+    file: UploadFileDto,
+    validation: ContentValidation,
+  ): void {
+    const buffer = file.buffer;
     const entropy = this.calculateEntropy(buffer);
-    
+
     validation.analysis.entropy = entropy;
-    
+
     // Entropie très élevée = possiblement chiffré/compressé de manière suspecte
     if (entropy > 7.5) {
-      validation.warnings.push(`High entropy detected (${entropy.toFixed(2)}), file may be encrypted or highly compressed`);
+      validation.warnings.push(
+        `High entropy detected (${entropy.toFixed(2)}), file may be encrypted or highly compressed`,
+      );
     }
   }
 
@@ -484,37 +574,43 @@ export class FileValidatorService {
    */
   private calculateEntropy(buffer: Buffer): number {
     const frequencies = new Map<number, number>();
-    
+
     for (let i = 0; i < buffer.length; i++) {
       const byte = buffer[i];
       frequencies.set(byte, (frequencies.get(byte) || 0) + 1);
     }
-    
+
     let entropy = 0;
     const length = buffer.length;
-    
+
     for (const count of frequencies.values()) {
       const probability = count / length;
       entropy -= probability * Math.log2(probability);
     }
-    
+
     return entropy;
   }
 
   /**
    * Validation structure PDF
    */
-  private validatePDFStructure(buffer: Buffer, validation: FormatValidation): void {
+  private validatePDFStructure(
+    buffer: Buffer,
+    validation: FormatValidation,
+  ): void {
     const content = buffer.toString('ascii', 0, Math.min(buffer.length, 1024));
-    
+
     if (!content.startsWith('%PDF-')) {
       validation.valid = false;
       validation.errors.push('Invalid PDF header');
       return;
     }
-    
+
     // Vérification fin de fichier PDF
-    const endContent = buffer.toString('ascii', Math.max(0, buffer.length - 128));
+    const endContent = buffer.toString(
+      'ascii',
+      Math.max(0, buffer.length - 128),
+    );
     if (!endContent.includes('%%EOF')) {
       validation.warnings.push('PDF may be truncated (missing %%EOF)');
     }
@@ -523,7 +619,10 @@ export class FileValidatorService {
   /**
    * Validation structure JSON
    */
-  private validateJSONStructure(buffer: Buffer, validation: FormatValidation): void {
+  private validateJSONStructure(
+    buffer: Buffer,
+    validation: FormatValidation,
+  ): void {
     try {
       JSON.parse(buffer.toString('utf8'));
     } catch (error) {
@@ -535,32 +634,51 @@ export class FileValidatorService {
   /**
    * Validation structure XML
    */
-  private validateXMLStructure(buffer: Buffer, validation: FormatValidation): void {
+  private validateXMLStructure(
+    buffer: Buffer,
+    validation: FormatValidation,
+  ): void {
     const content = buffer.toString('utf8');
-    
+
     // Vérification basique XML
     if (!content.trim().startsWith('<')) {
       validation.valid = false;
       validation.errors.push('Invalid XML: must start with <');
       return;
     }
-    
+
     // TODO: Validation XML plus poussée avec parser
   }
 
   /**
    * Validation structure image
    */
-  private validateImageStructure(buffer: Buffer, mimeType: string, validation: FormatValidation): void {
+  private validateImageStructure(
+    buffer: Buffer,
+    mimeType: string,
+    validation: FormatValidation,
+  ): void {
     // Validation basique selon le type
     switch (mimeType) {
       case 'image/jpeg':
-        if (!buffer.toString('hex', buffer.length - 2).toUpperCase().includes('FFD9')) {
-          validation.warnings.push('JPEG may be truncated (missing EOI marker)');
+        if (
+          !buffer
+            .toString('hex', buffer.length - 2)
+            .toUpperCase()
+            .includes('FFD9')
+        ) {
+          validation.warnings.push(
+            'JPEG may be truncated (missing EOI marker)',
+          );
         }
         break;
       case 'image/png':
-        if (!buffer.toString('hex', buffer.length - 8).toUpperCase().includes('49454E44AE426082')) {
+        if (
+          !buffer
+            .toString('hex', buffer.length - 8)
+            .toUpperCase()
+            .includes('49454E44AE426082')
+        ) {
           validation.warnings.push('PNG may be truncated (missing IEND chunk)');
         }
         break;
@@ -583,22 +701,28 @@ export class FileValidatorService {
    */
   private getExpectedMimeTypesForExtension(extension: string): string[] {
     const extensionMap: Record<string, string[]> = {
-      'pdf': ['application/pdf'],
-      'jpg': ['image/jpeg'],
-      'jpeg': ['image/jpeg'],
-      'png': ['image/png'],
-      'gif': ['image/gif'],
-      'webp': ['image/webp'],
-      'bmp': ['image/bmp'],
-      'txt': ['text/plain'],
-      'json': ['application/json'],
-      'xml': ['text/xml', 'application/xml'],
-      'html': ['text/html'],
-      'htm': ['text/html'],
-      'zip': ['application/zip'],
-      'docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-      'xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-      'pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation']
+      pdf: ['application/pdf'],
+      jpg: ['image/jpeg'],
+      jpeg: ['image/jpeg'],
+      png: ['image/png'],
+      gif: ['image/gif'],
+      webp: ['image/webp'],
+      bmp: ['image/bmp'],
+      txt: ['text/plain'],
+      json: ['application/json'],
+      xml: ['text/xml', 'application/xml'],
+      html: ['text/html'],
+      htm: ['text/html'],
+      zip: ['application/zip'],
+      docx: [
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ],
+      xlsx: [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ],
+      pptx: [
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      ],
     };
 
     return extensionMap[extension] || [];

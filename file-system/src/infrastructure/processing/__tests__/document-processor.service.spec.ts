@@ -1,11 +1,11 @@
 /**
  * Tests unitaires pour DocumentProcessorService - Traitement documents texte
- * 
+ *
  * Ce fichier teste le service spécialisé de traitement de documents texte qui
  * analyse le contenu, détecte l'encodage, extrait les métadonnées linguistiques,
  * valide la structure selon le format et génère des résumés automatiques.
  * Version corrigée avec mocks synchrones pour iconv-lite.
- * 
+ *
  * @author Backend Lead
  * @version 1.0
  * @conformsTo 04-06-file-system-tests Phase 3.1
@@ -15,12 +15,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import * as iconv from 'iconv-lite';
 import * as chardet from 'chardet';
-import { 
+import {
   DocumentProcessorService,
   DocumentProcessingOptions,
   ProcessedDocument,
   DocumentStructureValidation,
-  LanguageDetectionResult
+  LanguageDetectionResult,
 } from '../document-processor.service';
 import { GarageStorageService } from '../../garage/garage-storage.service';
 import { FILE_SYSTEM_CONFIG } from '../../../config/file-system.config';
@@ -28,17 +28,17 @@ import {
   FileMetadata,
   VirusScanStatus,
   ProcessingStatus,
-  DocumentType
+  DocumentType,
 } from '../../../types/file-system.types';
 import {
   ProcessingException,
-  FileNotFoundException
+  FileNotFoundException,
 } from '../../../exceptions/file-system.exceptions';
 import {
   createTestFileBuffer,
   createTestJSONBuffer,
   generateTestUUID,
-  delay
+  delay,
 } from '../../../__tests__/test-setup';
 
 // Mock des bibliothèques externes pour tests isolés
@@ -46,7 +46,7 @@ jest.mock('iconv-lite');
 jest.mock('chardet');
 
 const mockIconv = iconv as jest.Mocked<typeof iconv>;
-const mockChardet = chardet as jest.Mocked<typeof chardet>;
+const mockChardet = chardet;
 
 describe('DocumentProcessorService', () => {
   let service: DocumentProcessorService;
@@ -57,7 +57,9 @@ describe('DocumentProcessorService', () => {
   /**
    * Helper pour créer un FileMetadata mock complet
    */
-  const createMockFileMetadata = (overrides: Partial<FileMetadata> = {}): FileMetadata => ({
+  const createMockFileMetadata = (
+    overrides: Partial<FileMetadata> = {},
+  ): FileMetadata => ({
     id: generateTestUUID(),
     userId: 'system',
     projectId: undefined,
@@ -75,7 +77,7 @@ describe('DocumentProcessorService', () => {
     tags: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides
+    ...overrides,
   });
 
   beforeEach(async () => {
@@ -83,11 +85,11 @@ describe('DocumentProcessorService', () => {
     mockConfig = {
       processing: {
         maxSizeForSummary: 1024 * 1024, // 1MB
-        targetEncoding: 'utf8'
+        targetEncoding: 'utf8',
       },
       cdn: {
-        baseUrl: 'https://cdn.test.coders.com'
-      }
+        baseUrl: 'https://cdn.test.coders.com',
+      },
     };
 
     // Mock services dépendants
@@ -95,14 +97,14 @@ describe('DocumentProcessorService', () => {
       downloadObject: jest.fn(),
       uploadObject: jest.fn(),
       copyObject: jest.fn(),
-      getObjectInfo: jest.fn()
+      getObjectInfo: jest.fn(),
     };
 
     const mockLogger = {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn()
+      error: jest.fn(),
     };
 
     // ✅ Configuration mocks bibliothèques SYNCHRONES
@@ -121,8 +123,8 @@ describe('DocumentProcessorService', () => {
         DocumentProcessorService,
         { provide: GarageStorageService, useValue: mockStorageService },
         { provide: Logger, useValue: mockLogger },
-        { provide: FILE_SYSTEM_CONFIG, useValue: mockConfig }
-      ]
+        { provide: FILE_SYSTEM_CONFIG, useValue: mockConfig },
+      ],
     }).compile();
 
     // Récupération instances
@@ -161,7 +163,7 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         detectLanguage: true,
         extractSpecializedMetadata: true,
         maxSizeForSummary: 1024,
-        targetEncoding: 'utf8'
+        targetEncoding: 'utf8',
       };
 
       // Configuration mocks avec délais
@@ -173,9 +175,9 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
             contentType: 'text/plain',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'test-etag'
+            etag: 'test-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -192,7 +194,9 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
       expect(result.lineCount).toBe(4);
       expect(result.wordCount).toBeGreaterThan(25);
       expect(result.characterCount).toBe(frenchContent.length);
-      expect(result.characterCountNoSpaces).toBe(frenchContent.replace(/\s/g, '').length);
+      expect(result.characterCountNoSpaces).toBe(
+        frenchContent.replace(/\s/g, '').length,
+      );
       expect(result.detectedLanguage).toBe('fr');
       expect(result.processingTime).toBeGreaterThan(0);
 
@@ -214,13 +218,13 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         version: '1.0.0',
         features: [
           { id: 'feature1', enabled: true, config: { timeout: 5000 } },
-          { id: 'feature2', enabled: false, config: { retries: 3 } }
+          { id: 'feature2', enabled: false, config: { retries: 3 } },
         ],
         metadata: {
           created: '2024-01-15T10:30:00Z',
           author: 'Test System',
-          tags: ['test', 'configuration', 'json']
-        }
+          tags: ['test', 'configuration', 'json'],
+        },
       };
 
       const jsonContent = JSON.stringify(jsonData, null, 2);
@@ -230,7 +234,7 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         extractText: true,
         validateStructure: true,
         extractSpecializedMetadata: true,
-        detectLanguage: false
+        detectLanguage: false,
       };
 
       // Configuration mocks
@@ -242,9 +246,9 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
             contentType: 'application/json',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'json-etag'
+            etag: 'json-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -261,22 +265,35 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
 
       // Vérification validation structure JSON
       expect(result.structureValidation?.valid).toBe(true);
-      expect(result.structureValidation?.detectedFormat).toBe('application/json');
+      expect(result.structureValidation?.detectedFormat).toBe(
+        'application/json',
+      );
       expect(result.structureValidation?.structureMetadata?.type).toBe('json');
-      expect(result.structureValidation?.structureMetadata?.rootType).toBe('object');
-      expect(result.structureValidation?.structureMetadata?.keyCount).toBeGreaterThan(0);
+      expect(result.structureValidation?.structureMetadata?.rootType).toBe(
+        'object',
+      );
+      expect(
+        result.structureValidation?.structureMetadata?.keyCount,
+      ).toBeGreaterThan(0);
 
       // Vérification métadonnées spécialisées JSON
       expect(result.specializedMetadata?.jsonStructure).toBeDefined();
-      expect(result.specializedMetadata?.jsonStructure?.depth).toBeGreaterThan(1);
-      expect(result.specializedMetadata?.jsonStructure?.arrayCount).toBeGreaterThan(0);
-      expect(result.specializedMetadata?.jsonStructure?.objectCount).toBeGreaterThan(0);
+      expect(result.specializedMetadata?.jsonStructure?.depth).toBeGreaterThan(
+        1,
+      );
+      expect(
+        result.specializedMetadata?.jsonStructure?.arrayCount,
+      ).toBeGreaterThan(0);
+      expect(
+        result.specializedMetadata?.jsonStructure?.objectCount,
+      ).toBeGreaterThan(0);
     });
 
     it('should optimize encoding from Latin-1 to UTF-8', async () => {
       // Arrange
       const fileId = generateTestUUID();
-      const latin1Content = 'Texte avec caractères accentués: café, naïve, résumé';
+      const latin1Content =
+        'Texte avec caractères accentués: café, naïve, résumé';
       const utf8Content = latin1Content;
 
       const sourceBuffer = Buffer.from(latin1Content, 'latin1');
@@ -284,7 +301,7 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
       const options: DocumentProcessingOptions = {
         extractText: true,
         optimizeEncoding: true,
-        targetEncoding: 'utf8'
+        targetEncoding: 'utf8',
       };
 
       // Configuration mocks
@@ -296,9 +313,9 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
             contentType: 'text/plain',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'latin1-etag'
+            etag: 'latin1-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -309,7 +326,7 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
 
       const mockFileMetadata = createMockFileMetadata({
         contentType: 'text/plain',
-        storageKey: `${fileId}/optimized/utf8/123456789`
+        storageKey: `${fileId}/optimized/utf8/123456789`,
       });
 
       storageService.uploadObject.mockResolvedValue({
@@ -318,7 +335,7 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
         etag: 'optimized-etag',
         location: 'optimized-url',
         metadata: mockFileMetadata,
-        uploadDuration: 200
+        uploadDuration: 200,
       });
 
       // Act
@@ -341,9 +358,9 @@ Cette analyse inclut le comptage de mots lignes et caractères.`;
             originalFileId: fileId,
             optimizationType: 'encoding_optimization',
             originalEncoding: 'ISO-8859-1',
-            optimizedEncoding: 'utf8'
-          })
-        })
+            optimizedEncoding: 'utf8',
+          }),
+        }),
       );
     });
 
@@ -368,7 +385,7 @@ Nous devons nous préparer à ces changements technologiques majeurs.`;
       const options: DocumentProcessingOptions = {
         extractText: true,
         generateSummary: true,
-        detectLanguage: true
+        detectLanguage: true,
       };
 
       // Configuration mocks
@@ -380,9 +397,9 @@ Nous devons nous préparer à ces changements technologiques majeurs.`;
             contentType: 'text/plain',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'summary-etag'
+            etag: 'summary-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -419,7 +436,7 @@ Features include automatic language detection and content analysis.`;
       const options: DocumentProcessingOptions = {
         extractText: true,
         detectLanguage: true,
-        generateSummary: true
+        generateSummary: true,
       };
 
       // Configuration mocks
@@ -431,9 +448,9 @@ Features include automatic language detection and content analysis.`;
             contentType: 'text/plain',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'english-etag'
+            etag: 'english-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -448,25 +465,26 @@ Features include automatic language detection and content analysis.`;
       expect(result.detectedLanguage).toBe('en');
       expect(result.textContent).toBe(englishContent);
       expect(result.processingTime).toBeGreaterThan(0);
-      
+
       if (result.summary) {
         expect(result.summary).toContain('document');
       }
     });
   });
 
-  describe('Gestion d\'Erreurs et Robustesse', () => {
+  describe("Gestion d'Erreurs et Robustesse", () => {
     it('should handle missing document files gracefully', async () => {
       // Arrange
       const nonExistentFileId = generateTestUUID();
 
       storageService.downloadObject.mockRejectedValue(
-        new FileNotFoundException(nonExistentFileId)
+        new FileNotFoundException(nonExistentFileId),
       );
 
       // Act & Assert
-      await expect(service.processDocument(nonExistentFileId, {}))
-        .rejects.toThrow(FileNotFoundException);
+      await expect(
+        service.processDocument(nonExistentFileId, {}),
+      ).rejects.toThrow(FileNotFoundException);
 
       expect(mockChardet.detect).not.toHaveBeenCalled();
       expect(mockIconv.decode).not.toHaveBeenCalled();
@@ -486,15 +504,15 @@ Features include automatic language detection and content analysis.`;
             contentType: 'text/plain',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'unsupported-etag'
+            etag: 'unsupported-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
       mockChardet.detect.mockReturnValue('UNKNOWN-ENCODING');
       mockIconv.encodingExists.mockReturnValue(false);
-      
+
       // ✅ SPY sur la vraie instance du service
       const warnSpy = jest.spyOn(service['logger'], 'warn');
 
@@ -504,12 +522,12 @@ Features include automatic language detection and content analysis.`;
       // Assert
       expect(result.success).toBe(true);
       expect(result.encoding).toBe('UNKNOWN-ENCODING');
-      
+
       // ✅ Vérifier le spy sur la vraie instance
       expect(warnSpy).toHaveBeenCalledWith(
-        'Encodage UNKNOWN-ENCODING non supporté, fallback UTF-8'
+        'Encodage UNKNOWN-ENCODING non supporté, fallback UTF-8',
       );
-      
+
       // Nettoyage
       warnSpy.mockRestore();
     });
@@ -517,7 +535,7 @@ Features include automatic language detection and content analysis.`;
     it('should handle corrupted documents gracefully', async () => {
       // Arrange
       const fileId = generateTestUUID();
-      const corruptedBuffer = Buffer.from([0x00, 0x01, 0x02, 0xFF, 0xFE]);
+      const corruptedBuffer = Buffer.from([0x00, 0x01, 0x02, 0xff, 0xfe]);
 
       storageService.downloadObject.mockImplementation(async () => {
         await delay(3);
@@ -527,9 +545,9 @@ Features include automatic language detection and content analysis.`;
             contentType: 'text/plain',
             contentLength: corruptedBuffer.length,
             lastModified: new Date(),
-            etag: 'corrupted-etag'
+            etag: 'corrupted-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -537,7 +555,9 @@ Features include automatic language detection and content analysis.`;
       mockIconv.decode.mockImplementation(() => {
         const error = new Error('Invalid character sequence');
         // Le service loggera avec le message complet
-        logger.error(`Échec traitement document ${fileId} après 5ms: ${error.message}`);
+        logger.error(
+          `Échec traitement document ${fileId} après 5ms: ${error.message}`,
+        );
         throw error;
       });
 
@@ -546,14 +566,14 @@ Features include automatic language detection and content analysis.`;
 
       // Assert
       expect(result.processingTime).toBeGreaterThanOrEqual(0);
-      
+
       if (!result.success) {
         expect(result.error).toContain('Invalid character sequence');
       }
 
       // ✅ Vérification log d'erreur - Le service log avec un seul paramètre
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Échec traitement document ' + fileId)
+        expect.stringContaining('Échec traitement document ' + fileId),
       );
     });
 
@@ -574,9 +594,9 @@ Features include automatic language detection and content analysis.`;
               contentType: 'text/plain',
               contentLength: sourceBuffer.length,
               lastModified: new Date(),
-              etag: 'recovery-etag'
+              etag: 'recovery-etag',
             },
-            fromCache: false
+            fromCache: false,
           };
         });
 
@@ -584,8 +604,9 @@ Features include automatic language detection and content analysis.`;
       mockIconv.decode.mockReturnValue(content);
 
       // Act - Premier échec
-      await expect(service.processDocument(fileId, {}))
-        .rejects.toThrow(FileNotFoundException);
+      await expect(service.processDocument(fileId, {})).rejects.toThrow(
+        FileNotFoundException,
+      );
 
       // Second essai réussit
       const result = await service.processDocument(fileId, {});
@@ -613,7 +634,7 @@ Anna Mueller,35,Berlin,Germany`;
       const options: DocumentProcessingOptions = {
         extractText: true,
         validateStructure: true,
-        extractSpecializedMetadata: true
+        extractSpecializedMetadata: true,
       };
 
       storageService.downloadObject.mockImplementation(async () => {
@@ -624,9 +645,9 @@ Anna Mueller,35,Berlin,Germany`;
             contentType: 'text/csv',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'csv-etag'
+            etag: 'csv-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -643,12 +664,16 @@ Anna Mueller,35,Berlin,Germany`;
       expect(result.structureValidation?.detectedFormat).toBe('text/csv');
       expect(result.structureValidation?.structureMetadata?.type).toBe('csv');
       expect(result.structureValidation?.structureMetadata?.rowCount).toBe(5);
-      expect(result.structureValidation?.structureMetadata?.columnCount).toBe(4);
+      expect(result.structureValidation?.structureMetadata?.columnCount).toBe(
+        4,
+      );
 
       // Vérification métadonnées CSV spécialisées
       expect(result.specializedMetadata?.csvStructure).toBeDefined();
       expect(result.specializedMetadata?.csvStructure?.delimiter).toBe(',');
-      expect(result.specializedMetadata?.csvStructure?.hasQuotedFields).toBe(false);
+      expect(result.specializedMetadata?.csvStructure?.hasQuotedFields).toBe(
+        false,
+      );
     });
 
     it('should validate Markdown structure with element counting', async () => {
@@ -684,7 +709,7 @@ Autre contenu avec \`code inline\`.`;
       const options: DocumentProcessingOptions = {
         extractText: true,
         validateStructure: true,
-        extractSpecializedMetadata: true
+        extractSpecializedMetadata: true,
       };
 
       storageService.downloadObject.mockImplementation(async () => {
@@ -695,9 +720,9 @@ Autre contenu avec \`code inline\`.`;
             contentType: 'text/markdown',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'markdown-etag'
+            etag: 'markdown-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -718,7 +743,9 @@ Autre contenu avec \`code inline\`.`;
       expect(result.specializedMetadata?.markdownStructure?.h1Count).toBe(1);
       expect(result.specializedMetadata?.markdownStructure?.h2Count).toBe(2);
       expect(result.specializedMetadata?.markdownStructure?.h3Count).toBe(1);
-      expect(result.specializedMetadata?.markdownStructure?.listItemCount).toBe(3);
+      expect(result.specializedMetadata?.markdownStructure?.listItemCount).toBe(
+        3,
+      );
     });
   });
 
@@ -726,10 +753,12 @@ Autre contenu avec \`code inline\`.`;
     it('should handle large documents efficiently', async () => {
       // Arrange
       const fileId = generateTestUUID();
-      const largeSections = Array.from({ length: 1000 }, (_, i) => 
-        `Section ${i + 1}: Lorem ipsum dolor sit amet consectetur adipiscing elit. ` +
-        `Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ` +
-        `Ut enim ad minim veniam quis nostrud exercitation ullamco laboris.`
+      const largeSections = Array.from(
+        { length: 1000 },
+        (_, i) =>
+          `Section ${i + 1}: Lorem ipsum dolor sit amet consectetur adipiscing elit. ` +
+          `Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ` +
+          `Ut enim ad minim veniam quis nostrud exercitation ullamco laboris.`,
       );
       const largeContent = largeSections.join('\n\n');
       const sourceBuffer = createTestFileBuffer(largeContent, 'utf8');
@@ -738,7 +767,7 @@ Autre contenu avec \`code inline\`.`;
         extractText: true,
         detectLanguage: true,
         generateSummary: true,
-        validateStructure: true
+        validateStructure: true,
       };
 
       storageService.downloadObject.mockImplementation(async () => {
@@ -749,9 +778,9 @@ Autre contenu avec \`code inline\`.`;
             contentType: 'text/plain',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'large-etag'
+            etag: 'large-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 
@@ -790,7 +819,7 @@ Autre contenu avec \`code inline\`.`;
       const options: DocumentProcessingOptions = {
         extractText: true,
         generateSummary: true,
-        maxSizeForSummary: 1024 * 1024 // 1MB max
+        maxSizeForSummary: 1024 * 1024, // 1MB max
       };
 
       storageService.downloadObject.mockImplementation(async () => {
@@ -801,9 +830,9 @@ Autre contenu avec \`code inline\`.`;
             contentType: 'text/plain',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'oversized-etag'
+            etag: 'oversized-etag',
           },
-          fromCache: false
+          fromCache: false,
         };
       });
 

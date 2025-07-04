@@ -1,10 +1,10 @@
 /**
  * Tests unitaires pour ProcessFileAsyncUseCase
- * 
+ *
  * Tests complets du use case de traitement asynchrone de fichiers,
  * couvrant la validation, calcul de priorité, gestion de queue et monitoring.
  * Conforme aux standards 07-08 avec pattern AAA et mocks appropriés.
- * 
+ *
  * @module ProcessFileAsyncUseCaseSpec
  * @version 1.0
  * @author QA Backend
@@ -32,14 +32,14 @@ import {
   VirusScanStatus,
   DocumentType,
   ProcessingJobData,
-  ExtendedProcessingOptions
+  ExtendedProcessingOptions,
 } from '../../../types/file-system.types';
 
 import {
   FileNotFoundException,
   InvalidProcessingStateException,
   ProcessingQueueException,
-  FileProcessingException
+  FileProcessingException,
 } from '../../../exceptions/file-system.exceptions';
 
 /**
@@ -58,21 +58,21 @@ class MockJobFactory {
       returnvalue: undefined,
       failedReason: undefined,
       attemptsMade: 0,
-      
+
       // Méthodes mockées
       getState: jest.fn().mockResolvedValue('waiting'),
       progress: jest.fn().mockResolvedValue(undefined), // Retourne Promise<void>
       remove: jest.fn().mockResolvedValue(undefined),
       retry: jest.fn().mockResolvedValue(undefined),
       log: jest.fn(),
-      
+
       // Propriétés pour queue position
       getPosition: jest.fn().mockResolvedValue(1),
-      
+
       // Autres propriétés nécessaires
       queue: {} as any,
       delay: 0,
-      toJSON: jest.fn()
+      toJSON: jest.fn(),
     };
 
     return mockJob;
@@ -124,7 +124,7 @@ class FileMetadataTestDataBuilder {
     versionCount: 1,
     tags: ['test'],
     createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01')
+    updatedAt: new Date('2024-01-01'),
   };
 
   withId(id: string): this {
@@ -180,7 +180,7 @@ class ProcessingOptionsTestDataBuilder {
     generateThumbnail: true,
     optimizeForWeb: true,
     extractMetadata: true,
-    imageQuality: 85
+    imageQuality: 85,
   };
 
   withPriority(priority: number): this {
@@ -227,7 +227,7 @@ function createMockQueue(): jest.Mocked<Queue> {
       active: 2,
       completed: 100,
       failed: 5,
-      delayed: 0
+      delayed: 0,
     }),
     isPaused: jest.fn().mockResolvedValue(false),
     pause: jest.fn(),
@@ -242,14 +242,14 @@ function createMockQueue(): jest.Mocked<Queue> {
     // Autres méthodes nécessaires en tant que mocks vides
     process: jest.fn(),
     close: jest.fn(),
-    
+
     // Propriétés
     name: 'file-processing',
-    
+
     // EventEmitter methods
     on: jest.fn(),
     emit: jest.fn(),
-    removeListener: jest.fn()
+    removeListener: jest.fn(),
   } as unknown as jest.Mocked<Queue>;
 }
 
@@ -268,30 +268,30 @@ describe('ProcessFileAsyncUseCase', () => {
   beforeEach(async () => {
     // Arrange - Configuration des mocks selon standards 07-08
     mockFileProcessingQueue = createMockQueue();
-    
+
     const mockServices = {
       IFileMetadataRepository: {
         findById: jest.fn(),
         update: jest.fn(),
-        create: jest.fn()
+        create: jest.fn(),
       },
       MetricsService: {
         recordHistogram: jest.fn(),
         incrementCounter: jest.fn(),
-        updateGauge: jest.fn()
+        updateGauge: jest.fn(),
       },
       CacheManager: {
         get: jest.fn(),
         set: jest.fn(),
         del: jest.fn(),
-        reset: jest.fn()
+        reset: jest.fn(),
       },
       Logger: {
         log: jest.fn(),
         error: jest.fn(),
         warn: jest.fn(),
-        debug: jest.fn()
-      }
+        debug: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -299,25 +299,25 @@ describe('ProcessFileAsyncUseCase', () => {
         ProcessFileAsyncUseCase,
         {
           provide: getQueueToken('file-processing'),
-          useValue: mockFileProcessingQueue
+          useValue: mockFileProcessingQueue,
         },
         {
           provide: 'IFileMetadataRepository',
-          useValue: mockServices.IFileMetadataRepository
+          useValue: mockServices.IFileMetadataRepository,
         },
         {
           provide: MetricsService,
-          useValue: mockServices.MetricsService
+          useValue: mockServices.MetricsService,
         },
         {
           provide: CACHE_MANAGER,
-          useValue: mockServices.CacheManager
+          useValue: mockServices.CacheManager,
         },
         {
           provide: Logger,
-          useValue: mockServices.Logger
-        }
-      ]
+          useValue: mockServices.Logger,
+        },
+      ],
     }).compile();
 
     useCase = module.get<ProcessFileAsyncUseCase>(ProcessFileAsyncUseCase);
@@ -362,7 +362,9 @@ describe('ProcessFileAsyncUseCase', () => {
       expect(result.queuePosition).toBeGreaterThan(0);
 
       // Vérifications des appels de services
-      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(fileMetadata.id);
+      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(
+        fileMetadata.id,
+      );
       expect(mockFileProcessingQueue.add).toHaveBeenCalledWith(
         'process-uploaded-file',
         expect.objectContaining({
@@ -372,28 +374,28 @@ describe('ProcessFileAsyncUseCase', () => {
           options: expect.objectContaining({
             generateThumbnail: true,
             optimizeForWeb: true,
-            extractMetadata: true
-          })
+            extractMetadata: true,
+          }),
         }),
         expect.objectContaining({
           priority: expect.any(Number),
           attempts: 3,
-          backoff: expect.any(Object)
-        })
+          backoff: expect.any(Object),
+        }),
       );
 
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
           processingStatus: ProcessingStatus.PROCESSING,
-          jobId: 'job-123'
-        })
+          jobId: 'job-123',
+        }),
       );
 
       expect(mockCacheManager.set).toHaveBeenCalledWith(
         `file:job:${fileMetadata.id}`,
         expect.any(Object),
-        3600
+        3600,
       );
     });
 
@@ -418,11 +420,11 @@ describe('ProcessFileAsyncUseCase', () => {
       expect(mockFileProcessingQueue.add).toHaveBeenCalledWith(
         'process-uploaded-file',
         expect.objectContaining({
-          priority: 9
+          priority: 9,
         }),
         expect.objectContaining({
-          priority: 9
-        })
+          priority: 9,
+        }),
       );
     });
 
@@ -448,11 +450,11 @@ describe('ProcessFileAsyncUseCase', () => {
       expect(mockFileProcessingQueue.add).toHaveBeenCalledWith(
         'process-uploaded-file',
         expect.objectContaining({
-          priority: 3
+          priority: 3,
         }),
         expect.objectContaining({
-          priority: 3
-        })
+          priority: 3,
+        }),
       );
     });
 
@@ -481,11 +483,11 @@ describe('ProcessFileAsyncUseCase', () => {
       expect(mockFileProcessingQueue.add).toHaveBeenCalledWith(
         'process-uploaded-file',
         expect.objectContaining({
-          priority: 8
+          priority: 8,
         }),
         expect.objectContaining({
-          priority: 8
-        })
+          priority: 8,
+        }),
       );
     });
 
@@ -514,11 +516,11 @@ describe('ProcessFileAsyncUseCase', () => {
       expect(mockFileProcessingQueue.add).toHaveBeenCalledWith(
         'process-uploaded-file',
         expect.objectContaining({
-          priority: 2
+          priority: 2,
         }),
         expect.objectContaining({
-          priority: 2
-        })
+          priority: 2,
+        }),
       );
     });
 
@@ -540,23 +542,23 @@ describe('ProcessFileAsyncUseCase', () => {
         expect.any(Number),
         expect.objectContaining({
           contentType: fileMetadata.contentType,
-          documentType: fileMetadata.documentType
-        })
+          documentType: fileMetadata.documentType,
+        }),
       );
 
       expect(mockMetricsService.recordHistogram).toHaveBeenCalledWith(
         'file_processing_priority',
         expect.any(Number),
         expect.objectContaining({
-          documentType: fileMetadata.documentType
-        })
+          documentType: fileMetadata.documentType,
+        }),
       );
 
       expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
         'file_processing_jobs_queued',
         expect.objectContaining({
-          contentType: fileMetadata.contentType
-        })
+          contentType: fileMetadata.contentType,
+        }),
       );
     });
 
@@ -568,22 +570,26 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(useCase.execute(nonExistentFileId)).rejects.toThrow(FileNotFoundException);
+      await expect(useCase.execute(nonExistentFileId)).rejects.toThrow(
+        FileNotFoundException,
+      );
 
-      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(nonExistentFileId);
+      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(
+        nonExistentFileId,
+      );
       expect(mockFileProcessingQueue.add).not.toHaveBeenCalled();
     });
 
     it('should throw FileNotFoundException for deleted file', async () => {
       // Arrange
-      const deletedFile = new FileMetadataTestDataBuilder()
-        .asDeleted()
-        .build();
+      const deletedFile = new FileMetadataTestDataBuilder().asDeleted().build();
 
       mockFileMetadataRepository.findById.mockResolvedValue(deletedFile);
 
       // Act & Assert
-      await expect(useCase.execute(deletedFile.id)).rejects.toThrow(FileNotFoundException);
+      await expect(useCase.execute(deletedFile.id)).rejects.toThrow(
+        FileNotFoundException,
+      );
 
       expect(mockFileProcessingQueue.add).not.toHaveBeenCalled();
     });
@@ -597,7 +603,9 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(processingFile);
 
       // Act & Assert
-      await expect(useCase.execute(processingFile.id)).rejects.toThrow(InvalidProcessingStateException);
+      await expect(useCase.execute(processingFile.id)).rejects.toThrow(
+        InvalidProcessingStateException,
+      );
 
       expect(mockFileProcessingQueue.add).not.toHaveBeenCalled();
     });
@@ -611,7 +619,9 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(infectedFile);
 
       // Act & Assert
-      await expect(useCase.execute(infectedFile.id)).rejects.toThrow(FileProcessingException);
+      await expect(useCase.execute(infectedFile.id)).rejects.toThrow(
+        FileProcessingException,
+      );
 
       expect(mockFileProcessingQueue.add).not.toHaveBeenCalled();
     });
@@ -621,17 +631,21 @@ describe('ProcessFileAsyncUseCase', () => {
       const fileMetadata = new FileMetadataTestDataBuilder().build();
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockFileProcessingQueue.add.mockRejectedValue(new Error('Queue service unavailable'));
+      mockFileProcessingQueue.add.mockRejectedValue(
+        new Error('Queue service unavailable'),
+      );
 
       // Act & Assert
-      await expect(useCase.execute(fileMetadata.id)).rejects.toThrow('Queue service unavailable');
+      await expect(useCase.execute(fileMetadata.id)).rejects.toThrow(
+        'Queue service unavailable',
+      );
 
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
           processingStatus: ProcessingStatus.FAILED,
-          error: 'Failed to add job to queue: Queue service unavailable'
-        })
+          error: 'Failed to add job to queue: Queue service unavailable',
+        }),
       );
     });
 
@@ -656,8 +670,8 @@ describe('ProcessFileAsyncUseCase', () => {
         'process-uploaded-file',
         expect.any(Object),
         expect.objectContaining({
-          timeout: expect.any(Number)
-        })
+          timeout: expect.any(Number),
+        }),
       );
 
       // Le timeout devrait être plus élevé pour un gros PDF
@@ -682,7 +696,7 @@ describe('ProcessFileAsyncUseCase', () => {
       const mockProgress = jest.fn().mockReturnValue(45);
       Object.defineProperty(mockJob, 'progress', {
         value: mockProgress,
-        writable: true
+        writable: true,
       });
 
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
@@ -705,7 +719,10 @@ describe('ProcessFileAsyncUseCase', () => {
       // Arrange
       const jobId = 'job-completed-123';
       const result = { success: true, processingTime: 5000 };
-      const mockJob = MockJobFactory.createCompleted({ fileId: 'file-123' }, result);
+      const mockJob = MockJobFactory.createCompleted(
+        { fileId: 'file-123' },
+        result,
+      );
 
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
 
@@ -724,7 +741,10 @@ describe('ProcessFileAsyncUseCase', () => {
       // Arrange
       const jobId = 'job-failed-123';
       const errorMessage = 'Processing timeout exceeded';
-      const mockJob = MockJobFactory.createFailed({ fileId: 'file-123' }, errorMessage);
+      const mockJob = MockJobFactory.createFailed(
+        { fileId: 'file-123' },
+        errorMessage,
+      );
 
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
 
@@ -744,9 +764,13 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileProcessingQueue.getJob.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(useCase.getJobStatus(nonExistentJobId)).rejects.toThrow(ProcessingQueueException);
+      await expect(useCase.getJobStatus(nonExistentJobId)).rejects.toThrow(
+        ProcessingQueueException,
+      );
 
-      expect(mockFileProcessingQueue.getJob).toHaveBeenCalledWith(nonExistentJobId);
+      expect(mockFileProcessingQueue.getJob).toHaveBeenCalledWith(
+        nonExistentJobId,
+      );
     });
   });
 
@@ -760,7 +784,7 @@ describe('ProcessFileAsyncUseCase', () => {
       const jobId = 'job-waiting-123';
       const fileId = 'file-123';
       const reason = 'User cancelled processing';
-      
+
       const mockJob = MockJobFactory.create({ fileId });
       mockJob.getState.mockResolvedValue('waiting');
       mockJob.remove.mockResolvedValue(undefined);
@@ -780,8 +804,8 @@ describe('ProcessFileAsyncUseCase', () => {
         expect.objectContaining({
           processingStatus: ProcessingStatus.PENDING,
           cancelledAt: expect.any(Date),
-          cancelReason: reason
-        })
+          cancelReason: reason,
+        }),
       );
     });
 
@@ -790,7 +814,7 @@ describe('ProcessFileAsyncUseCase', () => {
       const jobId = 'job-active-123';
       const fileId = 'file-456';
       const reason = 'Emergency cancellation';
-      
+
       const mockJob = MockJobFactory.createActive({ fileId });
       mockJob.remove.mockResolvedValue(undefined);
 
@@ -809,8 +833,11 @@ describe('ProcessFileAsyncUseCase', () => {
       // Arrange
       const jobId = 'job-completed-123';
       const reason = 'Too late to cancel';
-      
-      const mockJob = MockJobFactory.createCompleted({ fileId: 'file-123' }, {});
+
+      const mockJob = MockJobFactory.createCompleted(
+        { fileId: 'file-123' },
+        {},
+      );
 
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
 
@@ -827,8 +854,11 @@ describe('ProcessFileAsyncUseCase', () => {
       // Arrange
       const jobId = 'job-failed-123';
       const reason = 'Cannot cancel failed job';
-      
-      const mockJob = MockJobFactory.createFailed({ fileId: 'file-123' }, 'Already failed');
+
+      const mockJob = MockJobFactory.createFailed(
+        { fileId: 'file-123' },
+        'Already failed',
+      );
 
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
 
@@ -847,7 +877,9 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileProcessingQueue.getJob.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(useCase.cancelJob(nonExistentJobId, reason)).rejects.toThrow(ProcessingQueueException);
+      await expect(useCase.cancelJob(nonExistentJobId, reason)).rejects.toThrow(
+        ProcessingQueueException,
+      );
     });
   });
 
@@ -858,9 +890,12 @@ describe('ProcessFileAsyncUseCase', () => {
   describe('retryJob', () => {
     it('should successfully retry failed job', async () => {
       const jobId = 'job-failed-123';
-      const mockJob = MockJobFactory.createFailed({ fileId: 'file-123' }, 'Processing timeout');
+      const mockJob = MockJobFactory.createFailed(
+        { fileId: 'file-123' },
+        'Processing timeout',
+      );
       mockJob.id = jobId;
-      
+
       // Simuler le retry qui change l'état
       mockJob.retry.mockImplementation(async () => {
         mockJob.getState.mockResolvedValue('waiting');
@@ -887,7 +922,9 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
 
       // Act & Assert
-      await expect(useCase.retryJob(jobId)).rejects.toThrow(ProcessingQueueException);
+      await expect(useCase.retryJob(jobId)).rejects.toThrow(
+        ProcessingQueueException,
+      );
 
       expect(mockJob.retry).not.toHaveBeenCalled();
     });
@@ -899,7 +936,9 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileProcessingQueue.getJob.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(useCase.retryJob(nonExistentJobId)).rejects.toThrow(ProcessingQueueException);
+      await expect(useCase.retryJob(nonExistentJobId)).rejects.toThrow(
+        ProcessingQueueException,
+      );
     });
   });
 
@@ -913,11 +952,13 @@ describe('ProcessFileAsyncUseCase', () => {
       const fileIds = ['file-1', 'file-2', 'file-3'];
       const options = new ProcessingOptionsTestDataBuilder().build();
 
-      const fileMetadataList = fileIds.map(id => 
-        new FileMetadataTestDataBuilder().withId(id).build()
+      const fileMetadataList = fileIds.map((id) =>
+        new FileMetadataTestDataBuilder().withId(id).build(),
       );
 
-      const mockJobs = fileIds.map(id => MockJobFactory.create({ fileId: id }));
+      const mockJobs = fileIds.map((id) =>
+        MockJobFactory.create({ fileId: id }),
+      );
 
       // Setup mocks pour chaque fichier
       mockFileMetadataRepository.findById
@@ -930,15 +971,14 @@ describe('ProcessFileAsyncUseCase', () => {
         .mockResolvedValueOnce(mockJobs[1])
         .mockResolvedValueOnce(mockJobs[2]);
 
-      mockFileMetadataRepository.update
-        .mockResolvedValue({} as FileMetadata);
+      mockFileMetadataRepository.update.mockResolvedValue({} as FileMetadata);
 
       // Act
       const results = await useCase.executeBatch(fileIds, options);
 
       // Assert
       expect(results).toHaveLength(3);
-      
+
       results.forEach((result, index) => {
         expect(result.jobId).toBe('job-123');
         expect(result.status).toBe(ProcessingJobStatus.RUNNING);
@@ -955,26 +995,25 @@ describe('ProcessFileAsyncUseCase', () => {
 
       const validFiles = [
         new FileMetadataTestDataBuilder().withId('file-success').build(),
-        new FileMetadataTestDataBuilder().withId('file-success-2').build()
+        new FileMetadataTestDataBuilder().withId('file-success-2').build(),
       ];
 
       const mockJobs = [
         MockJobFactory.create({ fileId: 'file-success' }),
-        MockJobFactory.create({ fileId: 'file-success-2' })
+        MockJobFactory.create({ fileId: 'file-success-2' }),
       ];
 
       // Setup mocks avec une erreur au milieu
       mockFileMetadataRepository.findById
-        .mockResolvedValueOnce(validFiles[0])   // file-success: OK
-        .mockResolvedValueOnce(null)            // file-not-found: Error
-        .mockResolvedValueOnce(validFiles[1]);  // file-success-2: OK
+        .mockResolvedValueOnce(validFiles[0]) // file-success: OK
+        .mockResolvedValueOnce(null) // file-not-found: Error
+        .mockResolvedValueOnce(validFiles[1]); // file-success-2: OK
 
       mockFileProcessingQueue.add
         .mockResolvedValueOnce(mockJobs[0])
         .mockResolvedValueOnce(mockJobs[1]);
 
-      mockFileMetadataRepository.update
-        .mockResolvedValue({} as FileMetadata);
+      mockFileMetadataRepository.update.mockResolvedValue({} as FileMetadata);
 
       // Act
       const results = await useCase.executeBatch(fileIds, options);
@@ -992,10 +1031,12 @@ describe('ProcessFileAsyncUseCase', () => {
       const options = new ProcessingOptionsTestDataBuilder().build();
 
       // Mock tous les fichiers comme valides
-      fileIds.forEach(id => {
-        const fileMetadata = new FileMetadataTestDataBuilder().withId(id).build();
+      fileIds.forEach((id) => {
+        const fileMetadata = new FileMetadataTestDataBuilder()
+          .withId(id)
+          .build();
         mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-        
+
         const mockJob = MockJobFactory.create({ fileId: id });
         mockFileProcessingQueue.add.mockResolvedValue(mockJob);
       });
@@ -1007,7 +1048,7 @@ describe('ProcessFileAsyncUseCase', () => {
 
       // Assert
       expect(results).toHaveLength(25);
-      
+
       // Vérifier que tous les fichiers ont été traités
       expect(mockFileMetadataRepository.findById).toHaveBeenCalledTimes(25);
       expect(mockFileProcessingQueue.add).toHaveBeenCalledTimes(25);
@@ -1096,11 +1137,13 @@ describe('ProcessFileAsyncUseCase', () => {
         const smallFileResult = await useCase.execute(smallFile.id);
 
         // Assert
-       expect(largeFileResult.estimatedDuration).toBeDefined();
-       expect(smallFileResult.estimatedDuration).toBeDefined();
-       expect(largeFileResult.estimatedDuration).toBeDefined();
-       expect(smallFileResult.estimatedDuration).toBeDefined();
-       expect(largeFileResult.estimatedDuration!).toBeGreaterThan(smallFileResult.estimatedDuration!);
+        expect(largeFileResult.estimatedDuration).toBeDefined();
+        expect(smallFileResult.estimatedDuration).toBeDefined();
+        expect(largeFileResult.estimatedDuration).toBeDefined();
+        expect(smallFileResult.estimatedDuration).toBeDefined();
+        expect(largeFileResult.estimatedDuration!).toBeGreaterThan(
+          smallFileResult.estimatedDuration!,
+        );
       });
 
       it('should estimate different durations for different content types', async () => {
@@ -1131,7 +1174,9 @@ describe('ProcessFileAsyncUseCase', () => {
         // PDF devrait prendre plus de temps (multiplier 1.5)
         expect(pdfResult.estimatedDuration).toBeDefined();
         expect(imageResult.estimatedDuration).toBeDefined();
-        expect(pdfResult.estimatedDuration!).toBeGreaterThan(imageResult.estimatedDuration!);
+        expect(pdfResult.estimatedDuration!).toBeGreaterThan(
+          imageResult.estimatedDuration!,
+        );
       });
     });
 
@@ -1154,7 +1199,7 @@ describe('ProcessFileAsyncUseCase', () => {
           active: 2,
           completed: 100,
           failed: 5,
-          delayed: 0
+          delayed: 0,
         });
 
         mockFileMetadataRepository.findById
@@ -1171,7 +1216,9 @@ describe('ProcessFileAsyncUseCase', () => {
         // High priority devrait avoir une position plus favorable
         expect(highPriorityResult.queuePosition).toBeDefined();
         expect(lowPriorityResult.queuePosition).toBeDefined();
-        expect(highPriorityResult.queuePosition!).toBeLessThanOrEqual(lowPriorityResult.queuePosition!);
+        expect(highPriorityResult.queuePosition!).toBeLessThanOrEqual(
+          lowPriorityResult.queuePosition!,
+        );
         expect(highPriorityResult.queuePosition).toBeGreaterThan(0);
         expect(lowPriorityResult.queuePosition).toBeGreaterThan(0);
       });
@@ -1196,7 +1243,7 @@ describe('ProcessFileAsyncUseCase', () => {
 
       // Job lifecycle: add → active → completed
       const mockJob = MockJobFactory.create({ fileId: fileMetadata.id });
-      
+
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
       mockFileProcessingQueue.add.mockResolvedValue(mockJob);
       mockFileMetadataRepository.update.mockResolvedValue(fileMetadata);
@@ -1210,18 +1257,20 @@ describe('ProcessFileAsyncUseCase', () => {
 
       // Act - Étape 2: Vérifier le statut pendant l'exécution
       mockJob.getState.mockResolvedValue('active');
-      
+
       // Créer un mock progress qui retourne 50
       const mockProgressFn = jest.fn().mockReturnValue(50);
       Object.defineProperty(mockJob, 'progress', {
         value: mockProgressFn,
-        writable: true
+        writable: true,
       });
-      
+
       mockJob.processedOn = Date.now() - 1000;
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
 
-      const activeStatus = await useCase.getJobStatus(queueResult.jobId.toString());
+      const activeStatus = await useCase.getJobStatus(
+        queueResult.jobId.toString(),
+      );
 
       // Assert - Job actif
       expect(activeStatus.status).toBe(ProcessingJobStatus.RUNNING);
@@ -1234,7 +1283,9 @@ describe('ProcessFileAsyncUseCase', () => {
       mockJob.returnvalue = completionResult;
       mockJob.finishedOn = Date.now();
 
-      const completedStatus = await useCase.getJobStatus(queueResult.jobId.toString());
+      const completedStatus = await useCase.getJobStatus(
+        queueResult.jobId.toString(),
+      );
 
       // Assert - Job complété
       expect(completedStatus.status).toBe(ProcessingJobStatus.COMPLETED);
@@ -1246,7 +1297,10 @@ describe('ProcessFileAsyncUseCase', () => {
     it('should handle error recovery and retry workflow', async () => {
       // Arrange - Scénario d'erreur et de retry
       const fileMetadata = new FileMetadataTestDataBuilder().build();
-      const mockJob = MockJobFactory.createFailed({ fileId: fileMetadata.id }, 'Temporary service error');
+      const mockJob = MockJobFactory.createFailed(
+        { fileId: fileMetadata.id },
+        'Temporary service error',
+      );
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
       mockFileProcessingQueue.getJob.mockResolvedValue(mockJob);
@@ -1285,15 +1339,19 @@ describe('ProcessFileAsyncUseCase', () => {
       mockFileMetadataRepository.update.mockResolvedValue(fileMetadata);
 
       // Act - Tentatives de traitement simultané
-      const promise1 = useCase.execute(fileMetadata.id, { reason: 'First attempt' });
-      
+      const promise1 = useCase.execute(fileMetadata.id, {
+        reason: 'First attempt',
+      });
+
       // Changer l'état du fichier pour simuler le premier traitement
       const result1 = await promise1;
       expect(result1).toBeDefined();
 
       // Maintenant que le fichier est en traitement, le second devrait échouer
       fileMetadata.processingStatus = ProcessingStatus.PROCESSING;
-      const promise2 = useCase.execute(fileMetadata.id, { reason: 'Second attempt' });
+      const promise2 = useCase.execute(fileMetadata.id, {
+        reason: 'Second attempt',
+      });
       // Le deuxième devrait être rejeté car le fichier est déjà en traitement
       await expect(promise2).rejects.toThrow(InvalidProcessingStateException);
     });

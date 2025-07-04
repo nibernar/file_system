@@ -8,7 +8,10 @@ export class FileMetadataService {
     return null;
   }
 
-  async updateFileMetadata(fileId: string, updates: Partial<FileMetadata>): Promise<FileMetadata> {
+  async updateFileMetadata(
+    fileId: string,
+    updates: Partial<FileMetadata>,
+  ): Promise<FileMetadata> {
     // TODO: Implémenter
     throw new Error('Not implemented');
   }

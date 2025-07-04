@@ -28,7 +28,7 @@ import { PresentationModule } from './presentation/presentation.module';
       cache: true,
       expandVariables: true,
     }),
-    
+
     // Cache global avec Redis
     CacheModule.register({
       isGlobal: true,
@@ -39,7 +39,7 @@ import { PresentationModule } from './presentation/presentation.module';
       db: parseInt(process.env.REDIS_CACHE_DB || '1'), // DB 1 pour le cache
       ttl: 3600, // 1 heure par défaut
     }),
-    
+
     // Modules Infrastructure
     PrismaModule,
     PersistenceModule,
@@ -48,11 +48,11 @@ import { PresentationModule } from './presentation/presentation.module';
     ProcessingModule,
     SecurityModule,
     MonitoringModule,
-    
+
     // Modules Application
     ApplicationModule,
     DomainModule,
-    
+
     // Module Presentation (Controllers)
     PresentationModule,
   ],

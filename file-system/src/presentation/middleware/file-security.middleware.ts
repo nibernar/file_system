@@ -1,11 +1,11 @@
 // src/presentation/middleware/file-security.middleware.ts
-import { 
-  Injectable, 
-  NestMiddleware, 
-  Logger, 
-  BadRequestException, 
-  HttpException, 
-  HttpStatus 
+import {
+  Injectable,
+  NestMiddleware,
+  Logger,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { RateLimitService } from '../../infrastructure/security/rate-limit.service';
@@ -31,7 +31,7 @@ interface AuthenticatedRequest extends Request {
     roles?: string[];
     isAdmin?: boolean;
   };
-  
+
   // Métadonnées de sécurité ajoutées par le middleware
   security?: {
     clientIp: string;
@@ -62,20 +62,20 @@ interface SecurityConfig {
 
 /**
  * Middleware de sécurité pour les fichiers
- * 
+ *
  * Ce middleware gère :
  * - La détection et le blocage des IPs malveillantes
  * - Le rate limiting par utilisateur et par IP
  * - L'analyse de l'intelligence IP (géolocalisation, VPN, Tor, etc.)
  * - La journalisation des activités suspectes
  * - Les headers de sécurité
- * 
+ *
  * @class FileSecurityMiddleware
  */
 @Injectable()
 export class FileSecurityMiddleware implements NestMiddleware {
   private readonly logger = new Logger(FileSecurityMiddleware.name);
-  
+
   /**
    * Configuration par défaut du middleware
    */
@@ -85,44 +85,53 @@ export class FileSecurityMiddleware implements NestMiddleware {
     maxThreatLevel: 'medium',
     blockedCountries: [], // À configurer selon vos besoins
     rateLimitExemptions: ['/health', '/metrics'],
-    devMode: process.env.NODE_ENV === 'development'
+    devMode: process.env.NODE_ENV === 'development',
   };
 
   constructor(
     private readonly rateLimitService: RateLimitService,
-    private readonly ipIntelligenceService: IpIntelligenceService
+    private readonly ipIntelligenceService: IpIntelligenceService,
   ) {}
 
   /**
    * Méthode principale du middleware
    */
-  async use(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  async use(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // 1. Extraction de l'IP client
       const clientIp = this.getClientIp(req);
-      
+
       if (this.config.devMode) {
-        this.logger.debug(`Processing request from IP: ${clientIp}, Path: ${req.path}, Method: ${req.method}`);
+        this.logger.debug(
+          `Processing request from IP: ${clientIp}, Path: ${req.path}, Method: ${req.method}`,
+        );
       }
 
       // 2. Vérification si l'endpoint est exempté
       if (this.isExemptEndpoint(req.path)) {
-        this.logger.debug(`Endpoint ${req.path} is exempt from security checks`);
+        this.logger.debug(
+          `Endpoint ${req.path} is exempt from security checks`,
+        );
         return next();
       }
 
       // 3. Analyse de l'intelligence IP
-      const ipIntelligence = await this.ipIntelligenceService.getIpIntelligence(clientIp);
-      
+      const ipIntelligence =
+        await this.ipIntelligenceService.getIpIntelligence(clientIp);
+
       // Ajout des métadonnées de sécurité à la requête
       req.security = {
         clientIp,
         threatLevel: ipIntelligence.threatLevel,
         isVpn: ipIntelligence.isVpn,
         isTor: ipIntelligence.isTor,
-        country: ipIntelligence.countryCode
+        country: ipIntelligence.countryCode,
       };
 
       // 4. Vérifications de sécurité IP
@@ -134,8 +143,8 @@ export class FileSecurityMiddleware implements NestMiddleware {
         {
           endpoint: req.path,
           method: req.method,
-          userId: req.user?.id
-        }
+          userId: req.user?.id,
+        },
       );
 
       // 6. Application des headers de rate limiting
@@ -144,24 +153,26 @@ export class FileSecurityMiddleware implements NestMiddleware {
       // 7. Vérification du rate limit
       if (!rateLimitResult.allowed) {
         res.setHeader('Retry-After', rateLimitResult.retryAfter || 60);
-        
-        this.logger.warn(`Rate limit exceeded for ${req.user?.id || clientIp} on ${req.path}`);
-        
+
+        this.logger.warn(
+          `Rate limit exceeded for ${req.user?.id || clientIp} on ${req.path}`,
+        );
+
         throw new TooManyRequestsException(
-          `Rate limit exceeded. Please retry after ${rateLimitResult.resetTime.toISOString()}`
+          `Rate limit exceeded. Please retry after ${rateLimitResult.resetTime.toISOString()}`,
         );
       }
 
       // 8. Incrémentation du compteur de rate limiting
       await this.rateLimitService.incrementCounter(
         req.user?.id || clientIp,
-        `${req.method}:${req.path}`
+        `${req.method}:${req.path}`,
       );
 
       // 9. Enregistrement de l'activité IP
       await this.ipIntelligenceService.recordIpActivity(
-        clientIp, 
-        `${req.method}:${req.path}`
+        clientIp,
+        `${req.method}:${req.path}`,
       );
 
       // 10. Headers de sécurité supplémentaires
@@ -170,21 +181,27 @@ export class FileSecurityMiddleware implements NestMiddleware {
       // 11. Logging de la requête (si mode dev ou niveau de menace élevé)
       if (this.config.devMode || ipIntelligence.threatLevel !== 'low') {
         const processingTime = Date.now() - startTime;
-        this.logger.log(`Security check completed for ${clientIp}: ${processingTime}ms, Threat: ${ipIntelligence.threatLevel}, User: ${req.user?.id || 'anonymous'}`);
+        this.logger.log(
+          `Security check completed for ${clientIp}: ${processingTime}ms, Threat: ${ipIntelligence.threatLevel}, User: ${req.user?.id || 'anonymous'}`,
+        );
       }
 
       next();
-      
     } catch (error) {
       // Gestion des erreurs
       const processingTime = Date.now() - startTime;
-      
+
       if (error instanceof HttpException) {
-        this.logger.warn(`Security check failed for ${req.ip}: ${error.message} (${processingTime}ms)`);
+        this.logger.warn(
+          `Security check failed for ${req.ip}: ${error.message} (${processingTime}ms)`,
+        );
         throw error;
       } else {
-        this.logger.error(`Unexpected error in security middleware: ${error.message}`, error.stack);
-        
+        this.logger.error(
+          `Unexpected error in security middleware: ${error.message}`,
+          error.stack,
+        );
+
         // En cas d'erreur inattendue, on laisse passer (fail-open) mais on log
         // Vous pouvez changer ce comportement selon vos besoins de sécurité
         if (this.config.devMode) {
@@ -199,28 +216,39 @@ export class FileSecurityMiddleware implements NestMiddleware {
   /**
    * Vérifie la sécurité de l'IP
    */
-  private async checkIpSecurity(ipIntelligence: any, clientIp: string): Promise<void> {
+  private async checkIpSecurity(
+    ipIntelligence: any,
+    clientIp: string,
+  ): Promise<void> {
     // Vérification du niveau de menace
     if (this.isThreatLevelBlocked(ipIntelligence.threatLevel)) {
-      this.logger.warn(`High threat IP blocked: ${clientIp} (Level: ${ipIntelligence.threatLevel})`);
+      this.logger.warn(
+        `High threat IP blocked: ${clientIp} (Level: ${ipIntelligence.threatLevel})`,
+      );
       throw new BadRequestException(`Access denied: IP threat level too high`);
     }
 
     // Vérification Tor
     if (this.config.blockTor && ipIntelligence.isTor) {
       this.logger.warn(`Tor exit node blocked: ${clientIp}`);
-      throw new BadRequestException('Access denied: Tor connections not allowed');
+      throw new BadRequestException(
+        'Access denied: Tor connections not allowed',
+      );
     }
 
     // Vérification VPN (si activée)
     if (this.config.blockVpn && ipIntelligence.isVpn) {
       this.logger.warn(`VPN connection blocked: ${clientIp}`);
-      throw new BadRequestException('Access denied: VPN connections not allowed');
+      throw new BadRequestException(
+        'Access denied: VPN connections not allowed',
+      );
     }
 
     // Vérification pays bloqués
     if (this.config.blockedCountries.includes(ipIntelligence.countryCode)) {
-      this.logger.warn(`Blocked country access: ${clientIp} from ${ipIntelligence.country}`);
+      this.logger.warn(
+        `Blocked country access: ${clientIp} from ${ipIntelligence.country}`,
+      );
       throw new BadRequestException('Access denied: Geographic restriction');
     }
 
@@ -239,7 +267,7 @@ export class FileSecurityMiddleware implements NestMiddleware {
     const levels = { low: 1, medium: 2, high: 3 };
     const maxLevel = levels[this.config.maxThreatLevel];
     const currentLevel = levels[threatLevel];
-    
+
     return currentLevel > maxLevel;
   }
 
@@ -247,8 +275,8 @@ export class FileSecurityMiddleware implements NestMiddleware {
    * Vérifie si l'endpoint est exempté des vérifications de sécurité
    */
   private isExemptEndpoint(path: string): boolean {
-    return this.config.rateLimitExemptions.some(exemption => 
-      path.startsWith(exemption)
+    return this.config.rateLimitExemptions.some((exemption) =>
+      path.startsWith(exemption),
     );
   }
 
@@ -259,10 +287,13 @@ export class FileSecurityMiddleware implements NestMiddleware {
     res.setHeader('X-RateLimit-Limit', rateLimitResult.limit);
     res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
     res.setHeader('X-RateLimit-Reset', rateLimitResult.resetTime.toISOString());
-    
+
     // Headers additionnels pour debugging (mode dev)
     if (this.config.devMode) {
-      res.setHeader('X-RateLimit-Used', rateLimitResult.limit - rateLimitResult.remaining);
+      res.setHeader(
+        'X-RateLimit-Used',
+        rateLimitResult.limit - rateLimitResult.remaining,
+      );
     }
   }
 
@@ -275,12 +306,12 @@ export class FileSecurityMiddleware implements NestMiddleware {
       res.setHeader('X-Client-Country', security.country);
       res.setHeader('X-Threat-Level', security.threatLevel);
     }
-    
+
     // Headers de sécurité standards
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    
+
     // Header personnalisé pour indiquer que la sécurité a été vérifiée
     res.setHeader('X-Security-Check', 'passed');
   }

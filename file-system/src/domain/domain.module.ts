@@ -11,7 +11,9 @@ import { GarageModule } from '../infrastructure/garage/garage.module';
 import { SecurityModule } from '../infrastructure/security/security.module';
 import { MonitoringModule } from '../infrastructure/monitoring/monitoring.module';
 import { QueueModule } from '../infrastructure/queue/queue.module';
-import fileSystemConfig, { FILE_SYSTEM_CONFIG } from '../config/file-system.config';
+import fileSystemConfig, {
+  FILE_SYSTEM_CONFIG,
+} from '../config/file-system.config';
 import { GarageStorageService } from '../infrastructure/garage/garage-storage.service';
 import { AuditService } from '../infrastructure/monitoring/audit.service';
 import { RateLimitService } from '../infrastructure/security/rate-limit.service';
@@ -35,7 +37,7 @@ import { RateLimitService } from '../infrastructure/security/rate-limit.service'
       useExisting: AuditService,
     },
     {
-      provide: 'IRateLimitService', 
+      provide: 'IRateLimitService',
       useExisting: RateLimitService,
     },
     {

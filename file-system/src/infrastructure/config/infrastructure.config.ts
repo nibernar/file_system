@@ -1,8 +1,8 @@
 /**
  * Configuration centralisée de l'infrastructure
- * 
+ *
  * Regroupe toutes les configurations des services d'infrastructure
- * 
+ *
  * @module InfrastructureConfig
  * @version 1.0
  */

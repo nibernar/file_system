@@ -7,9 +7,7 @@ import { IpIntelligenceService } from './ip-intelligence.service';
 import { RateLimitService } from './rate-limit.service';
 
 @Module({
-  imports: [
-    HttpModule,
-  ],
+  imports: [HttpModule],
   providers: [
     VirusScannerService,
     FileValidatorService,

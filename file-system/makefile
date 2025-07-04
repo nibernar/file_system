@@ -1,4 +1,3 @@
-# Makefile pour simplifier les opérations Garage
 
 .PHONY: help test setup clean fresh-test
 
@@ -38,14 +37,6 @@ clean:
 	@echo "🧹 Cleaning Docker environment..."
 	npm run dev:clean
 	
-# Réinitialise tout et lance les tests
-fresh-test: clean
-	@echo "🔄 Starting fresh test environment..."
-	docker compose up -d
-	@sleep 10
-	@$(MAKE) test
-
-
 # Affiche les infos Garage
 garage-info:
 	@echo "📊 Garage Status:"

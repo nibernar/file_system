@@ -5,7 +5,11 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { FileMetadataRepositoryImpl } from '../file-metadata.repository.impl';
 import { PrismaService } from '../../prisma/prisma.service';
-import { DocumentType, ProcessingStatus, VirusScanStatus } from '../../../types/file-system.types';
+import {
+  DocumentType,
+  ProcessingStatus,
+  VirusScanStatus,
+} from '../../../types/file-system.types';
 
 describe('FileMetadataRepository', () => {
   let repository: FileMetadataRepositoryImpl;
@@ -40,7 +44,9 @@ describe('FileMetadataRepository', () => {
       ],
     }).compile();
 
-    repository = module.get<FileMetadataRepositoryImpl>(FileMetadataRepositoryImpl);
+    repository = module.get<FileMetadataRepositoryImpl>(
+      FileMetadataRepositoryImpl,
+    );
     prismaService = module.get(PrismaService);
     cacheManager = module.get(CACHE_MANAGER);
   });
@@ -56,7 +62,7 @@ describe('FileMetadataRepository', () => {
       storageKey: 'files/test.pdf',
       checksumMd5: 'md5hash',
       checksumSha256: 'sha256hash',
-      documentType: DocumentType.DOCUMENT
+      documentType: DocumentType.DOCUMENT,
     };
 
     const mockResult = {
@@ -78,18 +84,20 @@ describe('FileMetadataRepository', () => {
       updated_at: new Date(),
       deleted_at: null,
       cdn_url: null,
-      project_id: null
+      project_id: null,
     };
 
-    (prismaService.$transaction as jest.Mock).mockImplementation(async (callback) => {
-      const tx = {
-        files: {
-          findUnique: jest.fn().mockResolvedValue(null),
-          create: jest.fn().mockResolvedValue(mockResult)
-        }
-      } as any;
-      return await callback(tx);
-    });
+    (prismaService.$transaction as jest.Mock).mockImplementation(
+      async (callback) => {
+        const tx = {
+          files: {
+            findUnique: jest.fn().mockResolvedValue(null),
+            create: jest.fn().mockResolvedValue(mockResult),
+          },
+        } as any;
+        return await callback(tx);
+      },
+    );
 
     // Act
     const result = await repository.create(createDto);
@@ -124,8 +132,8 @@ describe('FileMetadataRepository', () => {
         updated_at: new Date(),
         deleted_at: null,
         cdn_url: null,
-        project_id: null
-      }
+        project_id: null,
+      },
     ];
 
     (prismaService.files.findMany as jest.Mock).mockResolvedValue(mockFiles);
@@ -140,7 +148,7 @@ describe('FileMetadataRepository', () => {
       where: { user_id: userId, deleted_at: null },
       orderBy: { created_at: 'desc' },
       take: 10,
-      skip: 0
+      skip: 0,
     });
   });
 
@@ -149,21 +157,27 @@ describe('FileMetadataRepository', () => {
     const fileId = 'file-123';
     const updates = {
       filename: 'updated.pdf',
-      processingStatus: ProcessingStatus.COMPLETED
+      processingStatus: ProcessingStatus.COMPLETED,
     };
 
     const existingFile = { id: fileId, metadata: {} };
-    const updatedFile = { ...existingFile, filename: 'updated.pdf', processing_status: ProcessingStatus.COMPLETED };
+    const updatedFile = {
+      ...existingFile,
+      filename: 'updated.pdf',
+      processing_status: ProcessingStatus.COMPLETED,
+    };
 
-    (prismaService.$transaction as jest.Mock).mockImplementation(async (callback) => {
-      const tx = {
-        files: {
-          findUnique: jest.fn().mockResolvedValue(existingFile),
-          update: jest.fn().mockResolvedValue(updatedFile)
-        }
-      } as any;
-      return await callback(tx);
-    });
+    (prismaService.$transaction as jest.Mock).mockImplementation(
+      async (callback) => {
+        const tx = {
+          files: {
+            findUnique: jest.fn().mockResolvedValue(existingFile),
+            update: jest.fn().mockResolvedValue(updatedFile),
+          },
+        } as any;
+        return await callback(tx);
+      },
+    );
 
     // Act
     const result = await repository.update(fileId, updates);
@@ -178,23 +192,31 @@ describe('FileMetadataRepository', () => {
     const userId = 'user-123';
     const mockTotalStats = {
       _sum: { size: BigInt(1000000) },
-      _count: 10
+      _count: 10,
     };
     const mockByContentType = [
-      { content_type: 'application/pdf', _sum: { size: BigInt(500000) }, _count: 5 }
+      {
+        content_type: 'application/pdf',
+        _sum: { size: BigInt(500000) },
+        _count: 5,
+      },
     ];
     const mockByDocumentType = [
-      { document_type: DocumentType.DOCUMENT, _sum: { size: BigInt(500000) }, _count: 5 }
+      {
+        document_type: DocumentType.DOCUMENT,
+        _sum: { size: BigInt(500000) },
+        _count: 5,
+      },
     ];
     const mockByProcessingStatus = [
-      { processing_status: ProcessingStatus.COMPLETED, _count: 8 }
+      { processing_status: ProcessingStatus.COMPLETED, _count: 8 },
     ];
-    const mockTagStats = [
-      { tag: 'important', count: BigInt(3) }
-    ];
+    const mockTagStats = [{ tag: 'important', count: BigInt(3) }];
 
     (cacheManager.get as jest.Mock).mockResolvedValue(null);
-    (prismaService.files.aggregate as jest.Mock).mockResolvedValue(mockTotalStats);
+    (prismaService.files.aggregate as jest.Mock).mockResolvedValue(
+      mockTotalStats,
+    );
     (prismaService.files.groupBy as jest.Mock)
       .mockResolvedValueOnce(mockByContentType)
       .mockResolvedValueOnce(mockByProcessingStatus)
@@ -215,24 +237,24 @@ describe('FileMetadataRepository', () => {
     // Arrange
     const userId = 'user-123';
     const concurrentCount = 5;
-    
+
     (prismaService.files.aggregate as jest.Mock).mockResolvedValue({
       _sum: { size: BigInt(1000) },
-      _count: 1
+      _count: 1,
     });
     (prismaService.files.groupBy as jest.Mock).mockResolvedValue([]);
     (prismaService.$queryRaw as jest.Mock).mockResolvedValue([]);
     (cacheManager.get as jest.Mock).mockResolvedValue(null);
 
     // Act - Appels simultanés
-    const promises = Array.from({ length: concurrentCount }, () => 
-      repository.getUserStorageUsage(userId)
+    const promises = Array.from({ length: concurrentCount }, () =>
+      repository.getUserStorageUsage(userId),
     );
     const results = await Promise.all(promises);
 
     // Assert
     expect(results).toHaveLength(concurrentCount);
-    results.forEach(result => {
+    results.forEach((result) => {
       expect(result.totalSize).toBe(1000);
       expect(result.fileCount).toBe(1);
     });
@@ -256,7 +278,7 @@ describe('FileMetadataRepository', () => {
       tags: [],
       versionCount: 1,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     (cacheManager.get as jest.Mock).mockResolvedValue(cachedMetadata);

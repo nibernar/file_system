@@ -1,12 +1,12 @@
 /**
  * Service de traitement de fichiers pour le système Coders V1 - Version Complète
- * 
+ *
  * Ce service orchestre tous les aspects du traitement de fichiers :
  * - Traitement automatique post-upload
  * - Gestion des queues asynchrones
  * - Versioning et snapshots
  * - Intégration avec les services spécialisés
- * 
+ *
  * @version 1.0
  * @author Backend Lead
  * @conformsTo 03-06-file-system-specs
@@ -31,7 +31,7 @@ import {
   UpdateFileMetadataDto,
   ProcessingJobType,
   ProcessingJobStatus,
-  ImageFormat
+  ImageFormat,
 } from '../../types/file-system.types';
 import type { FileSystemConfig } from '../../config/file-system.config';
 import { FILE_SYSTEM_CONFIG } from '../../config/file-system.config';
@@ -42,12 +42,12 @@ import {
   FileSecurityException,
   ProcessingException,
   InvalidProcessingStateException,
-  ProcessingTimeoutException
+  ProcessingTimeoutException,
 } from '../../exceptions/file-system.exceptions';
 
 /**
  * Service principal de traitement de fichiers
- * 
+ *
  * Responsabilités :
  * - Orchestration du pipeline de traitement
  * - Gestion des jobs asynchrones
@@ -61,21 +61,21 @@ export class FileProcessingService {
   constructor(
     @Inject('IFileMetadataRepository')
     private readonly fileMetadataRepository: IFileMetadataRepository,
-    
+
     private readonly storageService: GarageStorageService,
-    
+
     @InjectQueue('file-processing')
     private readonly processingQueue: Queue,
-    
+
     @Inject(FILE_SYSTEM_CONFIG)
-    private readonly config: FileSystemConfig
+    private readonly config: FileSystemConfig,
   ) {
     this.logger.log('Service de traitement de fichiers initialisé');
   }
 
   /**
    * Traite un fichier uploadé avec pipeline complet
-   * 
+   *
    * Pipeline de traitement :
    * 1. Validation et récupération métadonnées
    * 2. Scan sécurité de base
@@ -83,54 +83,57 @@ export class FileProcessingService {
    * 4. Génération thumbnails si applicable
    * 5. Optimisations performance
    * 6. Mise à jour statut et cache
-   * 
+   *
    * @param fileId - Identifiant du fichier à traiter
    * @returns Résultat détaillé du traitement
    */
   async processUploadedFile(fileId: string): Promise<ProcessingResult> {
     const startTime = Date.now();
-    
+
     this.logger.log(`Début traitement fichier ${fileId}`);
-    
+
     try {
       // 1. Récupération et validation métadonnées
       const fileMetadata = await this.getFileMetadata(fileId);
-      
+
       // Validation état de traitement
       if (fileMetadata.processingStatus === ProcessingStatus.PROCESSING) {
         throw new InvalidProcessingStateException(
-          fileId, 
-          fileMetadata.processingStatus
+          fileId,
+          fileMetadata.processingStatus,
         );
       }
-      
+
       // Mise à jour statut en cours
       await this.updateProcessingStatus(fileId, ProcessingStatus.PROCESSING);
-      
+
       this.logger.debug(
-        `Fichier ${fileId} en traitement: ${fileMetadata.contentType}, ${fileMetadata.size} octets`
+        `Fichier ${fileId} en traitement: ${fileMetadata.contentType}, ${fileMetadata.size} octets`,
       );
-      
+
       // 2. Scan sécurité de base
       let securityValidated = true;
       try {
-        const securityResult = await this.performBasicSecurityCheck(fileMetadata);
+        const securityResult =
+          await this.performBasicSecurityCheck(fileMetadata);
         if (!securityResult.safe) {
           await this.handleUnsafeFile(fileId, securityResult);
           throw new FileSecurityException(
             `Fichier ${fileId} échoue au contrôle sécurité`,
-            securityResult.threats || []
+            securityResult.threats || [],
           );
         }
       } catch (securityError) {
-        this.logger.warn(`Contrôle sécurité échoué pour ${fileId}: ${securityError.message}`);
+        this.logger.warn(
+          `Contrôle sécurité échoué pour ${fileId}: ${securityError.message}`,
+        );
         securityValidated = false;
         // Continuer le traitement si le scan sécurité échoue (mode dégradé)
       }
-      
+
       // 3. Traitement selon type de fichier
       let processingResult: ProcessingResult;
-      
+
       if (fileMetadata.contentType.startsWith('image/')) {
         processingResult = await this.processImage(fileId, fileMetadata);
       } else if (fileMetadata.contentType === 'application/pdf') {
@@ -140,26 +143,37 @@ export class FileProcessingService {
       } else {
         processingResult = await this.processGenericFile(fileId, fileMetadata);
       }
-      
+
       // 4. Génération thumbnail si applicable et demandé
       if (this.shouldGenerateThumbnail(fileMetadata.contentType)) {
         try {
-          processingResult.thumbnailUrl = await this.generateThumbnail(fileId, fileMetadata);
-          this.logger.debug(`Thumbnail généré pour ${fileId}: ${processingResult.thumbnailUrl}`);
+          processingResult.thumbnailUrl = await this.generateThumbnail(
+            fileId,
+            fileMetadata,
+          );
+          this.logger.debug(
+            `Thumbnail généré pour ${fileId}: ${processingResult.thumbnailUrl}`,
+          );
         } catch (thumbnailError) {
-          this.logger.warn(`Échec génération thumbnail ${fileId}: ${thumbnailError.message}`);
+          this.logger.warn(
+            `Échec génération thumbnail ${fileId}: ${thumbnailError.message}`,
+          );
           // Non bloquant pour le traitement principal
         }
       }
-      
+
       // 5. Optimisations finales
-      await this.applyFinalOptimizations(fileId, fileMetadata, processingResult);
-      
+      await this.applyFinalOptimizations(
+        fileId,
+        fileMetadata,
+        processingResult,
+      );
+
       // 6. Finalisation
       const processingTime = Date.now() - startTime;
       processingResult.processingTime = processingTime;
       processingResult.success = true;
-      
+
       // Ajout informations sécurité au résultat
       if (!securityValidated) {
         processingResult.securityScan = {
@@ -168,59 +182,65 @@ export class FileProcessingService {
           engineVersion: 'basic',
           signaturesDate: new Date(),
           scanDuration: 0,
-          scannedAt: new Date()
+          scannedAt: new Date(),
         };
       }
-      
+
       await this.updateProcessingStatus(fileId, ProcessingStatus.COMPLETED);
-      
+
       this.logger.log(
         `Traitement complété pour ${fileId} en ${processingTime}ms: ` +
-        `${processingResult.success ? 'succès' : 'échec'}`
+          `${processingResult.success ? 'succès' : 'échec'}`,
       );
-      
+
       return processingResult;
-      
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      this.logger.error(`Échec traitement ${fileId} après ${processingTime}ms: ${error.message}`);
-      
+      this.logger.error(
+        `Échec traitement ${fileId} après ${processingTime}ms: ${error.message}`,
+      );
+
       await this.updateProcessingStatus(fileId, ProcessingStatus.FAILED);
-      
-      if (error instanceof FileSecurityException || 
-          error instanceof InvalidProcessingStateException ||
-          error instanceof ProcessingException) {
+
+      if (
+        error instanceof FileSecurityException ||
+        error instanceof InvalidProcessingStateException ||
+        error instanceof ProcessingException
+      ) {
         throw error;
       }
-      
+
       throw new ProcessingException(fileId, 'full_processing', error.message);
     }
   }
 
   /**
    * Ajoute un fichier à la queue de traitement asynchrone
-   * 
+   *
    * @param fileId - Identifiant du fichier
    * @param options - Options de traitement étendues
    * @returns Information sur le job créé
    */
-  async queueProcessing(fileId: string, options: ExtendedProcessingOptions = {}): Promise<QueueJobResult> {
+  async queueProcessing(
+    fileId: string,
+    options: ExtendedProcessingOptions = {},
+  ): Promise<QueueJobResult> {
     this.logger.debug(`Ajout fichier ${fileId} à la queue de traitement`);
-    
+
     try {
       // Validation état du fichier
       const fileMetadata = await this.getFileMetadata(fileId);
-      
+
       if (fileMetadata.processingStatus !== ProcessingStatus.PENDING) {
         throw new InvalidProcessingStateException(
-          fileId, 
-          fileMetadata.processingStatus
+          fileId,
+          fileMetadata.processingStatus,
         );
       }
-      
+
       // Calcul de priorité intelligente
       const priority = this.calculateJobPriority(fileMetadata, options);
-      
+
       // Préparation données du job
       const jobData: ProcessingJobData = {
         // Propriétés héritées de ProcessingJob
@@ -237,14 +257,14 @@ export class FileProcessingService {
           imageQuality: 85,
           thumbnailFormats: [ImageFormat.WEBP, ImageFormat.JPEG],
           pdfCompressionLevel: 6,
-          forceReprocess: false
+          forceReprocess: false,
         },
         createdAt: new Date(),
         // Propriétés spécifiques ProcessingJobData
         userId: options.userId,
-        reason: options.reason || 'Traitement automatique post-upload'
+        reason: options.reason || 'Traitement automatique post-upload',
       };
-      
+
       // Ajout à la queue avec configuration
       const job = await this.processingQueue.add(
         'process-uploaded-file',
@@ -254,28 +274,27 @@ export class FileProcessingService {
           attempts: 3,
           backoff: {
             type: 'exponential',
-            delay: 5000
+            delay: 5000,
           },
           removeOnComplete: 10,
           removeOnFail: 5,
-          delay: this.calculateProcessingDelay(fileMetadata)
-        }
+          delay: this.calculateProcessingDelay(fileMetadata),
+        },
       );
-      
+
       const estimatedDuration = this.estimateProcessingDuration(fileMetadata);
-      
+
       this.logger.log(
         `Job ${job.id} créé pour fichier ${fileId}: ` +
-        `priorité ${priority}, durée estimée ${estimatedDuration}s`
+          `priorité ${priority}, durée estimée ${estimatedDuration}s`,
       );
-      
+
       return {
-      jobId: String(job.id),
-      status: 'queued' as any,
-      progress: 0,
-      estimatedDuration,
-    };
-      
+        jobId: String(job.id),
+        status: 'queued' as any,
+        progress: 0,
+        estimatedDuration,
+      };
     } catch (error) {
       this.logger.error(`Échec ajout queue ${fileId}: ${error.message}`);
       throw error;
@@ -284,30 +303,33 @@ export class FileProcessingService {
 
   /**
    * Crée une nouvelle version d'un fichier
-   * 
+   *
    * @param fileId - Identifiant du fichier
    * @param options - Options de versioning
    * @returns Métadonnées de la version créée
    */
-  async createVersion(fileId: string, options: VersionOptions): Promise<FileVersion> {
+  async createVersion(
+    fileId: string,
+    options: VersionOptions,
+  ): Promise<FileVersion> {
     this.logger.log(`Création version pour fichier ${fileId}`);
-    
+
     try {
       // Récupération fichier existant
       const existingFile = await this.getFileMetadata(fileId);
       const versionNumber = existingFile.versionCount + 1;
-      
+
       // Génération clé de stockage pour la version
       const snapshotKey = `${fileId}/versions/${versionNumber}/${Date.now()}`;
-      
+
       this.logger.debug(`Snapshot fichier ${fileId} vers ${snapshotKey}`);
-      
+
       // Copie du fichier vers stockage de version
       await this.storageService.copyObject(
         existingFile.storageKey,
-        snapshotKey
+        snapshotKey,
       );
-      
+
       // Création métadonnées de version
       const version: FileVersion = {
         id: `version-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -320,20 +342,19 @@ export class FileProcessingService {
         changeType: options.changeType || VersionChangeType.MANUAL_EDIT,
         createdBy: options.userId || 'system',
         createdAt: new Date(),
-        isActive: false
+        isActive: false,
       };
-      
+
       // Mise à jour compteur de versions
       await this.fileMetadataRepository.update(fileId, {
-        versionCount: versionNumber
+        versionCount: versionNumber,
       });
-      
+
       this.logger.log(
-        `Version ${versionNumber} créée pour fichier ${fileId} par ${options.userId}`
+        `Version ${versionNumber} créée pour fichier ${fileId} par ${options.userId}`,
       );
-      
+
       return version;
-      
     } catch (error) {
       this.logger.error(`Échec création version ${fileId}: ${error.message}`);
       throw new ProcessingException(fileId, 'version_creation', error.message);
@@ -342,19 +363,19 @@ export class FileProcessingService {
 
   /**
    * Génère un thumbnail pour un fichier
-   * 
+   *
    * @param fileId - Identifiant du fichier
    * @param metadata - Métadonnées du fichier
    * @param size - Taille du thumbnail (défaut: configuration)
    * @returns URL du thumbnail généré
    */
   async generateThumbnail(
-    fileId: string, 
-    metadata: FileMetadata, 
-    size: number = this.config.processing.thumbnailSize
+    fileId: string,
+    metadata: FileMetadata,
+    size: number = this.config.processing.thumbnailSize,
   ): Promise<string> {
     this.logger.debug(`Génération thumbnail ${size}px pour ${fileId}`);
-    
+
     try {
       if (metadata.contentType.startsWith('image/')) {
         return await this.generateImageThumbnail(fileId, metadata, size);
@@ -364,10 +385,15 @@ export class FileProcessingService {
         // Thumbnail générique pour autres types
         return await this.generateGenericThumbnail(fileId, metadata, size);
       }
-      
     } catch (error) {
-      this.logger.warn(`Échec génération thumbnail ${fileId}: ${error.message}`);
-      throw new ProcessingException(fileId, 'thumbnail_generation', error.message);
+      this.logger.warn(
+        `Échec génération thumbnail ${fileId}: ${error.message}`,
+      );
+      throw new ProcessingException(
+        fileId,
+        'thumbnail_generation',
+        error.message,
+      );
     }
   }
 
@@ -378,9 +404,12 @@ export class FileProcessingService {
   /**
    * Traite une image avec optimisation basique
    */
-  private async processImage(fileId: string, metadata: FileMetadata): Promise<ProcessingResult> {
+  private async processImage(
+    fileId: string,
+    metadata: FileMetadata,
+  ): Promise<ProcessingResult> {
     this.logger.debug(`Traitement image basique ${fileId}`);
-    
+
     try {
       const result: ProcessingResult = {
         success: true,
@@ -389,16 +418,15 @@ export class FileProcessingService {
           optimizedSize: metadata.size,
           compressionRatio: 1.0,
           techniques: ['basic_image_processing'],
-          spaceSavingPercent: 0
+          spaceSavingPercent: 0,
         },
-        processingTime: 0
+        processingTime: 0,
       };
-      
+
       // TODO: Intégration avec ImageProcessorService quand disponible
       this.logger.debug(`Image ${fileId} traitée (mode basique)`);
-      
+
       return result;
-      
     } catch (error) {
       throw new ProcessingException(fileId, 'image_processing', error.message);
     }
@@ -407,9 +435,12 @@ export class FileProcessingService {
   /**
    * Traite un PDF avec optimisation basique
    */
-  private async processPDF(fileId: string, metadata: FileMetadata): Promise<ProcessingResult> {
+  private async processPDF(
+    fileId: string,
+    metadata: FileMetadata,
+  ): Promise<ProcessingResult> {
     this.logger.debug(`Traitement PDF basique ${fileId}`);
-    
+
     try {
       const result: ProcessingResult = {
         success: true,
@@ -418,20 +449,19 @@ export class FileProcessingService {
           optimizedSize: metadata.size,
           compressionRatio: 1.0,
           techniques: ['basic_pdf_processing'],
-          spaceSavingPercent: 0
+          spaceSavingPercent: 0,
         },
         extractedMetadata: {
           pageCount: this.estimatePageCount(metadata.size),
-          processingType: 'basic'
+          processingType: 'basic',
         },
-        processingTime: 0
+        processingTime: 0,
       };
-      
+
       // TODO: Intégration avec PdfProcessorService quand disponible
       this.logger.debug(`PDF ${fileId} traité (mode basique)`);
-      
+
       return result;
-      
     } catch (error) {
       throw new ProcessingException(fileId, 'pdf_processing', error.message);
     }
@@ -440,9 +470,12 @@ export class FileProcessingService {
   /**
    * Traite un document texte avec analyse basique
    */
-  private async processDocument(fileId: string, metadata: FileMetadata): Promise<ProcessingResult> {
+  private async processDocument(
+    fileId: string,
+    metadata: FileMetadata,
+  ): Promise<ProcessingResult> {
     this.logger.debug(`Traitement document basique ${fileId}`);
-    
+
     try {
       const result: ProcessingResult = {
         success: true,
@@ -450,36 +483,42 @@ export class FileProcessingService {
           contentType: metadata.contentType,
           size: metadata.size,
           processingType: 'basic_document',
-          estimatedWordCount: Math.floor(metadata.size / 5) // Estimation grossière
+          estimatedWordCount: Math.floor(metadata.size / 5), // Estimation grossière
         },
-        processingTime: 0
+        processingTime: 0,
       };
-      
+
       // TODO: Intégration avec DocumentProcessorService quand disponible
       this.logger.debug(`Document ${fileId} traité (mode basique)`);
-      
+
       return result;
-      
     } catch (error) {
-      throw new ProcessingException(fileId, 'document_processing', error.message);
+      throw new ProcessingException(
+        fileId,
+        'document_processing',
+        error.message,
+      );
     }
   }
 
   /**
    * Traite un fichier générique
    */
-  private async processGenericFile(fileId: string, metadata: FileMetadata): Promise<ProcessingResult> {
+  private async processGenericFile(
+    fileId: string,
+    metadata: FileMetadata,
+  ): Promise<ProcessingResult> {
     this.logger.debug(`Traitement générique ${fileId}`);
-    
+
     return {
       success: true,
       extractedMetadata: {
         contentType: metadata.contentType,
         size: metadata.size,
         processedAt: new Date(),
-        processingType: 'generic'
+        processingType: 'generic',
       },
-      processingTime: 0
+      processingTime: 0,
     };
   }
 
@@ -491,26 +530,26 @@ export class FileProcessingService {
    * Génère un thumbnail pour une image
    */
   private async generateImageThumbnail(
-    fileId: string, 
-    metadata: FileMetadata, 
-    size: number
+    fileId: string,
+    metadata: FileMetadata,
+    size: number,
   ): Promise<string> {
     const thumbnailKey = `${fileId}/thumbnails/${size}/image.jpg`;
-    
+
     // TODO: Intégration avec ImageProcessorService
     // Pour l'instant, simulation avec placeholder
     const placeholderBuffer = Buffer.from('mock-image-thumbnail');
-    
+
     await this.storageService.uploadObject(thumbnailKey, placeholderBuffer, {
       contentType: 'image/jpeg',
       userId: 'system',
       customMetadata: {
         originalFileId: fileId,
         thumbnailSize: size.toString(),
-        thumbnailType: 'image'
-      }
+        thumbnailType: 'image',
+      },
     });
-    
+
     return `${this.config.cdn.baseUrl}/${thumbnailKey}`;
   }
 
@@ -518,26 +557,26 @@ export class FileProcessingService {
    * Génère un thumbnail pour un PDF
    */
   private async generatePdfThumbnail(
-    fileId: string, 
-    metadata: FileMetadata, 
-    size: number
+    fileId: string,
+    metadata: FileMetadata,
+    size: number,
   ): Promise<string> {
     const thumbnailKey = `${fileId}/thumbnails/${size}/pdf-preview.jpg`;
-    
+
     // TODO: Intégration avec PdfProcessorService
     // Pour l'instant, simulation avec placeholder
     const placeholderBuffer = Buffer.from('mock-pdf-thumbnail');
-    
+
     await this.storageService.uploadObject(thumbnailKey, placeholderBuffer, {
       contentType: 'image/jpeg',
       userId: 'system',
       customMetadata: {
         originalFileId: fileId,
         thumbnailSize: size.toString(),
-        thumbnailType: 'pdf'
-      }
+        thumbnailType: 'pdf',
+      },
     });
-    
+
     return `${this.config.cdn.baseUrl}/${thumbnailKey}`;
   }
 
@@ -545,25 +584,27 @@ export class FileProcessingService {
    * Génère un thumbnail générique
    */
   private async generateGenericThumbnail(
-    fileId: string, 
-    metadata: FileMetadata, 
-    size: number
+    fileId: string,
+    metadata: FileMetadata,
+    size: number,
   ): Promise<string> {
     const thumbnailKey = `${fileId}/thumbnails/${size}/generic.png`;
-    
+
     // Génération thumbnail générique basé sur le type de fichier
-    const placeholderBuffer = Buffer.from(`generic-thumbnail-${metadata.contentType}`);
-    
+    const placeholderBuffer = Buffer.from(
+      `generic-thumbnail-${metadata.contentType}`,
+    );
+
     await this.storageService.uploadObject(thumbnailKey, placeholderBuffer, {
       contentType: 'image/png',
       userId: 'system',
       customMetadata: {
         originalFileId: fileId,
         thumbnailSize: size.toString(),
-        thumbnailType: 'generic'
-      }
+        thumbnailType: 'generic',
+      },
     });
-    
+
     return `${this.config.cdn.baseUrl}/${thumbnailKey}`;
   }
 
@@ -574,42 +615,51 @@ export class FileProcessingService {
   /**
    * Effectue un contrôle de sécurité basique
    */
-  private async performBasicSecurityCheck(metadata: FileMetadata): Promise<{ safe: boolean; threats?: string[] }> {
+  private async performBasicSecurityCheck(
+    metadata: FileMetadata,
+  ): Promise<{ safe: boolean; threats?: string[] }> {
     const threats: string[] = [];
-    
+
     // Contrôle taille
     if (metadata.size > this.config.processing.maxFileSize) {
       threats.push('FILE_TOO_LARGE');
     }
-    
+
     // Contrôle type MIME
-    if (!this.config.processing.allowedMimeTypes.some(type => 
-      metadata.contentType.match(new RegExp(type.replace('*', '.*')))
-    )) {
+    if (
+      !this.config.processing.allowedMimeTypes.some((type) =>
+        metadata.contentType.match(new RegExp(type.replace('*', '.*'))),
+      )
+    ) {
       threats.push('UNSUPPORTED_TYPE');
     }
-    
+
     // Contrôles supplémentaires basiques
     if (metadata.filename.includes('..') || metadata.filename.includes('/')) {
       threats.push('SUSPICIOUS_FILENAME');
     }
-    
+
     return {
       safe: threats.length === 0,
-      threats: threats.length > 0 ? threats : undefined
+      threats: threats.length > 0 ? threats : undefined,
     };
   }
 
   /**
    * Gère un fichier considéré comme non sûr
    */
-  private async handleUnsafeFile(fileId: string, securityResult: { safe: boolean; threats?: string[] }): Promise<void> {
-    this.logger.warn(`Fichier non sûr ${fileId}: ${securityResult.threats?.join(', ')}`);
-    
+  private async handleUnsafeFile(
+    fileId: string,
+    securityResult: { safe: boolean; threats?: string[] },
+  ): Promise<void> {
+    this.logger.warn(
+      `Fichier non sûr ${fileId}: ${securityResult.threats?.join(', ')}`,
+    );
+
     // Mise à jour statut sécurité sans quarantaine complexe
     await this.fileMetadataRepository.update(fileId, {
       virusScanStatus: VirusScanStatus.INFECTED,
-      processingStatus: ProcessingStatus.FAILED
+      processingStatus: ProcessingStatus.FAILED,
     });
   }
 
@@ -620,29 +670,34 @@ export class FileProcessingService {
   /**
    * Calcule la priorité d'un job de traitement
    */
-  private calculateJobPriority(metadata: FileMetadata, options: ExtendedProcessingOptions): number {
+  private calculateJobPriority(
+    metadata: FileMetadata,
+    options: ExtendedProcessingOptions,
+  ): number {
     let priority = 5; // Priorité de base
-    
+
     // Bonus pour petits fichiers (traitement plus rapide)
-    if (metadata.size < 1024 * 1024) { // < 1MB
+    if (metadata.size < 1024 * 1024) {
+      // < 1MB
       priority += 2;
     }
-    
+
     // Bonus pour documents confidentiels
     if (metadata.documentType === DocumentType.CONFIDENTIAL) {
       priority += 2;
     }
-    
+
     // Bonus pour retraitement forcé
     if (options.forceReprocess) {
       priority += 1;
     }
-    
+
     // Malus pour très gros fichiers
-    if (metadata.size > 50 * 1024 * 1024) { // > 50MB
+    if (metadata.size > 50 * 1024 * 1024) {
+      // > 50MB
       priority -= 1;
     }
-    
+
     // Normalisation entre 1 et 10
     return Math.min(Math.max(priority, 1), 10);
   }
@@ -653,7 +708,7 @@ export class FileProcessingService {
   private calculateProcessingDelay(metadata: FileMetadata): number {
     // Délai progressif selon taille pour éviter surcharge
     const sizeInMB = metadata.size / (1024 * 1024);
-    
+
     if (sizeInMB < 1) return 0; // Traitement immédiat
     if (sizeInMB < 10) return 1000; // 1s de délai
     if (sizeInMB < 50) return 5000; // 5s de délai
@@ -665,7 +720,7 @@ export class FileProcessingService {
    */
   private estimateProcessingDuration(metadata: FileMetadata): number {
     const sizeInMB = metadata.size / (1024 * 1024);
-    
+
     // Estimation selon type et taille
     if (metadata.contentType.startsWith('image/')) {
       return Math.max(5, Math.ceil(sizeInMB * 2)); // 2s par MB pour images
@@ -701,7 +756,7 @@ export class FileProcessingService {
   private async applyFinalOptimizations(
     fileId: string,
     metadata: FileMetadata,
-    result: ProcessingResult
+    result: ProcessingResult,
   ): Promise<void> {
     try {
       // Optimisations finales selon le type
@@ -709,12 +764,13 @@ export class FileProcessingService {
         // Optimisations images supplémentaires
         this.logger.debug(`Optimisations images finales pour ${fileId}`);
       }
-      
+
       // Mise en cache des métadonnées si applicable
       // TODO: Intégration avec service de cache
-      
     } catch (error) {
-      this.logger.warn(`Échec optimisations finales ${fileId}: ${error.message}`);
+      this.logger.warn(
+        `Échec optimisations finales ${fileId}: ${error.message}`,
+      );
       // Non bloquant
     }
   }
@@ -724,11 +780,11 @@ export class FileProcessingService {
    */
   async getFileMetadata(fileId: string): Promise<FileMetadata> {
     const metadata = await this.fileMetadataRepository.findById(fileId);
-    
+
     if (!metadata) {
       throw new FileNotFoundException(fileId);
     }
-    
+
     return metadata;
   }
 
@@ -737,14 +793,14 @@ export class FileProcessingService {
    */
   private async updateProcessingStatus(
     fileId: string,
-    status: ProcessingStatus
+    status: ProcessingStatus,
   ): Promise<void> {
     const updateData: UpdateFileMetadataDto = {
-      processingStatus: status
+      processingStatus: status,
     };
-    
+
     await this.fileMetadataRepository.update(fileId, updateData);
-    
+
     this.logger.debug(`Statut traitement ${fileId} mis à jour: ${status}`);
   }
 }

@@ -1,9 +1,9 @@
 /**
  * Tests de validation pour les types du système de fichiers
- * 
+ *
  * Tests conformes à la stratégie 04-06-file-system-tests.md
  * Pattern AAA (Arrange, Act, Assert) selon 07-08 Coding Standards
- * 
+ *
  * @version 1.0
  * @conformsTo 04-06-file-system-tests
  * @conformsTo 07-08-coding-standards
@@ -20,7 +20,7 @@ import {
   ProcessingJobType,
   ProcessingJobStatus,
   SecurityThreat,
-  
+
   // Interfaces principales
   FileMetadata,
   FileVersion,
@@ -32,7 +32,7 @@ import {
   DownloadResult,
   PresignedUrl,
   DistributionResult,
-  
+
   // DTOs et utilitaires
   UploadFileDto,
   GetUserFilesOptions,
@@ -41,24 +41,23 @@ import {
   DeleteFileOptions,
   ProcessingOptions,
   ProcessingResult,
-  
+
   // Type guards
   isFileMetadata,
   isProcessingResult,
-  
+
   // Constantes typées
   SUPPORTED_MIME_TYPES,
   FILE_SIZES,
   DURATIONS,
-  
+
   // Types utilitaires
   CreateDto,
   UpdateDto,
-  PartialWithId
+  PartialWithId,
 } from '../file-system.types';
 
 describe('FileSystemTypes', () => {
-
   // ============================================================================
   // TESTS ENUMS - Validation des énumérations
   // ============================================================================
@@ -71,9 +70,9 @@ describe('FileSystemTypes', () => {
       expect(VirusScanStatus.CLEAN).toBe('clean');
       expect(VirusScanStatus.INFECTED).toBe('infected');
       expect(VirusScanStatus.ERROR).toBe('error');
-      
+
       // Vérification que toutes les valeurs sont des strings
-      Object.values(VirusScanStatus).forEach(value => {
+      Object.values(VirusScanStatus).forEach((value) => {
         expect(typeof value).toBe('string');
       });
     });
@@ -83,19 +82,16 @@ describe('FileSystemTypes', () => {
       const statusFlow = [
         ProcessingStatus.PENDING,
         ProcessingStatus.PROCESSING,
-        ProcessingStatus.COMPLETED
+        ProcessingStatus.COMPLETED,
       ];
-      
+
       const failureFlow = [
         ProcessingStatus.PENDING,
         ProcessingStatus.PROCESSING,
-        ProcessingStatus.FAILED
+        ProcessingStatus.FAILED,
       ];
-      
-      const skipFlow = [
-        ProcessingStatus.PENDING,
-        ProcessingStatus.SKIPPED
-      ];
+
+      const skipFlow = [ProcessingStatus.PENDING, ProcessingStatus.SKIPPED];
 
       // Assert - Vérification workflow valide
       expect(statusFlow).toEqual(['pending', 'processing', 'completed']);
@@ -107,11 +103,11 @@ describe('FileSystemTypes', () => {
       // Arrange
       const expectedTypes = [
         'document',
-        'template', 
+        'template',
         'project_document',
         'confidential',
         'temporary',
-        'archive'
+        'archive',
       ];
 
       // Act
@@ -124,13 +120,19 @@ describe('FileSystemTypes', () => {
 
     it('should have all FileOperation types for access control', () => {
       // Arrange
-      const requiredOperations = ['read', 'write', 'delete', 'share', 'process'];
+      const requiredOperations = [
+        'read',
+        'write',
+        'delete',
+        'share',
+        'process',
+      ];
 
       // Act
       const operations = Object.values(FileOperation);
 
       // Assert
-      requiredOperations.forEach(op => {
+      requiredOperations.forEach((op) => {
         expect(operations).toContain(op);
       });
     });
@@ -142,11 +144,11 @@ describe('FileSystemTypes', () => {
         SecurityThreat.MALWARE_DETECTED,
         SecurityThreat.SUSPICIOUS_CONTENT,
         SecurityThreat.FILE_TOO_LARGE,
-        SecurityThreat.RATE_LIMIT_EXCEEDED
+        SecurityThreat.RATE_LIMIT_EXCEEDED,
       ];
 
       // Act & Assert
-      majorThreats.forEach(threat => {
+      majorThreats.forEach((threat) => {
         expect(typeof threat).toBe('string');
         expect(threat.length).toBeGreaterThan(0);
       });
@@ -171,14 +173,15 @@ describe('FileSystemTypes', () => {
         storageKey: 'files/user123/2024/01/test-document.pdf',
         cdnUrl: 'https://cdn.coders.com/files/optimized/test-document.pdf',
         checksumMd5: 'a1b2c3d4e5f6789012345678901234567',
-        checksumSha256: 'a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234',
+        checksumSha256:
+          'a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234',
         virusScanStatus: VirusScanStatus.CLEAN,
         processingStatus: ProcessingStatus.COMPLETED,
         documentType: DocumentType.PROJECT_DOCUMENT,
         versionCount: 1,
         tags: ['document', 'pdf', 'important'],
         createdAt: new Date('2024-01-15T10:00:00Z'),
-        updatedAt: new Date('2024-01-15T10:05:00Z')
+        updatedAt: new Date('2024-01-15T10:05:00Z'),
       };
 
       // Act & Assert
@@ -203,7 +206,7 @@ describe('FileSystemTypes', () => {
         changeType: VersionChangeType.MANUAL_EDIT,
         createdBy: 'user-789',
         createdAt: new Date('2024-01-15T11:00:00Z'),
-        isActive: true
+        isActive: true,
       };
 
       // Act & Assert
@@ -227,15 +230,17 @@ describe('FileSystemTypes', () => {
         metadata: {
           downloadDuration: 1250,
           cacheHit: true,
-          cdnLocation: 'eu-west-1'
+          cdnLocation: 'eu-west-1',
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Act & Assert
       expect(fileAccess.operation).toBe(FileOperation.READ);
       expect(fileAccess.result).toMatch(/^(SUCCESS|FAILURE|PARTIAL)$/);
-      expect(fileAccess.ipAddress).toMatch(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+      expect(fileAccess.ipAddress).toMatch(
+        /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
+      );
       expect(typeof fileAccess.metadata).toBe('object');
       expect(fileAccess.timestamp).toBeInstanceOf(Date);
     });
@@ -253,9 +258,9 @@ describe('FileSystemTypes', () => {
           generateThumbnail: true,
           optimizeForWeb: true,
           extractMetadata: true,
-          imageQuality: 85
+          imageQuality: 85,
         },
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       // Act & Assert
@@ -282,7 +287,7 @@ describe('FileSystemTypes', () => {
         contentType: 'application/pdf',
         size: 1024,
         virusScanStatus: VirusScanStatus.CLEAN,
-        processingStatus: ProcessingStatus.COMPLETED
+        processingStatus: ProcessingStatus.COMPLETED,
       };
 
       const invalidObjects = [
@@ -292,13 +297,18 @@ describe('FileSystemTypes', () => {
         { id: 123 }, // id wrong type
         { id: 'valid', userId: null }, // userId null
         { id: 'valid', userId: 'user-123', size: 'not-a-number' }, // size wrong type
-        { id: 'valid', userId: 'user-123', size: 1024, virusScanStatus: 'invalid-status' }
+        {
+          id: 'valid',
+          userId: 'user-123',
+          size: 1024,
+          virusScanStatus: 'invalid-status',
+        },
       ];
 
       // Act & Assert
       expect(isFileMetadata(validFileMetadata)).toBe(true);
-      
-      invalidObjects.forEach(obj => {
+
+      invalidObjects.forEach((obj) => {
         expect(isFileMetadata(obj)).toBe(false);
       });
     });
@@ -307,12 +317,12 @@ describe('FileSystemTypes', () => {
       // Arrange
       const validProcessingResult = {
         success: true,
-        processingTime: 5000
+        processingTime: 5000,
       };
 
       const validFailedResult = {
         success: false,
-        processingTime: 1000
+        processingTime: 1000,
       };
 
       const invalidResults = [
@@ -320,14 +330,14 @@ describe('FileSystemTypes', () => {
         { success: 'true' }, // success wrong type
         { processingTime: 5000 }, // missing success
         { success: true }, // missing processingTime
-        { success: true, processingTime: 'slow' } // processingTime wrong type
+        { success: true, processingTime: 'slow' }, // processingTime wrong type
       ];
 
       // Act & Assert
       expect(isProcessingResult(validProcessingResult)).toBe(true);
       expect(isProcessingResult(validFailedResult)).toBe(true);
-      
-      invalidResults.forEach(result => {
+
+      invalidResults.forEach((result) => {
         expect(isProcessingResult(result)).toBe(false);
       });
     });
@@ -348,7 +358,8 @@ describe('FileSystemTypes', () => {
         documentType: DocumentType.PROJECT_DOCUMENT,
         projectId: 'project-123',
         tags: ['important', 'contract'],
-        checksumSha256: '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' // Exactly 64 hex chars
+        checksumSha256:
+          '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // Exactly 64 hex chars
       };
 
       // Act & Assert
@@ -369,7 +380,7 @@ describe('FileSystemTypes', () => {
         processingStatus: ProcessingStatus.COMPLETED,
         projectId: 'project-123',
         tags: ['important'],
-        includeDeleted: false
+        includeDeleted: false,
       };
 
       // Act & Assert
@@ -397,7 +408,7 @@ describe('FileSystemTypes', () => {
         versionCount: 1,
         tags: [],
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const paginatedList: PaginatedFileList = {
@@ -408,13 +419,13 @@ describe('FileSystemTypes', () => {
           totalItems: 100,
           itemsPerPage: 20,
           hasNextPage: true,
-          hasPreviousPage: false
+          hasPreviousPage: false,
         },
         stats: {
           totalSize: 1024000,
           fileCount: 100,
-          lastActivity: new Date()
-        }
+          lastActivity: new Date(),
+        },
       };
 
       // Act & Assert
@@ -437,7 +448,7 @@ describe('FileSystemTypes', () => {
         passed: false,
         threats: [
           SecurityThreat.MALWARE_DETECTED,
-          SecurityThreat.SUSPICIOUS_CONTENT
+          SecurityThreat.SUSPICIOUS_CONTENT,
         ],
         mitigations: ['QUARANTINE', 'BLOCK_USER_IP'],
         scanId: 'scan-123e4567-e89b-12d3',
@@ -445,8 +456,8 @@ describe('FileSystemTypes', () => {
         details: {
           virusName: 'Trojan.Win32.Example',
           scanEngine: 'ClamAV 0.103.0',
-          suspiciousPatterns: ['embedded_javascript', 'external_links']
-        }
+          suspiciousPatterns: ['embedded_javascript', 'external_links'],
+        },
       };
 
       // Act & Assert
@@ -471,8 +482,8 @@ describe('FileSystemTypes', () => {
           totalSignatures: 8234567,
           scanMethod: 'full_scan',
           memoryUsage: '64MB',
-          filesScanned: 1
-        }
+          filesScanned: 1,
+        },
       };
 
       // Act & Assert
@@ -491,9 +502,9 @@ describe('FileSystemTypes', () => {
         restrictions: {
           ipAddress: ['192.168.1.100', '10.0.0.0/8'],
           userAgent: 'CoderApp/1.0',
-          operations: ['GET']
+          operations: ['GET'],
         },
-        securityToken: 'sec_token_123abc'
+        securityToken: 'sec_token_123abc',
       };
 
       // Act & Assert
@@ -513,7 +524,7 @@ describe('FileSystemTypes', () => {
     it('should work with CreateDto utility type', () => {
       // Arrange
       type CreateFileDto = CreateDto<FileMetadata>;
-      
+
       const createDto: CreateFileDto = {
         userId: 'user-123',
         filename: 'new-file.pdf',
@@ -527,7 +538,7 @@ describe('FileSystemTypes', () => {
         processingStatus: ProcessingStatus.PENDING,
         documentType: DocumentType.DOCUMENT,
         versionCount: 1,
-        tags: []
+        tags: [],
         // id, createdAt, updatedAt sont exclus par CreateDto
       };
 
@@ -541,12 +552,12 @@ describe('FileSystemTypes', () => {
     it('should work with UpdateDto utility type', () => {
       // Arrange
       type UpdateFileDto = UpdateDto<FileMetadata>;
-      
+
       const updateDto: UpdateFileDto = {
         id: 'file-123', // Required by PartialWithId
         filename: 'updated-filename.pdf',
         tags: ['updated', 'modified'],
-        processingStatus: ProcessingStatus.COMPLETED
+        processingStatus: ProcessingStatus.COMPLETED,
         // Autres champs optionnels
       };
 
@@ -560,10 +571,10 @@ describe('FileSystemTypes', () => {
     it('should work with PartialWithId utility type', () => {
       // Arrange
       type PartialFile = PartialWithId<FileMetadata>;
-      
+
       const partialFile: PartialFile = {
         id: 'required-id-123',
-        filename: 'optional-update.pdf'
+        filename: 'optional-update.pdf',
         // Tous les autres champs sont optionnels
       };
 
@@ -588,12 +599,12 @@ describe('FileSystemTypes', () => {
       expect(Array.isArray(imageTypes)).toBe(true);
       expect(Array.isArray(documentTypes)).toBe(true);
       expect(Array.isArray(templateTypes)).toBe(true);
-      
+
       expect(imageTypes).toContain('image/jpeg');
       expect(imageTypes).toContain('image/png');
       expect(documentTypes).toContain('application/pdf');
       expect(templateTypes).toContain('application/json');
-      
+
       // Type literal test - ces valeurs sont des types literal grâce à 'as const'
       const jpegType: 'image/jpeg' = imageTypes[0];
       expect(jpegType).toBe('image/jpeg');
@@ -605,7 +616,7 @@ describe('FileSystemTypes', () => {
       expect(FILE_SIZES.MB).toBe(1024 * 1024);
       expect(FILE_SIZES.GB).toBe(1024 * 1024 * 1024);
       expect(FILE_SIZES.MAX_UPLOAD).toBe(100 * 1024 * 1024); // 100MB
-      
+
       // Vérification calculs corrects
       expect(FILE_SIZES.MB / FILE_SIZES.KB).toBe(1024);
       expect(FILE_SIZES.GB / FILE_SIZES.MB).toBe(1024);
@@ -617,7 +628,7 @@ describe('FileSystemTypes', () => {
       expect(DURATIONS.MINUTE).toBe(60 * 1000);
       expect(DURATIONS.HOUR).toBe(60 * 60 * 1000);
       expect(DURATIONS.DAY).toBe(24 * 60 * 60 * 1000);
-      
+
       // Vérification cohérence temporelle
       expect(DURATIONS.MINUTE / DURATIONS.SECOND).toBe(60);
       expect(DURATIONS.HOUR / DURATIONS.MINUTE).toBe(60);
@@ -635,8 +646,12 @@ describe('FileSystemTypes', () => {
       const fileMetadata: FileMetadata = createMockFileMetadata();
 
       // Act & Assert - Vérifier que les enums sont compatibles
-      expect(Object.values(VirusScanStatus)).toContain(fileMetadata.virusScanStatus);
-      expect(Object.values(ProcessingStatus)).toContain(fileMetadata.processingStatus);
+      expect(Object.values(VirusScanStatus)).toContain(
+        fileMetadata.virusScanStatus,
+      );
+      expect(Object.values(ProcessingStatus)).toContain(
+        fileMetadata.processingStatus,
+      );
       expect(Object.values(DocumentType)).toContain(fileMetadata.documentType);
     });
 
@@ -651,7 +666,7 @@ describe('FileSystemTypes', () => {
       expect(fileMetadata.createdAt).toBeInstanceOf(Date);
       expect(fileMetadata.updatedAt).toBeInstanceOf(Date);
       expect(fileMetadata.createdAt.getTime()).toBe(now.getTime());
-      
+
       // Vérifier sérialisation JSON
       const serialized = JSON.stringify(fileMetadata);
       const deserialized = JSON.parse(serialized);
@@ -663,13 +678,17 @@ describe('FileSystemTypes', () => {
       const complexObject = {
         fileMetadata: createMockFileMetadata(),
         processingJob: createMockProcessingJob(),
-        securityValidation: createMockSecurityValidation()
+        securityValidation: createMockSecurityValidation(),
       };
 
       // Act & Assert
       expect(isFileMetadata(complexObject.fileMetadata)).toBe(true);
-      expect(complexObject.processingJob.options.generateThumbnail).toBeDefined();
-      expect(Array.isArray(complexObject.securityValidation.threats)).toBe(true);
+      expect(
+        complexObject.processingJob.options.generateThumbnail,
+      ).toBeDefined();
+      expect(Array.isArray(complexObject.securityValidation.threats)).toBe(
+        true,
+      );
     });
   });
 
@@ -692,14 +711,15 @@ describe('FileSystemTypes', () => {
       storageKey: 'files/user123/2024/01/test-document.pdf',
       cdnUrl: 'https://cdn.coders.com/files/test-document.pdf',
       checksumMd5: 'a1b2c3d4e5f6789012345678901234567',
-      checksumSha256: 'a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234',
+      checksumSha256:
+        'a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234',
       virusScanStatus: VirusScanStatus.CLEAN,
       processingStatus: ProcessingStatus.COMPLETED,
       documentType: DocumentType.PROJECT_DOCUMENT,
       versionCount: 1,
       tags: ['test', 'document'],
       createdAt: new Date('2024-01-15T10:00:00Z'),
-      updatedAt: new Date('2024-01-15T10:05:00Z')
+      updatedAt: new Date('2024-01-15T10:05:00Z'),
     };
   }
 
@@ -719,7 +739,7 @@ describe('FileSystemTypes', () => {
         optimizeForWeb: true,
         extractMetadata: true,
         imageQuality: 85,
-        forceReprocess: false
+        forceReprocess: false,
       },
       result: {
         success: true,
@@ -729,13 +749,13 @@ describe('FileSystemTypes', () => {
           optimizedSize: 786432,
           compressionRatio: 0.75,
           techniques: ['compression', 'optimization'],
-          spaceSavingPercent: 25
-        }
+          spaceSavingPercent: 25,
+        },
       },
       executionTime: 5000,
       createdAt: new Date('2024-01-15T10:00:00Z'),
       startedAt: new Date('2024-01-15T10:01:00Z'),
-      completedAt: new Date('2024-01-15T10:06:00Z')
+      completedAt: new Date('2024-01-15T10:06:00Z'),
     };
   }
 
@@ -752,8 +772,8 @@ describe('FileSystemTypes', () => {
       details: {
         scanEngine: 'ClamAV 0.103.8',
         scanDuration: 1500,
-        signatures: 8234567
-      }
+        signatures: 8234567,
+      },
     };
   }
 });

@@ -16,7 +16,7 @@ import fileSystemConfig, {
   SecurityConfig,
   isValidFileSystemConfig,
   getEnvironmentConfig,
-  FILE_SYSTEM_CONFIG
+  FILE_SYSTEM_CONFIG,
 } from '../file-system.config';
 
 describe('FileSystemConfig', () => {
@@ -37,9 +37,9 @@ describe('FileSystemConfig', () => {
       imports: [
         ConfigModule.forRoot({
           load: [fileSystemConfig],
-          envFilePath: '.env.test'
-        })
-      ]
+          envFilePath: '.env.test',
+        }),
+      ],
     }).compile();
 
     configService = module.get<ConfigService>(ConfigService);
@@ -48,7 +48,7 @@ describe('FileSystemConfig', () => {
   afterEach(async () => {
     // ISOLATION : Restaurer l'environnement original
     process.env = originalEnv;
-    
+
     await module.close();
   });
 
@@ -69,7 +69,7 @@ describe('FileSystemConfig', () => {
         GARAGE_REGION: 'eu-west-1',
         CDN_BASE_URL: 'https://cdn.coders.com',
         CDN_INVALIDATION_TOKEN: 'cdn_token_123',
-        SECURITY_TOKEN_SECRET: 'super_secret_token_key_32_chars_minimum_length'
+        SECURITY_TOKEN_SECRET: 'super_secret_token_key_32_chars_minimum_length',
       };
 
       // Act - Reset complet de l'environnement
@@ -82,7 +82,9 @@ describe('FileSystemConfig', () => {
       expect(config.garage.accessKey).toBe('GK_TEST_ACCESS_KEY');
       expect(config.garage.buckets.documents).toBe('coders-documents');
       expect(config.cdn.baseUrl).toBe('https://cdn.coders.com');
-      expect(config.security.securityTokenSecret).toBe('super_secret_token_key_32_chars_minimum_length');
+      expect(config.security.securityTokenSecret).toBe(
+        'super_secret_token_key_32_chars_minimum_length',
+      );
     });
 
     it('should apply default values for optional configuration', () => {
@@ -97,7 +99,7 @@ describe('FileSystemConfig', () => {
         GARAGE_REGION: 'eu-west-1',
         CDN_BASE_URL: 'https://cdn.test.com',
         CDN_INVALIDATION_TOKEN: 'token',
-        SECURITY_TOKEN_SECRET: 'minimum_length_secret_key_here_32_chars_ok'
+        SECURITY_TOKEN_SECRET: 'minimum_length_secret_key_here_32_chars_ok',
         // PAS d'autres variables = valeurs par défaut utilisées
       };
 
@@ -110,7 +112,7 @@ describe('FileSystemConfig', () => {
       expect(config.processing.imageOptimizationQuality).toBe(85); // Défaut de file-system.config.ts
       expect(config.security.presignedUrlExpiry).toBe(3600); // 1 hour
       expect(config.security.ipRestrictionEnabled).toBe(true); // Défaut = true
-      expect(config.security.scanVirusEnabled).toBe(true); // Défaut = true 
+      expect(config.security.scanVirusEnabled).toBe(true); // Défaut = true
       expect(config.cdn.defaultTtl).toBe(86400); // 24 hours
     });
 
@@ -119,12 +121,14 @@ describe('FileSystemConfig', () => {
       const incompleteEnv = {
         GARAGE_ENDPOINT: 'https://s3.test.com',
         // GARAGE_ACCESS_KEY manquant - requis !
-        GARAGE_SECRET_KEY: 'test_secret'
+        GARAGE_SECRET_KEY: 'test_secret',
       };
 
       // Act & Assert - Reset complet de l'environnement
       process.env = { ...incompleteEnv };
-      expect(() => fileSystemConfig()).toThrow(/is required and cannot be empty/);
+      expect(() => fileSystemConfig()).toThrow(
+        /is required and cannot be empty/,
+      );
     });
 
     it('should validate numeric environment variables', () => {
@@ -142,7 +146,7 @@ describe('FileSystemConfig', () => {
         SECURITY_TOKEN_SECRET: 'secret_key_with_sufficient_length_32_chars_min',
         MAX_FILE_SIZE: '52428800', // 50MB as string
         IMAGE_OPTIMIZATION_QUALITY: '90',
-        PRESIGNED_URL_EXPIRY: '7200' // 2 hours
+        PRESIGNED_URL_EXPIRY: '7200', // 2 hours
       };
 
       // Act - Reset complet de l'environnement
@@ -170,8 +174,8 @@ describe('FileSystemConfig', () => {
         CDN_INVALIDATION_TOKEN: 'token',
         SECURITY_TOKEN_SECRET: 'secret_key_with_sufficient_length_32_chars_min',
         IP_RESTRICTION_ENABLED: 'false',
-        SCAN_VIRUS_ENABLED: 'true',  // EXPLICITEMENT à true
-        DEVICE_FINGERPRINTING_ENABLED: 'true'
+        SCAN_VIRUS_ENABLED: 'true', // EXPLICITEMENT à true
+        DEVICE_FINGERPRINTING_ENABLED: 'true',
       };
 
       // Act - Reset complet de l'environnement
@@ -199,7 +203,7 @@ describe('FileSystemConfig', () => {
         CDN_INVALIDATION_TOKEN: 'token',
         SECURITY_TOKEN_SECRET: 'secret_key_with_sufficient_length_32_chars_min',
         CDN_EDGE_LOCATIONS: 'eu-west-1, us-east-1, ap-southeast-1',
-        ALLOWED_MIME_TYPES: 'image/jpeg,application/pdf, text/plain'
+        ALLOWED_MIME_TYPES: 'image/jpeg,application/pdf, text/plain',
       };
 
       // Act - Reset complet de l'environnement
@@ -207,8 +211,16 @@ describe('FileSystemConfig', () => {
       const config = fileSystemConfig();
 
       // Assert - Conversion string → array avec trim
-      expect(config.cdn.edgeLocations).toEqual(['eu-west-1', 'us-east-1', 'ap-southeast-1']);
-      expect(config.processing.allowedMimeTypes).toEqual(['image/jpeg', 'application/pdf', 'text/plain']);
+      expect(config.cdn.edgeLocations).toEqual([
+        'eu-west-1',
+        'us-east-1',
+        'ap-southeast-1',
+      ]);
+      expect(config.processing.allowedMimeTypes).toEqual([
+        'image/jpeg',
+        'application/pdf',
+        'text/plain',
+      ]);
       expect(Array.isArray(config.cdn.edgeLocations)).toBe(true);
     });
   });
@@ -221,7 +233,7 @@ describe('FileSystemConfig', () => {
     it('should have correct configuration structure', () => {
       // Arrange
       const validEnv = createValidEnvironment();
-      
+
       // Act - Reset complet de l'environnement
       process.env = { ...validEnv };
       const config = fileSystemConfig();
@@ -259,7 +271,7 @@ describe('FileSystemConfig', () => {
     it('should set forcePathStyle to true for Garage compatibility', () => {
       // Arrange
       const validEnv = createValidEnvironment();
-      
+
       // Act - Reset complet de l'environnement
       process.env = { ...validEnv };
       const config = fileSystemConfig();
@@ -293,7 +305,7 @@ describe('FileSystemConfig', () => {
           secretKey: 'test',
           buckets: { documents: 'docs', backups: 'backups', temp: 'temp' },
           region: 'eu-west-1',
-          forcePathStyle: true
+          forcePathStyle: true,
         },
         cdn: {
           baseUrl: 'https://cdn.test.com',
@@ -301,7 +313,7 @@ describe('FileSystemConfig', () => {
           invalidationToken: 'token',
           edgeLocations: ['eu-west-1'],
           defaultTtl: 3600,
-          maxTtl: 86400
+          maxTtl: 86400,
         },
         processing: {
           maxFileSize: 100 * 1024 * 1024,
@@ -311,7 +323,7 @@ describe('FileSystemConfig', () => {
           thumbnailSize: 200,
           pdfCompressionLevel: 6,
           maxWorkers: 4,
-          chunkSize: 64 * 1024
+          chunkSize: 64 * 1024,
         },
         security: {
           presignedUrlExpiry: 3600,
@@ -321,8 +333,9 @@ describe('FileSystemConfig', () => {
           rateLimitUploadsPerMinute: 10,
           abuseBlockDuration: 300,
           deviceFingerprintingEnabled: true,
-          securityTokenSecret: 'valid_secret_key_with_sufficient_length_32_chars'
-        }
+          securityTokenSecret:
+            'valid_secret_key_with_sufficient_length_32_chars',
+        },
       };
 
       // Act
@@ -341,11 +354,11 @@ describe('FileSystemConfig', () => {
         { garage: null },
         { garage: {}, cdn: null },
         { garage: {}, cdn: {}, processing: null },
-        'not an object'
+        'not an object',
       ];
 
       // Act & Assert
-      invalidConfigs.forEach(config => {
+      invalidConfigs.forEach((config) => {
         expect(isValidFileSystemConfig(config)).toBe(false);
       });
     });
@@ -387,10 +400,18 @@ describe('FileSystemConfig', () => {
 
     it('should provide typed access to configuration sections', () => {
       // Arrange & Act
-      const garageConfig = configService.get<GarageConfig>(`${FILE_SYSTEM_CONFIG}.garage`);
-      const cdnConfig = configService.get<CDNConfig>(`${FILE_SYSTEM_CONFIG}.cdn`);
-      const processingConfig = configService.get<ProcessingConfig>(`${FILE_SYSTEM_CONFIG}.processing`);
-      const securityConfig = configService.get<SecurityConfig>(`${FILE_SYSTEM_CONFIG}.security`);
+      const garageConfig = configService.get<GarageConfig>(
+        `${FILE_SYSTEM_CONFIG}.garage`,
+      );
+      const cdnConfig = configService.get<CDNConfig>(
+        `${FILE_SYSTEM_CONFIG}.cdn`,
+      );
+      const processingConfig = configService.get<ProcessingConfig>(
+        `${FILE_SYSTEM_CONFIG}.processing`,
+      );
+      const securityConfig = configService.get<SecurityConfig>(
+        `${FILE_SYSTEM_CONFIG}.security`,
+      );
 
       // Assert
       expect(garageConfig).toBeDefined();
@@ -422,12 +443,14 @@ describe('FileSystemConfig', () => {
       const envWithEmptyStrings = {
         GARAGE_ENDPOINT: '',
         GARAGE_ACCESS_KEY: '',
-        GARAGE_SECRET_KEY: ''
+        GARAGE_SECRET_KEY: '',
       };
 
       // Act & Assert - Reset complet de l'environnement
       process.env = { ...envWithEmptyStrings };
-      expect(() => fileSystemConfig()).toThrow(/is required and cannot be empty/);
+      expect(() => fileSystemConfig()).toThrow(
+        /is required and cannot be empty/,
+      );
     });
 
     it('should handle malformed numeric values', () => {
@@ -497,7 +520,8 @@ describe('FileSystemConfig', () => {
       GARAGE_REGION: 'eu-west-1',
       CDN_BASE_URL: 'https://cdn.test.coders.com',
       CDN_INVALIDATION_TOKEN: 'test_cdn_invalidation_token_123',
-      SECURITY_TOKEN_SECRET: 'test_security_token_secret_with_minimum_32_characters_length'
+      SECURITY_TOKEN_SECRET:
+        'test_security_token_secret_with_minimum_32_characters_length',
     };
   }
 });

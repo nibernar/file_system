@@ -1,10 +1,10 @@
 /**
  * Tests unitaires pour FileProcessingService - Orchestration traitement
- * 
+ *
  * Ce fichier teste le service principal d'orchestration qui coordonne tous
  * les traitements de fichiers, gère les queues asynchrones et le versioning.
  * Version corrigée avec les bons mocks et signatures.
- * 
+ *
  * @author Backend Lead
  * @version 1.0
  * @conformsTo 04-06-file-system-tests Phase 3.1
@@ -25,17 +25,14 @@ import {
   QueueJobResult,
   ImageFormat,
   VersionOptions,
-  VersionChangeType
+  VersionChangeType,
 } from '../../../types/file-system.types';
 import {
   FileNotFoundException,
   ProcessingException,
-  InvalidProcessingStateException
+  InvalidProcessingStateException,
 } from '../../../exceptions/file-system.exceptions';
-import {
-  generateTestUUID,
-  delay
-} from '../../../__tests__/test-setup';
+import { generateTestUUID, delay } from '../../../__tests__/test-setup';
 
 describe('FileProcessingService', () => {
   let service: FileProcessingService;
@@ -48,7 +45,9 @@ describe('FileProcessingService', () => {
   /**
    * Helper pour créer un FileMetadata mock complet
    */
-  const createMockFileMetadata = (overrides: Partial<FileMetadata> = {}): FileMetadata => ({
+  const createMockFileMetadata = (
+    overrides: Partial<FileMetadata> = {},
+  ): FileMetadata => ({
     id: generateTestUUID(),
     userId: 'test-user',
     projectId: undefined,
@@ -66,7 +65,7 @@ describe('FileProcessingService', () => {
     tags: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides
+    ...overrides,
   });
 
   beforeEach(async () => {
@@ -76,11 +75,11 @@ describe('FileProcessingService', () => {
         maxFileSize: 100 * 1024 * 1024, // 100MB
         allowedMimeTypes: ['image/*', 'application/pdf', 'text/*'],
         thumbnailSize: 200,
-        imageOptimizationQuality: 85
+        imageOptimizationQuality: 85,
       },
       cdn: {
-        baseUrl: 'https://cdn.test.coders.com'
-      }
+        baseUrl: 'https://cdn.test.coders.com',
+      },
     };
 
     // Mock services
@@ -88,7 +87,7 @@ describe('FileProcessingService', () => {
       downloadObject: jest.fn(),
       uploadObject: jest.fn(),
       copyObject: jest.fn(),
-      getObjectInfo: jest.fn()
+      getObjectInfo: jest.fn(),
     };
 
     const mockProcessingQueue = {
@@ -97,21 +96,21 @@ describe('FileProcessingService', () => {
       clean: jest.fn(),
       close: jest.fn(),
       getJob: jest.fn(),
-      getJobs: jest.fn()
+      getJobs: jest.fn(),
     };
 
     const mockFileMetadataRepository = {
       findById: jest.fn(),
       update: jest.fn(),
       create: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
     };
 
     const mockLogger = {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn()
+      error: jest.fn(),
     };
 
     // Configuration module NestJS
@@ -120,10 +119,13 @@ describe('FileProcessingService', () => {
         FileProcessingService,
         { provide: GarageStorageService, useValue: mockStorageService },
         { provide: 'BullQueue_file-processing', useValue: mockProcessingQueue },
-        { provide: 'IFileMetadataRepository', useValue: mockFileMetadataRepository },
+        {
+          provide: 'IFileMetadataRepository',
+          useValue: mockFileMetadataRepository,
+        },
         { provide: Logger, useValue: mockLogger },
-        { provide: FILE_SYSTEM_CONFIG, useValue: mockConfig }
-      ]
+        { provide: FILE_SYSTEM_CONFIG, useValue: mockConfig },
+      ],
     }).compile();
 
     // Récupération instances
@@ -153,19 +155,21 @@ describe('FileProcessingService', () => {
         id: fileId,
         contentType: 'image/jpeg',
         size: 2048,
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
       fileMetadataRepository.update.mockResolvedValue(mockFileMetadata);
 
-      jest.spyOn(service as any, 'performBasicSecurityCheck')
+      jest
+        .spyOn(service as any, 'performBasicSecurityCheck')
         .mockImplementation(async () => {
           await delay(5); // ✅ Délai artificiel
           return { safe: true, threats: [], engineVersion: 'basic' };
         });
 
-      jest.spyOn(service as any, 'processImage')
+      jest
+        .spyOn(service as any, 'processImage')
         .mockImplementation(async () => {
           await delay(10);
           return {
@@ -176,12 +180,13 @@ describe('FileProcessingService', () => {
               optimizedSize: 1024,
               compressionRatio: 0.5,
               spaceSavingPercent: 50,
-              techniques: ['image_compression', 'format_optimization']
-            }
+              techniques: ['image_compression', 'format_optimization'],
+            },
           };
         });
 
-      jest.spyOn(service as any, 'generateThumbnail')
+      jest
+        .spyOn(service as any, 'generateThumbnail')
         .mockImplementation(async () => {
           await delay(3); // ✅ Délai pour génération thumbnail
           return 'https://cdn.test.coders.com/test/thumbnails/200/image.jpg';
@@ -196,14 +201,12 @@ describe('FileProcessingService', () => {
       expect(result.optimizations).toBeDefined();
       expect(result.thumbnailUrl).toContain('cdn.test.coders.com');
 
-      expect(fileMetadataRepository.update).toHaveBeenCalledWith(
-        fileId, 
-        { processingStatus: ProcessingStatus.PROCESSING }
-      );
-      expect(fileMetadataRepository.update).toHaveBeenCalledWith(
-        fileId, 
-        { processingStatus: ProcessingStatus.COMPLETED }
-      );
+      expect(fileMetadataRepository.update).toHaveBeenCalledWith(fileId, {
+        processingStatus: ProcessingStatus.PROCESSING,
+      });
+      expect(fileMetadataRepository.update).toHaveBeenCalledWith(fileId, {
+        processingStatus: ProcessingStatus.COMPLETED,
+      });
     });
 
     it('should process PDF file with metadata extraction', async () => {
@@ -211,7 +214,7 @@ describe('FileProcessingService', () => {
       const mockFileMetadata = createMockFileMetadata({
         contentType: 'application/pdf',
         size: 2 * 1024 * 1024, // 2MB
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -223,7 +226,7 @@ describe('FileProcessingService', () => {
         etag: 'pdf-etag',
         location: 'pdf-url',
         metadata: mockFileMetadata,
-        uploadDuration: 200
+        uploadDuration: 200,
       });
 
       // Act
@@ -240,7 +243,7 @@ describe('FileProcessingService', () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
         contentType: 'text/plain',
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -253,7 +256,7 @@ describe('FileProcessingService', () => {
         etag: 'doc-etag',
         location: 'doc-url',
         metadata: mockFileMetadata,
-        uploadDuration: 50
+        uploadDuration: 50,
       });
 
       // Act
@@ -271,36 +274,36 @@ describe('FileProcessingService', () => {
       const fileId = generateTestUUID();
       const mockFileMetadata = createMockFileMetadata({
         id: fileId,
-        processingStatus: ProcessingStatus.PROCESSING // ✅ Déjà en cours
+        processingStatus: ProcessingStatus.PROCESSING, // ✅ Déjà en cours
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
 
       // Act & Assert
-      await expect(service.processUploadedFile(fileId))
-        .rejects.toThrow(InvalidProcessingStateException);
+      await expect(service.processUploadedFile(fileId)).rejects.toThrow(
+        InvalidProcessingStateException,
+      );
 
       // ✅ Le service met quand même le statut à FAILED dans le catch
       // donc on s'attend à ce que update soit appelé avec 'failed'
-      expect(fileMetadataRepository.update).toHaveBeenCalledWith(
-        fileId, 
-        { processingStatus: ProcessingStatus.FAILED }
-      );
+      expect(fileMetadataRepository.update).toHaveBeenCalledWith(fileId, {
+        processingStatus: ProcessingStatus.FAILED,
+      });
     });
-
 
     it('should handle file not found', async () => {
       // Arrange
       const nonExistentFileId = generateTestUUID();
 
       fileMetadataRepository.findById.mockRejectedValue(
-        new FileNotFoundException(nonExistentFileId)
+        new FileNotFoundException(nonExistentFileId),
       );
 
       // Act & Assert - ✅ Le service wrappé dans ProcessingException
-      await expect(service.processUploadedFile(nonExistentFileId))
-        .rejects.toThrow(ProcessingException);
-        
+      await expect(
+        service.processUploadedFile(nonExistentFileId),
+      ).rejects.toThrow(ProcessingException);
+
       // ✅ Vérification que c'est bien une erreur de processing avec le bon message
       try {
         await service.processUploadedFile(nonExistentFileId);
@@ -318,33 +321,36 @@ describe('FileProcessingService', () => {
         id: fileId,
         contentType: 'image/jpeg',
         size: 200 * 1024 * 1024, // 200MB - gros fichier mais pas trop
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
       fileMetadataRepository.update.mockResolvedValue(mockFileMetadata);
 
       // ✅ Mock du scan sécurité qui échoue
-      jest.spyOn(service as any, 'performBasicSecurityCheck')
+      jest
+        .spyOn(service as any, 'performBasicSecurityCheck')
         .mockRejectedValue(new Error('Security scan failed'));
 
       // Mock du traitement d'image qui réussit
-      jest.spyOn(service as any, 'processImage')
-        .mockResolvedValue({
-          success: true,
-          processingTime: 0,
-          optimizations: {
-            originalSize: mockFileMetadata.size,
-            optimizedSize: mockFileMetadata.size,
-            compressionRatio: 1,
-            spaceSavingPercent: 0,
-            techniques: ['basic_image_processing']
-          }
-        });
+      jest.spyOn(service as any, 'processImage').mockResolvedValue({
+        success: true,
+        processingTime: 0,
+        optimizations: {
+          originalSize: mockFileMetadata.size,
+          optimizedSize: mockFileMetadata.size,
+          compressionRatio: 1,
+          spaceSavingPercent: 0,
+          techniques: ['basic_image_processing'],
+        },
+      });
 
       // Mock génération thumbnail
-      jest.spyOn(service as any, 'generateThumbnail')
-        .mockResolvedValue('https://cdn.test.coders.com/test/thumbnails/200/image.jpg');
+      jest
+        .spyOn(service as any, 'generateThumbnail')
+        .mockResolvedValue(
+          'https://cdn.test.coders.com/test/thumbnails/200/image.jpg',
+        );
 
       // Act
       const result = await service.processUploadedFile(fileId);
@@ -353,14 +359,16 @@ describe('FileProcessingService', () => {
       expect(result.success).toBe(true);
       expect(result.securityScan).toBeDefined();
       expect(result.securityScan?.safe).toBe(false);
-      expect(result.securityScan?.threatsFound).toContain('SECURITY_SCAN_FAILED');
+      expect(result.securityScan?.threatsFound).toContain(
+        'SECURITY_SCAN_FAILED',
+      );
     });
 
     it('should process generic file type', async () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
         contentType: 'application/zip',
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -382,14 +390,14 @@ describe('FileProcessingService', () => {
       const mockFileMetadata = createMockFileMetadata({
         size: 1024 * 1024, // 1MB - petite taille = priorité plus élevée
         documentType: DocumentType.CONFIDENTIAL,
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       const processingOptions: ExtendedProcessingOptions = {
         generateThumbnail: true,
         optimizeForWeb: true,
         priority: 8,
-        userId: 'test-user'
+        userId: 'test-user',
       };
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -398,7 +406,10 @@ describe('FileProcessingService', () => {
       processingQueue.add.mockResolvedValue(mockJobResult as any);
 
       // Act
-      const result = await service.queueProcessing(mockFileMetadata.id, processingOptions);
+      const result = await service.queueProcessing(
+        mockFileMetadata.id,
+        processingOptions,
+      );
 
       // Assert
       expect(result.jobId).toBe('job-123');
@@ -409,12 +420,12 @@ describe('FileProcessingService', () => {
         'process-uploaded-file',
         expect.objectContaining({
           fileId: mockFileMetadata.id,
-          userId: 'test-user'
+          userId: 'test-user',
         }),
         expect.objectContaining({
           priority: expect.any(Number),
-          attempts: 3
-        })
+          attempts: 3,
+        }),
       );
     });
 
@@ -423,13 +434,13 @@ describe('FileProcessingService', () => {
       const smallImageFile = createMockFileMetadata({
         size: 500 * 1024, // 500KB
         contentType: 'image/jpeg',
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       const largeVideoFile = createMockFileMetadata({
         size: 80 * 1024 * 1024, // 80MB
         contentType: 'video/mp4',
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       const urgentOptions: ExtendedProcessingOptions = { priority: 9 };
@@ -448,35 +459,37 @@ describe('FileProcessingService', () => {
       await service.queueProcessing(largeVideoFile.id, normalOptions);
 
       // Assert
-      expect(processingQueue.add).toHaveBeenNthCalledWith(1,
+      expect(processingQueue.add).toHaveBeenNthCalledWith(
+        1,
         'process-uploaded-file',
         expect.anything(),
         expect.objectContaining({
-          priority: expect.any(Number) // Petits fichiers = priorité plus élevée
-        })
+          priority: expect.any(Number), // Petits fichiers = priorité plus élevée
+        }),
       );
 
-      expect(processingQueue.add).toHaveBeenNthCalledWith(2,
+      expect(processingQueue.add).toHaveBeenNthCalledWith(
+        2,
         'process-uploaded-file',
         expect.anything(),
         expect.objectContaining({
-          priority: expect.any(Number) // Gros fichiers = priorité plus faible
-        })
+          priority: expect.any(Number), // Gros fichiers = priorité plus faible
+        }),
       );
     });
 
     it('should handle queue processing errors gracefully', async () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       const retryOptions: ExtendedProcessingOptions = {
         retryConfig: {
           maxAttempts: 3,
           backoffMs: 1000,
-          exponentialBackoff: true
-        }
+          exponentialBackoff: true,
+        },
       };
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -486,11 +499,15 @@ describe('FileProcessingService', () => {
         .mockResolvedValueOnce({ id: 'retry-job' } as any);
 
       // Act & Assert - Premier échec
-      await expect(service.queueProcessing(mockFileMetadata.id, retryOptions))
-        .rejects.toThrow('Queue temporarily unavailable');
+      await expect(
+        service.queueProcessing(mockFileMetadata.id, retryOptions),
+      ).rejects.toThrow('Queue temporarily unavailable');
 
       // Retry réussit
-      const retryResult = await service.queueProcessing(mockFileMetadata.id, retryOptions);
+      const retryResult = await service.queueProcessing(
+        mockFileMetadata.id,
+        retryOptions,
+      );
 
       expect(retryResult.jobId).toBe('retry-job');
       expect(processingQueue.add).toHaveBeenCalledTimes(2);
@@ -499,14 +516,15 @@ describe('FileProcessingService', () => {
     it('should reject file not in pending state', async () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
-        processingStatus: ProcessingStatus.COMPLETED // Déjà traité
+        processingStatus: ProcessingStatus.COMPLETED, // Déjà traité
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
 
       // Act & Assert
-      await expect(service.queueProcessing(mockFileMetadata.id, {}))
-        .rejects.toThrow(InvalidProcessingStateException);
+      await expect(
+        service.queueProcessing(mockFileMetadata.id, {}),
+      ).rejects.toThrow(InvalidProcessingStateException);
 
       expect(processingQueue.add).not.toHaveBeenCalled();
     });
@@ -516,7 +534,7 @@ describe('FileProcessingService', () => {
     it('should create file version successfully', async () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
-        versionCount: 2
+        versionCount: 2,
       });
 
       const versionOptions: VersionOptions = {
@@ -524,7 +542,7 @@ describe('FileProcessingService', () => {
         keepOldVersions: true,
         description: 'Version de test',
         changeType: VersionChangeType.MANUAL_EDIT,
-        userId: 'test-user'
+        userId: 'test-user',
       };
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -534,11 +552,14 @@ describe('FileProcessingService', () => {
         sourceKey: mockFileMetadata.storageKey,
         destinationKey: expect.stringContaining('/versions/3/'),
         etag: 'version-etag',
-        lastModified: new Date()
+        lastModified: new Date(),
       });
 
       // Act
-      const version = await service.createVersion(mockFileMetadata.id, versionOptions);
+      const version = await service.createVersion(
+        mockFileMetadata.id,
+        versionOptions,
+      );
 
       // Assert
       expect(version.fileId).toBe(mockFileMetadata.id);
@@ -550,13 +571,13 @@ describe('FileProcessingService', () => {
       // Vérification copie fichier
       expect(storageService.copyObject).toHaveBeenCalledWith(
         mockFileMetadata.storageKey,
-        expect.stringContaining('/versions/3/')
+        expect.stringContaining('/versions/3/'),
       );
 
       // Vérification mise à jour compteur
       expect(fileMetadataRepository.update).toHaveBeenCalledWith(
         mockFileMetadata.id,
-        { versionCount: 3 }
+        { versionCount: 3 },
       );
     });
   });
@@ -565,11 +586,11 @@ describe('FileProcessingService', () => {
     it('should generate thumbnail for different file types', async () => {
       // Arrange
       const imageFile = createMockFileMetadata({
-        contentType: 'image/png'
+        contentType: 'image/png',
       });
 
       const pdfFile = createMockFileMetadata({
-        contentType: 'application/pdf'
+        contentType: 'application/pdf',
       });
 
       storageService.uploadObject
@@ -579,7 +600,7 @@ describe('FileProcessingService', () => {
           etag: 'image-etag',
           location: 'image-url',
           metadata: imageFile,
-          uploadDuration: 100
+          uploadDuration: 100,
         })
         .mockResolvedValueOnce({
           uploadId: 'pdf-thumb',
@@ -587,11 +608,14 @@ describe('FileProcessingService', () => {
           etag: 'pdf-etag',
           location: 'pdf-url',
           metadata: pdfFile,
-          uploadDuration: 150
+          uploadDuration: 150,
         });
 
       // Act
-      const imageThumbUrl = await service.generateThumbnail(imageFile.id, imageFile);
+      const imageThumbUrl = await service.generateThumbnail(
+        imageFile.id,
+        imageFile,
+      );
       const pdfThumbUrl = await service.generateThumbnail(pdfFile.id, pdfFile);
 
       // Assert
@@ -603,16 +627,17 @@ describe('FileProcessingService', () => {
     it('should handle thumbnail generation failures', async () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
-        contentType: 'image/corrupted'
+        contentType: 'image/corrupted',
       });
 
       storageService.uploadObject.mockRejectedValue(
-        new Error('Storage upload failed')
+        new Error('Storage upload failed'),
       );
 
       // Act & Assert
-      await expect(service.generateThumbnail(mockFileMetadata.id, mockFileMetadata))
-        .rejects.toThrow(ProcessingException);
+      await expect(
+        service.generateThumbnail(mockFileMetadata.id, mockFileMetadata),
+      ).rejects.toThrow(ProcessingException);
     });
   });
 
@@ -620,7 +645,7 @@ describe('FileProcessingService', () => {
     it('should handle concurrent processing attempts', async () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -628,24 +653,34 @@ describe('FileProcessingService', () => {
 
       const concurrentOptions: ExtendedProcessingOptions = {
         generateThumbnail: true,
-        timeout: 5000
+        timeout: 5000,
       };
 
       processingQueue.add.mockResolvedValue({
         id: 'concurrent-job-1',
         status: 'queued',
         progress: 0,
-        estimatedDuration: 30
+        estimatedDuration: 30,
       } as any);
 
       // Act - Tentative de traitement concurrent
-      const promise1 = service.queueProcessing(mockFileMetadata.id, concurrentOptions);
-      const promise2 = service.queueProcessing(mockFileMetadata.id, concurrentOptions);
+      const promise1 = service.queueProcessing(
+        mockFileMetadata.id,
+        concurrentOptions,
+      );
+      const promise2 = service.queueProcessing(
+        mockFileMetadata.id,
+        concurrentOptions,
+      );
 
       // Assert - Une des deux devrait réussir
       const results = await Promise.allSettled([promise1, promise2]);
-      const successCount = results.filter(r => r.status === 'fulfilled').length;
-      const rejectedCount = results.filter(r => r.status === 'rejected').length;
+      const successCount = results.filter(
+        (r) => r.status === 'fulfilled',
+      ).length;
+      const rejectedCount = results.filter(
+        (r) => r.status === 'rejected',
+      ).length;
 
       expect(successCount + rejectedCount).toBe(2);
       expect(successCount).toBeGreaterThanOrEqual(1);
@@ -655,7 +690,7 @@ describe('FileProcessingService', () => {
       // Arrange
       const mockFileMetadata = createMockFileMetadata({
         processingStatus: ProcessingStatus.PENDING,
-        size: 500 * 1024 * 1024 // Très gros fichier
+        size: 500 * 1024 * 1024, // Très gros fichier
       });
 
       fileMetadataRepository.findById.mockResolvedValue(mockFileMetadata);
@@ -665,19 +700,21 @@ describe('FileProcessingService', () => {
         retryConfig: {
           maxAttempts: 1,
           backoffMs: 0,
-          exponentialBackoff: false
-        }
+          exponentialBackoff: false,
+        },
       };
 
-      processingQueue.add.mockImplementation(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Processing timeout')), 50)
-        )
+      processingQueue.add.mockImplementation(
+        () =>
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Processing timeout')), 50),
+          ),
       );
 
       // Act & Assert
-      await expect(service.queueProcessing(mockFileMetadata.id, timeoutOptions))
-        .rejects.toThrow('Processing timeout');
+      await expect(
+        service.queueProcessing(mockFileMetadata.id, timeoutOptions),
+      ).rejects.toThrow('Processing timeout');
     });
 
     it('should optimize processing based on file type and size', async () => {
@@ -685,13 +722,13 @@ describe('FileProcessingService', () => {
       const smallTextFile = createMockFileMetadata({
         contentType: 'text/plain',
         size: 10 * 1024, // 10KB
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       const largeImageFile = createMockFileMetadata({
         contentType: 'image/jpeg',
         size: 25 * 1024 * 1024, // 25MB
-        processingStatus: ProcessingStatus.PENDING
+        processingStatus: ProcessingStatus.PENDING,
       });
 
       fileMetadataRepository.findById
@@ -708,9 +745,9 @@ describe('FileProcessingService', () => {
           image: {
             preserveExif: false,
             autoOrient: true,
-            progressive: true
-          }
-        }
+            progressive: true,
+          },
+        },
       };
 
       // Act
@@ -724,7 +761,9 @@ describe('FileProcessingService', () => {
       const textFileCall = processingQueue.add.mock.calls[0];
       const imageFileCall = processingQueue.add.mock.calls[1];
 
-      expect(textFileCall[2]?.priority).toBeGreaterThanOrEqual(imageFileCall[2]?.priority || 0);
+      expect(textFileCall[2]?.priority).toBeGreaterThanOrEqual(
+        imageFileCall[2]?.priority || 0,
+      );
     });
   });
 });

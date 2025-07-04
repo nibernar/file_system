@@ -1,10 +1,10 @@
 /**
  * Tests unitaires pour FileProcessingProcessor
- * 
+ *
  * Tests complets du processor de traitement asynchrone de fichiers,
  * couvrant tous les types de jobs, gestion d'erreurs, et événements de queue.
  * Conforme aux standards 07-08 avec pattern AAA et mocks appropriés.
- * 
+ *
  * @module FileProcessingProcessorSpec
  * @version 1.0
  * @author QA Backend
@@ -17,9 +17,20 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { FileProcessingProcessor } from '../file-processing.processor';
 import { FileProcessingService } from '../../../domain/services/file-processing.service';
-import { ImageProcessorService, LocalOptimizedImage, LocalConversionResult } from '../../processing/image-processor.service';
-import { PdfProcessorService, OptimizedPdf, PdfPreview } from '../../processing/pdf-processor.service';
-import { DocumentProcessorService,  ProcessedDocument } from '../../processing/document-processor.service';
+import {
+  ImageProcessorService,
+  LocalOptimizedImage,
+  LocalConversionResult,
+} from '../../processing/image-processor.service';
+import {
+  PdfProcessorService,
+  OptimizedPdf,
+  PdfPreview,
+} from '../../processing/pdf-processor.service';
+import {
+  DocumentProcessorService,
+  ProcessedDocument,
+} from '../../processing/document-processor.service';
 import { MetricsService } from '../../monitoring/metrics.service';
 import { IFileMetadataRepository } from '../../../domain/repositories/file-metadata.repository';
 import {
@@ -37,13 +48,13 @@ import {
   ImageFormat,
   FileMetadata,
   SecurityScanResult,
-  FileOptimizations
+  FileOptimizations,
 } from '../../../types/file-system.types';
 import {
   FileNotFoundException,
   ProcessingException,
   OptimizationException,
-  ThumbnailGenerationException
+  ThumbnailGenerationException,
 } from '../../../exceptions/file-system.exceptions';
 
 // ============================================================================
@@ -66,7 +77,7 @@ class FileMetadataTestDataBuilder {
     versionCount: 1,
     tags: ['test'],
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 
   withId(id: string): this {
@@ -123,11 +134,11 @@ class ProcessingJobDataTestDataBuilder {
     options: {
       generateThumbnail: true,
       optimizeForWeb: true,
-      extractMetadata: true
+      extractMetadata: true,
     },
     userId: 'test-user-456',
     reason: 'Test processing',
-    createdAt: new Date()
+    createdAt: new Date(),
   };
 
   withFileId(fileId: string): this {
@@ -162,7 +173,7 @@ class MockJobFactory {
   static create<T = any>(data: T, options: any = {}): jest.Mocked<Job<T>> {
     const mockJob = {
       id: 'job-123',
-      name: 'process-uploaded-file', 
+      name: 'process-uploaded-file',
       data,
       opts: { priority: 5, ...options },
       timestamp: Date.now(),
@@ -171,15 +182,15 @@ class MockJobFactory {
       returnvalue: undefined,
       failedReason: undefined,
       attemptsMade: 0,
-      
+
       // Mock methods with proper Jest mock functions
       getState: jest.fn().mockResolvedValue('waiting'),
       progress: jest.fn().mockResolvedValue(undefined),
       remove: jest.fn().mockResolvedValue(undefined),
-      retry: jest.fn().mockResolvedValue(undefined), 
+      retry: jest.fn().mockResolvedValue(undefined),
       log: jest.fn().mockResolvedValue(undefined),
       getPosition: jest.fn().mockResolvedValue(1),
-      
+
       // Additional required properties for full Job interface
       stacktrace: [],
       isCompleted: jest.fn().mockResolvedValue(false),
@@ -189,18 +200,18 @@ class MockJobFactory {
       isWaiting: jest.fn().mockResolvedValue(true),
       isPaused: jest.fn().mockResolvedValue(false),
       isStuck: jest.fn().mockResolvedValue(false),
-      
+
       // Other properties
       queue: {} as any,
       delay: 0,
       toJSON: jest.fn().mockReturnValue({}),
-      
+
       // Additional methods that might be called
       moveToCompleted: jest.fn(),
       moveToFailed: jest.fn(),
       discard: jest.fn(),
       promote: jest.fn(),
-      finished: jest.fn().mockResolvedValue(undefined)
+      finished: jest.fn().mockResolvedValue(undefined),
     };
 
     return mockJob as any;
@@ -210,7 +221,10 @@ class MockJobFactory {
 /**
  * Mock complet d'un Job Bull
  */
-function createMockJob<T = any>(data: T, options: any = {}): jest.Mocked<Job<T>> {
+function createMockJob<T = any>(
+  data: T,
+  options: any = {},
+): jest.Mocked<Job<T>> {
   return MockJobFactory.create(data, options);
 }
 
@@ -230,8 +244,8 @@ class MockResultsFactory {
       scanDetails: {
         fileId: 'test-file-123',
         contentType: 'application/pdf',
-        size: 5 * 1024 * 1024
-      }
+        size: 5 * 1024 * 1024,
+      },
     };
   }
 
@@ -244,9 +258,9 @@ class MockResultsFactory {
       format: 'webp',
       dimensions: {
         width: 1920,
-        height: 1080
+        height: 1080,
       },
-      storageKey: 'optimized/test-file-123.webp'
+      storageKey: 'optimized/test-file-123.webp',
     };
   }
 
@@ -260,7 +274,7 @@ class MockResultsFactory {
       size: 15000,
       quality: 85,
       width: 150,
-      height: 150
+      height: 150,
     };
   }
 
@@ -273,7 +287,7 @@ class MockResultsFactory {
       techniques: ['compression', 'image_optimization'],
       pageCount: 10,
       processingTime: 5000,
-      storageKey: 'optimized/test-file-123.pdf'
+      storageKey: 'optimized/test-file-123.pdf',
     };
   }
 
@@ -285,13 +299,13 @@ class MockResultsFactory {
         {
           pageNumber: 1,
           url: 'https://cdn.coders.com/previews/test-page-1.jpg',
-          dimensions: { width: 595, height: 842 }
-        }
+          dimensions: { width: 595, height: 842 },
+        },
       ],
       originalDimensions: {
         width: 595,
-        height: 842
-      }
+        height: 842,
+      },
     };
   }
 
@@ -308,13 +322,15 @@ class MockResultsFactory {
       summary: 'Document summary',
       specializedMetadata: {
         author: 'Test Author',
-        title: 'Test Document'
+        title: 'Test Document',
       },
-      processingTime: 3000
+      processingTime: 3000,
     };
   }
 
-  static createConversionResult(success: boolean = true): LocalConversionResult {
+  static createConversionResult(
+    success: boolean = true,
+  ): LocalConversionResult {
     if (success) {
       return {
         success: true,
@@ -325,7 +341,7 @@ class MockResultsFactory {
         convertedSize: 1.2 * 1024 * 1024,
         compressionRatio: 0.6,
         qualityRetained: 90,
-        conversionTime: 3000
+        conversionTime: 3000,
       };
     } else {
       return {
@@ -338,7 +354,7 @@ class MockResultsFactory {
         compressionRatio: 0,
         qualityRetained: 0,
         conversionTime: 0,
-        error: 'Conversion failed due to corrupted image'
+        error: 'Conversion failed due to corrupted image',
       };
     }
   }
@@ -363,31 +379,31 @@ describe('FileProcessingProcessor', () => {
       FileProcessingService: {
         processUploadedFile: jest.fn(),
         createVersion: jest.fn(),
-        getFileMetadata: jest.fn()
+        getFileMetadata: jest.fn(),
       },
       ImageProcessorService: {
         optimizeImage: jest.fn(),
         generateThumbnail: jest.fn(),
-        generateMultipleFormats: jest.fn()
+        generateMultipleFormats: jest.fn(),
       },
       PdfProcessorService: {
         optimizePdf: jest.fn(),
         generatePreview: jest.fn(),
-        extractMetadata: jest.fn()
+        extractMetadata: jest.fn(),
       },
       DocumentProcessorService: {
-        processDocument: jest.fn()
+        processDocument: jest.fn(),
       },
       MetricsService: {
         recordHistogram: jest.fn(),
         incrementCounter: jest.fn(),
-        updateGauge: jest.fn()
+        updateGauge: jest.fn(),
       },
       IFileMetadataRepository: {
         findById: jest.fn(),
         update: jest.fn(),
-        create: jest.fn()
-      }
+        create: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -395,27 +411,27 @@ describe('FileProcessingProcessor', () => {
         FileProcessingProcessor,
         {
           provide: FileProcessingService,
-          useValue: mockServices.FileProcessingService
+          useValue: mockServices.FileProcessingService,
         },
         {
           provide: ImageProcessorService,
-          useValue: mockServices.ImageProcessorService
+          useValue: mockServices.ImageProcessorService,
         },
         {
           provide: PdfProcessorService,
-          useValue: mockServices.PdfProcessorService
+          useValue: mockServices.PdfProcessorService,
         },
         {
           provide: DocumentProcessorService,
-          useValue: mockServices.DocumentProcessorService
+          useValue: mockServices.DocumentProcessorService,
         },
         {
           provide: MetricsService,
-          useValue: mockServices.MetricsService
+          useValue: mockServices.MetricsService,
         },
         {
           provide: 'IFileMetadataRepository',
-          useValue: mockServices.IFileMetadataRepository
+          useValue: mockServices.IFileMetadataRepository,
         },
         {
           provide: Logger,
@@ -423,10 +439,10 @@ describe('FileProcessingProcessor', () => {
             log: jest.fn(),
             debug: jest.fn(),
             error: jest.fn(),
-            warn: jest.fn()
-          }
-        }
-      ]
+            warn: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     processor = module.get<FileProcessingProcessor>(FileProcessingProcessor);
@@ -461,12 +477,16 @@ describe('FileProcessingProcessor', () => {
       const job = createMockJob(jobData);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockPdfProcessor.optimizePdf.mockResolvedValue(MockResultsFactory.createOptimizedPdfResult());
-      mockPdfProcessor.generatePreview.mockResolvedValue(MockResultsFactory.createPdfPreviewResult());
+      mockPdfProcessor.optimizePdf.mockResolvedValue(
+        MockResultsFactory.createOptimizedPdfResult(),
+      );
+      mockPdfProcessor.generatePreview.mockResolvedValue(
+        MockResultsFactory.createPdfPreviewResult(),
+      );
       mockPdfProcessor.extractMetadata.mockResolvedValue({
         title: 'Test PDF',
         author: 'Test Author',
-        pageCount: 10
+        pageCount: 10,
       });
 
       // Act
@@ -479,27 +499,41 @@ describe('FileProcessingProcessor', () => {
       expect(result.optimizations).toBeDefined();
       expect(result.optimizations).toBeDefined();
       expect(result.optimizations!.compressionRatio).toBe(0.7);
-      expect(result.thumbnailUrl).toBe('https://cdn.coders.com/previews/test.jpg');
+      expect(result.thumbnailUrl).toBe(
+        'https://cdn.coders.com/previews/test.jpg',
+      );
       expect(result.extractedMetadata).toBeDefined();
       expect(result.extractedMetadata!.type).toBe('pdf');
 
       // Vérifier appels aux services
-      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(fileMetadata.id);
+      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(
+        fileMetadata.id,
+      );
       expect(mockPdfProcessor.optimizePdf).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
           compressionLevel: 6,
-          linearize: true
-        })
+          linearize: true,
+        }),
       );
-      expect(mockPdfProcessor.generatePreview).toHaveBeenCalledWith(fileMetadata.id, 1, 150);
-      expect(mockPdfProcessor.extractMetadata).toHaveBeenCalledWith(fileMetadata.id);
+      expect(mockPdfProcessor.generatePreview).toHaveBeenCalledWith(
+        fileMetadata.id,
+        1,
+        150,
+      );
+      expect(mockPdfProcessor.extractMetadata).toHaveBeenCalledWith(
+        fileMetadata.id,
+      );
 
       // Vérifier progression du job
       expect(job.progress).toHaveBeenCalledWith(0);
       expect(job.progress).toHaveBeenCalledWith(100);
-      expect(job.log).toHaveBeenCalledWith(expect.stringContaining('Processing initiated'));
-      expect(job.log).toHaveBeenCalledWith(expect.stringContaining('completed successfully'));
+      expect(job.log).toHaveBeenCalledWith(
+        expect.stringContaining('Processing initiated'),
+      );
+      expect(job.log).toHaveBeenCalledWith(
+        expect.stringContaining('completed successfully'),
+      );
     });
 
     it('should process image file successfully with optimization and thumbnail', async () => {
@@ -516,8 +550,12 @@ describe('FileProcessingProcessor', () => {
       const job = createMockJob(jobData);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockImageProcessor.optimizeImage.mockResolvedValue(MockResultsFactory.createOptimizedImageResult());
-      mockImageProcessor.generateThumbnail.mockResolvedValue(MockResultsFactory.createThumbnailResult());
+      mockImageProcessor.optimizeImage.mockResolvedValue(
+        MockResultsFactory.createOptimizedImageResult(),
+      );
+      mockImageProcessor.generateThumbnail.mockResolvedValue(
+        MockResultsFactory.createThumbnailResult(),
+      );
 
       // Act
       const result = await processor.processUploadedFile(job);
@@ -534,13 +572,13 @@ describe('FileProcessingProcessor', () => {
         expect.objectContaining({
           optimizeForWeb: true,
           quality: 85,
-          format: ImageFormat.WEBP
-        })
+          format: ImageFormat.WEBP,
+        }),
       );
       expect(mockImageProcessor.generateThumbnail).toHaveBeenCalledWith(
         fileMetadata.id,
         150,
-        [ImageFormat.WEBP, ImageFormat.JPEG]
+        [ImageFormat.WEBP, ImageFormat.JPEG],
       );
     });
 
@@ -558,7 +596,9 @@ describe('FileProcessingProcessor', () => {
       const job = createMockJob(jobData);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockDocumentProcessor.processDocument.mockResolvedValue(MockResultsFactory.createDocumentProcessingResult());
+      mockDocumentProcessor.processDocument.mockResolvedValue(
+        MockResultsFactory.createDocumentProcessingResult(),
+      );
 
       // Act
       const result = await processor.processUploadedFile(job);
@@ -577,8 +617,8 @@ describe('FileProcessingProcessor', () => {
           extractText: true,
           detectLanguage: true,
           generateSummary: true,
-          optimizeEncoding: true
-        })
+          optimizeEncoding: true,
+        }),
       );
     });
 
@@ -593,10 +633,16 @@ describe('FileProcessingProcessor', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(processor.processUploadedFile(job)).rejects.toThrow(FileNotFoundException);
+      await expect(processor.processUploadedFile(job)).rejects.toThrow(
+        FileNotFoundException,
+      );
 
-      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith('non-existent-file');
-      expect(job.log).toHaveBeenCalledWith(expect.stringContaining('Processing failed'));
+      expect(mockFileMetadataRepository.findById).toHaveBeenCalledWith(
+        'non-existent-file',
+      );
+      expect(job.log).toHaveBeenCalledWith(
+        expect.stringContaining('Processing failed'),
+      );
     });
 
     it('should handle deleted file appropriately', async () => {
@@ -614,7 +660,9 @@ describe('FileProcessingProcessor', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
       // Act & Assert
-      await expect(processor.processUploadedFile(job)).rejects.toThrow(FileNotFoundException);
+      await expect(processor.processUploadedFile(job)).rejects.toThrow(
+        FileNotFoundException,
+      );
     });
 
     it('should quarantine infected file and stop processing', async () => {
@@ -632,19 +680,22 @@ describe('FileProcessingProcessor', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
       // Mock scan sécurité qui détecte un virus
-      jest.spyOn(processor as any, 'performSecurityScan')
+      jest
+        .spyOn(processor as any, 'performSecurityScan')
         .mockResolvedValue(MockResultsFactory.createSecurityScanResult(false));
 
       // Act & Assert
-      await expect(processor.processUploadedFile(job)).rejects.toThrow(ProcessingException);
+      await expect(processor.processUploadedFile(job)).rejects.toThrow(
+        ProcessingException,
+      );
 
       expect(job.log).toHaveBeenCalledWith('Starting security scan');
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
           virusScanStatus: VirusScanStatus.INFECTED,
-          deletedAt: expect.any(Date)
-        })
+          deletedAt: expect.any(Date),
+        }),
       );
     });
 
@@ -660,7 +711,9 @@ describe('FileProcessingProcessor', () => {
 
       const job = createMockJob(jobData);
 
-      mockFileMetadataRepository.findById.mockRejectedValue(new Error('Database connection failed'));
+      mockFileMetadataRepository.findById.mockRejectedValue(
+        new Error('Database connection failed'),
+      );
 
       // Act & Assert
       await expect(processor.processUploadedFile(job)).rejects.toThrow();
@@ -668,8 +721,8 @@ describe('FileProcessingProcessor', () => {
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
-          processingStatus: ProcessingStatus.FAILED
-        })
+          processingStatus: ProcessingStatus.FAILED,
+        }),
       );
     });
   });
@@ -689,20 +742,24 @@ describe('FileProcessingProcessor', () => {
         fileId: fileMetadata.id,
         sizes: '150',
         format: 'webp',
-        quality: 85
+        quality: 85,
       };
 
       const job = createMockJob(thumbnailJobData);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockImageProcessor.generateThumbnail.mockResolvedValue(MockResultsFactory.createThumbnailResult());
+      mockImageProcessor.generateThumbnail.mockResolvedValue(
+        MockResultsFactory.createThumbnailResult(),
+      );
 
       // Act
       const result = await processor.generateThumbnail(job);
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.url).toBe('https://cdn.coders.com/thumbnails/test-file-123/thumbnail.webp');
+      expect(result.url).toBe(
+        'https://cdn.coders.com/thumbnails/test-file-123/thumbnail.webp',
+      );
       expect(result.width).toBe(150);
       expect(result.height).toBe(150);
       expect(result.format).toBe(ImageFormat.WEBP);
@@ -711,7 +768,7 @@ describe('FileProcessingProcessor', () => {
       expect(mockImageProcessor.generateThumbnail).toHaveBeenCalledWith(
         fileMetadata.id,
         150,
-        [ImageFormat.WEBP]
+        [ImageFormat.WEBP],
       );
       expect(job.progress).toHaveBeenCalledWith(100);
     });
@@ -724,7 +781,7 @@ describe('FileProcessingProcessor', () => {
 
       const thumbnailJobData: ThumbnailJobData = {
         fileId: fileMetadata.id,
-        sizes: '150'
+        sizes: '150',
       };
 
       const job = createMockJob(thumbnailJobData);
@@ -732,7 +789,9 @@ describe('FileProcessingProcessor', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
       // Act & Assert
-      await expect(processor.generateThumbnail(job)).rejects.toThrow(ThumbnailGenerationException);
+      await expect(processor.generateThumbnail(job)).rejects.toThrow(
+        ThumbnailGenerationException,
+      );
 
       expect(mockImageProcessor.generateThumbnail).not.toHaveBeenCalled();
     });
@@ -746,13 +805,15 @@ describe('FileProcessingProcessor', () => {
       const thumbnailJobData: ThumbnailJobData = {
         fileId: fileMetadata.id,
         sizes: ['150', '300', '500'],
-        format: 'jpeg'
+        format: 'jpeg',
       };
 
       const job = createMockJob(thumbnailJobData);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockImageProcessor.generateThumbnail.mockResolvedValue(MockResultsFactory.createThumbnailResult());
+      mockImageProcessor.generateThumbnail.mockResolvedValue(
+        MockResultsFactory.createThumbnailResult(),
+      );
 
       // Act
       const result = await processor.generateThumbnail(job);
@@ -762,7 +823,7 @@ describe('FileProcessingProcessor', () => {
       expect(mockImageProcessor.generateThumbnail).toHaveBeenCalledWith(
         fileMetadata.id,
         150, // Premier de la liste
-        [ImageFormat.JPEG]
+        [ImageFormat.JPEG],
       );
     });
   });
@@ -787,7 +848,9 @@ describe('FileProcessingProcessor', () => {
       const job = createMockJob(jobData);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockPdfProcessor.optimizePdf.mockResolvedValue(MockResultsFactory.createOptimizedPdfResult());
+      mockPdfProcessor.optimizePdf.mockResolvedValue(
+        MockResultsFactory.createOptimizedPdfResult(),
+      );
 
       // Act
       const result = await processor.optimizePdf(job);
@@ -806,15 +869,15 @@ describe('FileProcessingProcessor', () => {
           linearize: true,
           removeMetadata: false,
           optimizeImages: true,
-          imageQuality: 75
-        })
+          imageQuality: 75,
+        }),
       );
 
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
-          processingStatus: ProcessingStatus.COMPLETED
-        })
+          processingStatus: ProcessingStatus.COMPLETED,
+        }),
       );
     });
 
@@ -833,7 +896,9 @@ describe('FileProcessingProcessor', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
       // Act & Assert
-      await expect(processor.optimizePdf(job)).rejects.toThrow(OptimizationException);
+      await expect(processor.optimizePdf(job)).rejects.toThrow(
+        OptimizationException,
+      );
 
       expect(mockPdfProcessor.optimizePdf).not.toHaveBeenCalled();
     });
@@ -851,7 +916,9 @@ describe('FileProcessingProcessor', () => {
       const job = createMockJob(jobData);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockPdfProcessor.optimizePdf.mockRejectedValue(new Error('Corrupted PDF'));
+      mockPdfProcessor.optimizePdf.mockRejectedValue(
+        new Error('Corrupted PDF'),
+      );
 
       // Act & Assert
       await expect(processor.optimizePdf(job)).rejects.toThrow('Corrupted PDF');
@@ -874,15 +941,18 @@ describe('FileProcessingProcessor', () => {
       const conversionJobData: ConversionJobData = {
         fileId: fileMetadata.id,
         targetFormat: 'webp',
-        options: { quality: 90 }
+        options: { quality: 90 },
       };
 
       const job = createMockJob(conversionJobData);
 
-      const mockConversionResult = MockResultsFactory.createConversionResult(true);
+      const mockConversionResult =
+        MockResultsFactory.createConversionResult(true);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockImageProcessor.generateMultipleFormats.mockResolvedValue([mockConversionResult]);
+      mockImageProcessor.generateMultipleFormats.mockResolvedValue([
+        mockConversionResult,
+      ]);
 
       // Act
       const result = await processor.convertFormat(job);
@@ -897,7 +967,7 @@ describe('FileProcessingProcessor', () => {
 
       expect(mockImageProcessor.generateMultipleFormats).toHaveBeenCalledWith(
         fileMetadata.id,
-        [ImageFormat.WEBP]
+        [ImageFormat.WEBP],
       );
     });
 
@@ -909,18 +979,23 @@ describe('FileProcessingProcessor', () => {
 
       const conversionJobData: ConversionJobData = {
         fileId: fileMetadata.id,
-        targetFormat: 'png'
+        targetFormat: 'png',
       };
 
       const job = createMockJob(conversionJobData);
 
-      const mockFailedConversion = MockResultsFactory.createConversionResult(false);
+      const mockFailedConversion =
+        MockResultsFactory.createConversionResult(false);
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
-      mockImageProcessor.generateMultipleFormats.mockResolvedValue([mockFailedConversion]);
+      mockImageProcessor.generateMultipleFormats.mockResolvedValue([
+        mockFailedConversion,
+      ]);
 
       // Act & Assert
-      await expect(processor.convertFormat(job)).rejects.toThrow('Conversion failed due to corrupted image');
+      await expect(processor.convertFormat(job)).rejects.toThrow(
+        'Conversion failed due to corrupted image',
+      );
     });
 
     it('should reject conversion for unsupported file type', async () => {
@@ -931,7 +1006,7 @@ describe('FileProcessingProcessor', () => {
 
       const conversionJobData: ConversionJobData = {
         fileId: fileMetadata.id,
-        targetFormat: 'jpeg'
+        targetFormat: 'jpeg',
       };
 
       const job = createMockJob(conversionJobData);
@@ -939,7 +1014,9 @@ describe('FileProcessingProcessor', () => {
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
       // Act & Assert
-      await expect(processor.convertFormat(job)).rejects.toThrow('Format conversion not supported');
+      await expect(processor.convertFormat(job)).rejects.toThrow(
+        'Format conversion not supported',
+      );
     });
   });
 
@@ -962,7 +1039,8 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
-      jest.spyOn(processor as any, 'performSecurityScan')
+      jest
+        .spyOn(processor as any, 'performSecurityScan')
         .mockResolvedValue(MockResultsFactory.createSecurityScanResult(true));
 
       // Act
@@ -976,8 +1054,8 @@ describe('FileProcessingProcessor', () => {
       expect(mockFileMetadataRepository.update).toHaveBeenCalledWith(
         fileMetadata.id,
         expect.objectContaining({
-          virusScanStatus: VirusScanStatus.CLEAN
-        })
+          virusScanStatus: VirusScanStatus.CLEAN,
+        }),
       );
 
       expect(job.log).toHaveBeenCalledWith('Virus rescan completed: CLEAN');
@@ -997,10 +1075,12 @@ describe('FileProcessingProcessor', () => {
 
       mockFileMetadataRepository.findById.mockResolvedValue(fileMetadata);
 
-      jest.spyOn(processor as any, 'performSecurityScan')
+      jest
+        .spyOn(processor as any, 'performSecurityScan')
         .mockResolvedValue(MockResultsFactory.createSecurityScanResult(false));
-      
-      jest.spyOn(processor as any, 'quarantineFile')
+
+      jest
+        .spyOn(processor as any, 'quarantineFile')
         .mockResolvedValue(undefined);
 
       // Act
@@ -1011,7 +1091,9 @@ describe('FileProcessingProcessor', () => {
       expect(result.securityScan).toBeDefined();
       expect(result.securityScan!.safe).toBe(false);
 
-      expect(job.log).toHaveBeenCalledWith('SECURITY ALERT: Threats detected in file test-file-123');
+      expect(job.log).toHaveBeenCalledWith(
+        'SECURITY ALERT: Threats detected in file test-file-123',
+      );
       expect(job.log).toHaveBeenCalledWith('Virus rescan completed: INFECTED');
     });
   });
@@ -1027,7 +1109,7 @@ describe('FileProcessingProcessor', () => {
         text: 'Ceci est un texte de test en français avec des MAJUSCULES et des chiffres 123.',
         timestamp: Date.now(),
         type: 'analysis',
-        source: 'user_input'
+        source: 'user_input',
       };
 
       const job = createMockJob(textJobData);
@@ -1047,7 +1129,9 @@ describe('FileProcessingProcessor', () => {
 
       expect(job.progress).toHaveBeenCalledWith(0);
       expect(job.progress).toHaveBeenCalledWith(100);
-      expect(job.log).toHaveBeenCalledWith('Text processing completed successfully');
+      expect(job.log).toHaveBeenCalledWith(
+        'Text processing completed successfully',
+      );
     });
 
     it('should detect English language correctly', async () => {
@@ -1056,7 +1140,7 @@ describe('FileProcessingProcessor', () => {
         text: 'This is a great English text with excellent content and good quality.',
         timestamp: Date.now(),
         type: 'analysis',
-        source: 'document'
+        source: 'document',
       };
 
       const job = createMockJob(textJobData);
@@ -1075,7 +1159,7 @@ describe('FileProcessingProcessor', () => {
         text: 'This is a terrible and awful document with bad content.',
         timestamp: Date.now(),
         type: 'sentiment',
-        source: 'review'
+        source: 'review',
       };
 
       const job = createMockJob(textJobData);
@@ -1093,7 +1177,7 @@ describe('FileProcessingProcessor', () => {
         text: '', // Texte vide
         timestamp: Date.now(),
         type: 'analysis',
-        source: 'empty'
+        source: 'empty',
       };
 
       const job = createMockJob(textJobData);
@@ -1123,7 +1207,7 @@ describe('FileProcessingProcessor', () => {
         // Assert
         expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
           'file_processing_jobs_started',
-          { jobType: 'process-uploaded-file' }
+          { jobType: 'process-uploaded-file' },
         );
       });
     });
@@ -1146,8 +1230,8 @@ describe('FileProcessingProcessor', () => {
           expect.any(Number),
           expect.objectContaining({
             jobType: 'process-uploaded-file',
-            success: 'true'
-          })
+            success: 'true',
+          }),
         );
       });
     });
@@ -1171,8 +1255,8 @@ describe('FileProcessingProcessor', () => {
           'file_processing_jobs_failed',
           expect.objectContaining({
             jobType: 'process-uploaded-file',
-            errorType: 'Error'
-          })
+            errorType: 'Error',
+          }),
         );
       });
     });
@@ -1193,8 +1277,8 @@ describe('FileProcessingProcessor', () => {
           45,
           expect.objectContaining({
             jobId: 'job-123',
-            fileId: jobData.fileId
-          })
+            fileId: jobData.fileId,
+          }),
         );
       });
     });
@@ -1212,7 +1296,7 @@ describe('FileProcessingProcessor', () => {
         // Assert
         expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
           'file_processing_jobs_stalled',
-          { jobType: 'process-uploaded-file' }
+          { jobType: 'process-uploaded-file' },
         );
       });
     });
@@ -1228,7 +1312,7 @@ describe('FileProcessingProcessor', () => {
         // Assert
         expect(mockMetricsService.incrementCounter).toHaveBeenCalledWith(
           'file_processing_queue_errors',
-          { errorType: 'Error' }
+          { errorType: 'Error' },
         );
       });
     });
@@ -1282,9 +1366,15 @@ describe('FileProcessingProcessor', () => {
       it('should parse thumbnail formats correctly', () => {
         const parseThumbnailFormats = (processor as any).parseThumbnailFormats;
 
-        expect(parseThumbnailFormats()).toEqual([ImageFormat.WEBP, ImageFormat.JPEG]);
+        expect(parseThumbnailFormats()).toEqual([
+          ImageFormat.WEBP,
+          ImageFormat.JPEG,
+        ]);
         expect(parseThumbnailFormats('png')).toEqual([ImageFormat.PNG]);
-        expect(parseThumbnailFormats(['webp', 'jpeg'])).toEqual([ImageFormat.WEBP, ImageFormat.JPEG]);
+        expect(parseThumbnailFormats(['webp', 'jpeg'])).toEqual([
+          ImageFormat.WEBP,
+          ImageFormat.JPEG,
+        ]);
       });
     });
 
@@ -1292,14 +1382,16 @@ describe('FileProcessingProcessor', () => {
       it('should detect French language correctly', () => {
         const detectLanguage = (processor as any).detectLanguage;
 
-        const frenchText = 'Ceci est un texte en français avec les mots le, la, de, et, dans.';
+        const frenchText =
+          'Ceci est un texte en français avec les mots le, la, de, et, dans.';
         expect(detectLanguage(frenchText)).toBe('fr');
       });
 
       it('should detect English language correctly', () => {
         const detectLanguage = (processor as any).detectLanguage;
 
-        const englishText = 'This is a text in English with the words the, and, or, in, on.';
+        const englishText =
+          'This is a text in English with the words the, and, or, in, on.';
         expect(detectLanguage(englishText)).toBe('en');
       });
 
@@ -1313,13 +1405,16 @@ describe('FileProcessingProcessor', () => {
       it('should analyze sentiment correctly', () => {
         const analyzeSentiment = (processor as any).analyzeSentiment;
 
-        const positiveText = 'This is excellent and great content with good quality.';
+        const positiveText =
+          'This is excellent and great content with good quality.';
         expect(analyzeSentiment(positiveText)).toBe('positive');
 
-        const negativeText = 'This is terrible and awful content with bad quality.';
+        const negativeText =
+          'This is terrible and awful content with bad quality.';
         expect(analyzeSentiment(negativeText)).toBe('negative');
 
-        const neutralText = 'This is some regular content without strong sentiment.';
+        const neutralText =
+          'This is some regular content without strong sentiment.';
         expect(analyzeSentiment(neutralText)).toBe('neutral');
       });
     });

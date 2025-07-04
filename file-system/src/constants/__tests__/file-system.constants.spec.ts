@@ -1,9 +1,9 @@
 /**
  * Tests de validation pour les constantes du système de fichiers
- * 
+ *
  * Tests conformes à la stratégie 04-06-file-system-tests.md
  * Pattern AAA (Arrange, Act, Assert) selon 07-08 Coding Standards
- * 
+ *
  * @version 1.0
  * @conformsTo 04-06-file-system-tests
  * @conformsTo 07-08-coding-standards
@@ -14,7 +14,7 @@ import {
   FILE_SIZE_LIMITS,
   SIZE_UNITS,
   PERFORMANCE_LIMITS,
-  
+
   // Formats et sécurité
   SUPPORTED_MIME_TYPES,
   ALLOWED_EXTENSIONS,
@@ -22,43 +22,42 @@ import {
   SECURITY_LIMITS,
   FILENAME_PATTERNS,
   STORAGE_PATTERNS,
-  
+
   // Traitement et qualité
   IMAGE_QUALITY,
   PDF_COMPRESSION,
   THUMBNAIL_SIZES,
   OUTPUT_FORMATS,
-  
+
   // CDN et cache
   CACHE_TTL,
   CACHE_HEADERS,
   CDN_EDGE_LOCATIONS,
-  
+
   // Erreurs et monitoring
   ERROR_MESSAGES,
   ERROR_CODES,
   PERFORMANCE_TARGETS,
   ALERT_THRESHOLDS,
-  
+
   // Paths et templates
   STORAGE_PATH_TEMPLATES,
   ENVIRONMENT_PREFIXES,
   FILE_EVENTS,
-  
+
   // Export groupé
   FILE_SYSTEM_CONSTANTS,
-  
+
   // Helper functions
   isAllowedExtension,
   isSupportedMimeType,
   getMimeTypeCategory,
   generateStoragePath,
   isValidFilename,
-  getRecommendedImageQuality
+  getRecommendedImageQuality,
 } from '../file-system.constants';
 
 describe('FileSystemConstants', () => {
-
   // ============================================================================
   // TESTS LIMITES TECHNIQUES - Validation des seuils
   // ============================================================================
@@ -69,11 +68,17 @@ describe('FileSystemConstants', () => {
       expect(FILE_SIZE_LIMITS.MIN_FILE_SIZE).toBe(1);
       expect(FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT).toBe(100 * 1024 * 1024); // 100MB
       expect(FILE_SIZE_LIMITS.MAX_FILE_SIZE_ABSOLUTE).toBe(500 * 1024 * 1024); // 500MB
-      
+
       // Vérification hiérarchie logique
-      expect(FILE_SIZE_LIMITS.MIN_FILE_SIZE).toBeLessThan(FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT);
-      expect(FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT).toBeLessThan(FILE_SIZE_LIMITS.MAX_FILE_SIZE_ABSOLUTE);
-      expect(FILE_SIZE_LIMITS.MULTIPART_THRESHOLD).toBeLessThan(FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT);
+      expect(FILE_SIZE_LIMITS.MIN_FILE_SIZE).toBeLessThan(
+        FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT,
+      );
+      expect(FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT).toBeLessThan(
+        FILE_SIZE_LIMITS.MAX_FILE_SIZE_ABSOLUTE,
+      );
+      expect(FILE_SIZE_LIMITS.MULTIPART_THRESHOLD).toBeLessThan(
+        FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT,
+      );
     });
 
     it('should have correct size unit calculations', () => {
@@ -83,7 +88,7 @@ describe('FileSystemConstants', () => {
       expect(SIZE_UNITS.MB).toBe(1024 * 1024);
       expect(SIZE_UNITS.GB).toBe(1024 * 1024 * 1024);
       expect(SIZE_UNITS.TB).toBe(1024 * 1024 * 1024 * 1024);
-      
+
       // Vérification calculs corrects
       expect(SIZE_UNITS.KB / SIZE_UNITS.BYTE).toBe(1024);
       expect(SIZE_UNITS.MB / SIZE_UNITS.KB).toBe(1024);
@@ -96,15 +101,23 @@ describe('FileSystemConstants', () => {
       expect(PERFORMANCE_LIMITS.UPLOAD_TIMEOUT_MS).toBe(5 * 60 * 1000); // 5 minutes
       expect(PERFORMANCE_LIMITS.DOWNLOAD_TIMEOUT_MS).toBe(2 * 60 * 1000); // 2 minutes
       expect(PERFORMANCE_LIMITS.VIRUS_SCAN_TIMEOUT_MS).toBe(30 * 1000); // 30 seconds
-      
+
       // Vérification cohérence temporelle
-      expect(PERFORMANCE_LIMITS.DOWNLOAD_TIMEOUT_MS).toBeLessThan(PERFORMANCE_LIMITS.UPLOAD_TIMEOUT_MS);
-      expect(PERFORMANCE_LIMITS.VIRUS_SCAN_TIMEOUT_MS).toBeLessThan(PERFORMANCE_LIMITS.UPLOAD_TIMEOUT_MS);
-      
+      expect(PERFORMANCE_LIMITS.DOWNLOAD_TIMEOUT_MS).toBeLessThan(
+        PERFORMANCE_LIMITS.UPLOAD_TIMEOUT_MS,
+      );
+      expect(PERFORMANCE_LIMITS.VIRUS_SCAN_TIMEOUT_MS).toBeLessThan(
+        PERFORMANCE_LIMITS.UPLOAD_TIMEOUT_MS,
+      );
+
       // Vérification limites concurrence raisonnables
       expect(PERFORMANCE_LIMITS.MAX_CONCURRENT_PROCESSING).toBeGreaterThan(0);
-      expect(PERFORMANCE_LIMITS.MAX_CONCURRENT_PROCESSING).toBeLessThanOrEqual(50);
-      expect(PERFORMANCE_LIMITS.MAX_CONCURRENT_UPLOADS_PER_USER).toBeLessThanOrEqual(10);
+      expect(PERFORMANCE_LIMITS.MAX_CONCURRENT_PROCESSING).toBeLessThanOrEqual(
+        50,
+      );
+      expect(
+        PERFORMANCE_LIMITS.MAX_CONCURRENT_UPLOADS_PER_USER,
+      ).toBeLessThanOrEqual(10);
     });
   });
 
@@ -120,20 +133,20 @@ describe('FileSystemConstants', () => {
         ...SUPPORTED_MIME_TYPES.DOCUMENTS,
         ...SUPPORTED_MIME_TYPES.TEXT,
         ...SUPPORTED_MIME_TYPES.CODE,
-        ...SUPPORTED_MIME_TYPES.ARCHIVES
+        ...SUPPORTED_MIME_TYPES.ARCHIVES,
       ];
 
       // Assert
       expect(SUPPORTED_MIME_TYPES.IMAGES.length).toBeGreaterThan(0);
       expect(SUPPORTED_MIME_TYPES.DOCUMENTS.length).toBeGreaterThan(0);
       expect(allMimeTypes.length).toBeGreaterThan(10);
-      
+
       // Vérification pas de doublons
       const uniqueTypes = new Set(allMimeTypes);
       expect(uniqueTypes.size).toBe(allMimeTypes.length);
-      
+
       // Vérification format MIME valide
-      allMimeTypes.forEach(mimeType => {
+      allMimeTypes.forEach((mimeType) => {
         expect(mimeType).toMatch(/^[a-z-]+\/[a-z0-9-+.]+$/);
       });
     });
@@ -144,10 +157,10 @@ describe('FileSystemConstants', () => {
       expect(ALLOWED_EXTENSIONS.IMAGES).toContain('.png');
       expect(ALLOWED_EXTENSIONS.DOCUMENTS).toContain('.pdf');
       expect(ALLOWED_EXTENSIONS.TEXT).toContain('.txt');
-      
+
       // Vérification format extension valide - Types corrigés
       Object.values(ALLOWED_EXTENSIONS).forEach((extensions) => {
-        extensions.forEach(ext => {
+        extensions.forEach((ext) => {
           expect(ext).toMatch(/^\.[a-z0-9]+$/);
           expect(ext.length).toBeGreaterThan(1);
           expect(ext.length).toBeLessThanOrEqual(10);
@@ -160,17 +173,19 @@ describe('FileSystemConstants', () => {
       expect(Array.isArray(FILE_MAGIC_NUMBERS.PDF)).toBe(true);
       expect(Array.isArray(FILE_MAGIC_NUMBERS.JPEG)).toBe(true);
       expect(Array.isArray(FILE_MAGIC_NUMBERS.PNG)).toBe(true);
-      
+
       // Vérification signatures connues
       expect(FILE_MAGIC_NUMBERS.PDF).toEqual([0x25, 0x50, 0x44, 0x46]); // %PDF
-      expect(FILE_MAGIC_NUMBERS.JPEG).toEqual([0xFF, 0xD8, 0xFF]);
-      expect(FILE_MAGIC_NUMBERS.PNG).toEqual([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
-      
+      expect(FILE_MAGIC_NUMBERS.JPEG).toEqual([0xff, 0xd8, 0xff]);
+      expect(FILE_MAGIC_NUMBERS.PNG).toEqual([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ]);
+
       // Vérification valeurs hexadécimales valides - Types corrigés
       Object.values(FILE_MAGIC_NUMBERS).forEach((signature) => {
-        signature.forEach(byte => {
+        signature.forEach((byte) => {
           expect(byte).toBeGreaterThanOrEqual(0x00);
-          expect(byte).toBeLessThanOrEqual(0xFF);
+          expect(byte).toBeLessThanOrEqual(0xff);
         });
       });
     });
@@ -181,28 +196,36 @@ describe('FileSystemConstants', () => {
         'document.pdf',
         'My Document (1).pdf',
         'test_file-v2.jpg',
-        'report[final].docx'
+        'report[final].docx',
       ];
-      
+
       const invalidFilenames = [
         '../../../etc/passwd',
         'file<script>.pdf',
         'test\x00file.pdf',
         'document.exe',
-        'file|pipe.pdf'
+        'file|pipe.pdf',
       ];
 
       // Act & Assert - Valid filenames
-      validFilenames.forEach(filename => {
+      validFilenames.forEach((filename) => {
         expect(FILENAME_PATTERNS.ALLOWED_CHARS.test(filename)).toBe(true);
         expect(FILENAME_PATTERNS.PATH_TRAVERSAL.test(filename)).toBe(false);
-        expect(FILENAME_PATTERNS.DANGEROUS_EXTENSIONS.test(filename)).toBe(false);
+        expect(FILENAME_PATTERNS.DANGEROUS_EXTENSIONS.test(filename)).toBe(
+          false,
+        );
       });
 
       // Assert - Invalid filenames
-      expect(FILENAME_PATTERNS.PATH_TRAVERSAL.test('../../../etc/passwd')).toBe(true);
-      expect(FILENAME_PATTERNS.DANGEROUS_CHARS.test('file<script>.pdf')).toBe(true);
-      expect(FILENAME_PATTERNS.DANGEROUS_EXTENSIONS.test('document.exe')).toBe(true);
+      expect(FILENAME_PATTERNS.PATH_TRAVERSAL.test('../../../etc/passwd')).toBe(
+        true,
+      );
+      expect(FILENAME_PATTERNS.DANGEROUS_CHARS.test('file<script>.pdf')).toBe(
+        true,
+      );
+      expect(FILENAME_PATTERNS.DANGEROUS_EXTENSIONS.test('document.exe')).toBe(
+        true,
+      );
     });
   });
 
@@ -216,16 +239,16 @@ describe('FileSystemConstants', () => {
       expect(IMAGE_QUALITY.MAX).toBe(100);
       expect(IMAGE_QUALITY.MIN).toBe(30);
       expect(IMAGE_QUALITY.DEFAULT).toBe(85);
-      
+
       // Vérification hiérarchie qualité
       expect(IMAGE_QUALITY.MIN).toBeLessThan(IMAGE_QUALITY.LOW);
       expect(IMAGE_QUALITY.LOW).toBeLessThan(IMAGE_QUALITY.MEDIUM);
       expect(IMAGE_QUALITY.MEDIUM).toBeLessThan(IMAGE_QUALITY.DEFAULT);
       expect(IMAGE_QUALITY.DEFAULT).toBeLessThan(IMAGE_QUALITY.HIGH);
       expect(IMAGE_QUALITY.HIGH).toBeLessThan(IMAGE_QUALITY.MAX);
-      
+
       // Vérification valeurs dans la plage 0-100
-      Object.values(IMAGE_QUALITY).forEach(quality => {
+      Object.values(IMAGE_QUALITY).forEach((quality) => {
         expect(quality).toBeGreaterThanOrEqual(0);
         expect(quality).toBeLessThanOrEqual(100);
       });
@@ -236,14 +259,14 @@ describe('FileSystemConstants', () => {
       expect(PDF_COMPRESSION.NONE).toBe(0);
       expect(PDF_COMPRESSION.DEFAULT).toBe(6);
       expect(PDF_COMPRESSION.HIGH).toBe(9);
-      
+
       // Vérification progression logique
       expect(PDF_COMPRESSION.NONE).toBeLessThan(PDF_COMPRESSION.LOW);
       expect(PDF_COMPRESSION.LOW).toBeLessThan(PDF_COMPRESSION.DEFAULT);
       expect(PDF_COMPRESSION.DEFAULT).toBeLessThan(PDF_COMPRESSION.HIGH);
-      
+
       // Vérification plage valide (0-9 pour compression)
-      Object.values(PDF_COMPRESSION).forEach(level => {
+      Object.values(PDF_COMPRESSION).forEach((level) => {
         expect(level).toBeGreaterThanOrEqual(0);
         expect(level).toBeLessThanOrEqual(9);
       });
@@ -254,15 +277,15 @@ describe('FileSystemConstants', () => {
       expect(THUMBNAIL_SIZES.TINY).toBe(64);
       expect(THUMBNAIL_SIZES.DEFAULT).toBe(200);
       expect(THUMBNAIL_SIZES.LARGE).toBe(800);
-      
+
       // Vérification progression tailles
       expect(THUMBNAIL_SIZES.TINY).toBeLessThan(THUMBNAIL_SIZES.SMALL);
       expect(THUMBNAIL_SIZES.SMALL).toBeLessThan(THUMBNAIL_SIZES.DEFAULT);
       expect(THUMBNAIL_SIZES.DEFAULT).toBeLessThan(THUMBNAIL_SIZES.MEDIUM);
       expect(THUMBNAIL_SIZES.MEDIUM).toBeLessThan(THUMBNAIL_SIZES.LARGE);
-      
+
       // Vérification tailles raisonnables (64px à 800px)
-      Object.values(THUMBNAIL_SIZES).forEach(size => {
+      Object.values(THUMBNAIL_SIZES).forEach((size) => {
         expect(size).toBeGreaterThanOrEqual(32);
         expect(size).toBeLessThanOrEqual(1024);
       });
@@ -280,7 +303,7 @@ describe('FileSystemConstants', () => {
       expect(CACHE_TTL.DEFAULT).toBe(3600); // 1 hour
       expect(CACHE_TTL.LONG).toBe(24 * 3600); // 24 hours
       expect(CACHE_TTL.PERMANENT).toBe(365 * 24 * 3600); // 1 year
-      
+
       // Vérification hiérarchie TTL
       expect(CACHE_TTL.SHORT).toBeLessThan(CACHE_TTL.DEFAULT);
       expect(CACHE_TTL.DEFAULT).toBeLessThan(CACHE_TTL.MEDIUM);
@@ -296,7 +319,7 @@ describe('FileSystemConstants', () => {
       expect(CACHE_HEADERS.THUMBNAILS).toContain('immutable');
       expect(CACHE_HEADERS.PRIVATE).toContain('private');
       expect(CACHE_HEADERS.PRIVATE).toContain('no-cache');
-      
+
       // Vérification format headers valides
       Object.values(CACHE_HEADERS).forEach((header) => {
         expect(typeof header).toBe('string');
@@ -309,12 +332,12 @@ describe('FileSystemConstants', () => {
       expect(Array.isArray(CDN_EDGE_LOCATIONS.EUROPE)).toBe(true);
       expect(Array.isArray(CDN_EDGE_LOCATIONS.NORTH_AMERICA)).toBe(true);
       expect(Array.isArray(CDN_EDGE_LOCATIONS.ASIA_PACIFIC)).toBe(true);
-      
+
       // Vérification format région AWS
-      CDN_EDGE_LOCATIONS.ALL.forEach(location => {
+      CDN_EDGE_LOCATIONS.ALL.forEach((location) => {
         expect(location).toMatch(/^[a-z]{2}-[a-z]+-\d+$/); // ex: eu-west-1
       });
-      
+
       // Vérification couverture globale
       expect(CDN_EDGE_LOCATIONS.ALL.length).toBeGreaterThanOrEqual(3);
     });
@@ -330,7 +353,7 @@ describe('FileSystemConstants', () => {
       expect(typeof ERROR_MESSAGES.FILE_TOO_LARGE).toBe('string');
       expect(typeof ERROR_MESSAGES.VIRUS_DETECTED).toBe('string');
       expect(typeof ERROR_MESSAGES.ACCESS_DENIED).toBe('string');
-      
+
       // Vérification messages non vides et informatifs
       Object.values(ERROR_MESSAGES).forEach((message) => {
         expect(message.length).toBeGreaterThan(10);
@@ -345,20 +368,20 @@ describe('FileSystemConstants', () => {
       expect(ERROR_CODES.VIRUS_FOUND).toBe('FS_1101');
       expect(ERROR_CODES.PROCESSING_ERROR).toBe('FS_1201');
       expect(ERROR_CODES.STORAGE_ERROR).toBe('FS_1301');
-      
+
       // Vérification format codes structurés
       Object.values(ERROR_CODES).forEach((code) => {
         expect(code).toMatch(/^FS_\d{4}$/); // Format FS_XXXX
       });
-      
+
       // Vérification catégories par range
-      const validationCodes = Object.values(ERROR_CODES).filter((code) => 
-        code.startsWith('FS_10')
+      const validationCodes = Object.values(ERROR_CODES).filter((code) =>
+        code.startsWith('FS_10'),
       );
-      const securityCodes = Object.values(ERROR_CODES).filter((code) => 
-        code.startsWith('FS_11')
+      const securityCodes = Object.values(ERROR_CODES).filter((code) =>
+        code.startsWith('FS_11'),
       );
-      
+
       expect(validationCodes.length).toBeGreaterThan(0);
       expect(securityCodes.length).toBeGreaterThan(0);
     });
@@ -369,14 +392,22 @@ describe('FileSystemConstants', () => {
       expect(PERFORMANCE_TARGETS.TARGET_UPLOAD_SPEED).toBe(10); // 10 MB/s target
       expect(PERFORMANCE_TARGETS.API_RESPONSE_TIME_METADATA).toBe(100); // 100ms
       expect(PERFORMANCE_TARGETS.MIN_CDN_CACHE_HIT_RATIO).toBe(90); // 90%
-      
+
       // Vérification cohérence targets
-      expect(PERFORMANCE_TARGETS.MIN_UPLOAD_SPEED).toBeLessThan(PERFORMANCE_TARGETS.TARGET_UPLOAD_SPEED);
-      expect(PERFORMANCE_TARGETS.API_RESPONSE_TIME_METADATA).toBeLessThan(PERFORMANCE_TARGETS.API_RESPONSE_TIME_PRESIGNED);
-      
+      expect(PERFORMANCE_TARGETS.MIN_UPLOAD_SPEED).toBeLessThan(
+        PERFORMANCE_TARGETS.TARGET_UPLOAD_SPEED,
+      );
+      expect(PERFORMANCE_TARGETS.API_RESPONSE_TIME_METADATA).toBeLessThan(
+        PERFORMANCE_TARGETS.API_RESPONSE_TIME_PRESIGNED,
+      );
+
       // Vérification valeurs raisonnables
-      expect(PERFORMANCE_TARGETS.MIN_CDN_CACHE_HIT_RATIO).toBeGreaterThanOrEqual(80);
-      expect(PERFORMANCE_TARGETS.MIN_CDN_CACHE_HIT_RATIO).toBeLessThanOrEqual(100);
+      expect(
+        PERFORMANCE_TARGETS.MIN_CDN_CACHE_HIT_RATIO,
+      ).toBeGreaterThanOrEqual(80);
+      expect(PERFORMANCE_TARGETS.MIN_CDN_CACHE_HIT_RATIO).toBeLessThanOrEqual(
+        100,
+      );
     });
 
     it('should have appropriate alert thresholds', () => {
@@ -384,7 +415,7 @@ describe('FileSystemConstants', () => {
       expect(ALERT_THRESHOLDS.MAX_ERROR_RATE).toBe(5); // 5%
       expect(ALERT_THRESHOLDS.MAX_CPU_USAGE).toBe(80); // 80%
       expect(ALERT_THRESHOLDS.MAX_MEMORY_USAGE).toBe(85); // 85%
-      
+
       // Vérification seuils raisonnables
       expect(ALERT_THRESHOLDS.MAX_ERROR_RATE).toBeGreaterThan(0);
       expect(ALERT_THRESHOLDS.MAX_ERROR_RATE).toBeLessThan(50);
@@ -404,12 +435,12 @@ describe('FileSystemConstants', () => {
       const invalidExtensions = ['.exe', '.bat', '.xyz', '.unknown'];
 
       // Act & Assert - Valid extensions
-      validExtensions.forEach(ext => {
+      validExtensions.forEach((ext) => {
         expect(isAllowedExtension(ext)).toBe(true);
       });
 
       // Assert - Invalid extensions
-      invalidExtensions.forEach(ext => {
+      invalidExtensions.forEach((ext) => {
         expect(isAllowedExtension(ext)).toBe(false);
       });
 
@@ -421,15 +452,19 @@ describe('FileSystemConstants', () => {
     it('should validate supported MIME types correctly', () => {
       // Arrange
       const validMimeTypes = ['image/jpeg', 'application/pdf', 'text/plain'];
-      const invalidMimeTypes = ['application/exe', 'unknown/type', 'malicious/script'];
+      const invalidMimeTypes = [
+        'application/exe',
+        'unknown/type',
+        'malicious/script',
+      ];
 
       // Act & Assert - Valid MIME types
-      validMimeTypes.forEach(mimeType => {
+      validMimeTypes.forEach((mimeType) => {
         expect(isSupportedMimeType(mimeType)).toBe(true);
       });
 
       // Assert - Invalid MIME types
-      invalidMimeTypes.forEach(mimeType => {
+      invalidMimeTypes.forEach((mimeType) => {
         expect(isSupportedMimeType(mimeType)).toBe(false);
       });
     });
@@ -449,14 +484,14 @@ describe('FileSystemConstants', () => {
         userId: 'user-123',
         year: '2024',
         month: '01',
-        fileId: 'file-456'
+        fileId: 'file-456',
       };
 
       // Act
       const userFilePath = generateStoragePath('USER_FILES', variables);
       const versionPath = generateStoragePath('FILE_VERSIONS', {
         ...variables,
-        versionNumber: '2'
+        versionNumber: '2',
       });
 
       // Assert
@@ -472,37 +507,41 @@ describe('FileSystemConstants', () => {
         'document.pdf',
         'my-file_v2.jpg',
         'Report (Final).docx',
-        'data-2024.csv'
+        'data-2024.csv',
       ];
 
       const invalidFilenames = [
         '../../../etc/passwd', // Path traversal
-        'file<script>.pdf',    // XSS chars
-        'document.exe',        // Dangerous extension
-        'file\x00name.pdf',    // Control chars
-        'very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_long_filename.pdf' // Too long
+        'file<script>.pdf', // XSS chars
+        'document.exe', // Dangerous extension
+        'file\x00name.pdf', // Control chars
+        'very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_long_filename.pdf', // Too long
       ];
 
       // Act & Assert - Valid filenames
-      validFilenames.forEach(filename => {
+      validFilenames.forEach((filename) => {
         expect(isValidFilename(filename)).toBe(true);
       });
 
       // Assert - Invalid filenames
-      invalidFilenames.forEach(filename => {
+      invalidFilenames.forEach((filename) => {
         expect(isValidFilename(filename)).toBe(false);
       });
     });
 
     it('should recommend appropriate image quality by context', () => {
       // Arrange & Act & Assert
-      expect(getRecommendedImageQuality('thumbnail')).toBe(IMAGE_QUALITY.MEDIUM);
+      expect(getRecommendedImageQuality('thumbnail')).toBe(
+        IMAGE_QUALITY.MEDIUM,
+      );
       expect(getRecommendedImageQuality('web')).toBe(IMAGE_QUALITY.DEFAULT);
       expect(getRecommendedImageQuality('print')).toBe(IMAGE_QUALITY.HIGH);
       expect(getRecommendedImageQuality('archive')).toBe(IMAGE_QUALITY.MAX);
-      
+
       // Test unknown context should return default
-      expect(getRecommendedImageQuality('unknown' as any)).toBe(IMAGE_QUALITY.DEFAULT);
+      expect(getRecommendedImageQuality('unknown' as any)).toBe(
+        IMAGE_QUALITY.DEFAULT,
+      );
     });
   });
 
@@ -521,7 +560,7 @@ describe('FileSystemConstants', () => {
       expect(FILE_SYSTEM_CONSTANTS.ERROR_MESSAGES).toBeDefined();
       expect(FILE_SYSTEM_CONSTANTS.ERROR_CODES).toBeDefined();
       expect(FILE_SYSTEM_CONSTANTS.PERFORMANCE_TARGETS).toBeDefined();
-      
+
       // Vérification structure complète
       const expectedSections = [
         'FILE_SIZE_LIMITS',
@@ -530,10 +569,10 @@ describe('FileSystemConstants', () => {
         'IMAGE_QUALITY',
         'CACHE_TTL',
         'ERROR_MESSAGES',
-        'PERFORMANCE_TARGETS'
+        'PERFORMANCE_TARGETS',
       ];
-      
-      expectedSections.forEach(section => {
+
+      expectedSections.forEach((section) => {
         expect(FILE_SYSTEM_CONSTANTS).toHaveProperty(section);
       });
     });
@@ -542,11 +581,11 @@ describe('FileSystemConstants', () => {
       // Arrange & Act & Assert
       // TypeScript compile-time protection via 'as const'
       // Ces assignations sont bloquées à la compilation, pas au runtime
-      
+
       // Vérification que les constantes sont accessibles
       expect(FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT).toBeDefined();
       expect(SUPPORTED_MIME_TYPES.IMAGES.length).toBeGreaterThan(0);
-      
+
       // Test runtime - TypeScript empêche la modification mais pas le runtime
       expect(() => {
         (FILE_SIZE_LIMITS as any).NEW_LIMIT = 999;
@@ -558,7 +597,7 @@ describe('FileSystemConstants', () => {
       const constantNames = Object.keys(FILE_SYSTEM_CONSTANTS);
 
       // Assert - Vérification convention UPPER_SNAKE_CASE
-      constantNames.forEach(name => {
+      constantNames.forEach((name) => {
         expect(name).toMatch(/^[A-Z][A-Z0-9_]*$/);
         expect(name).not.toContain('-');
         expect(name).not.toContain(' ');
@@ -594,12 +633,15 @@ describe('FileSystemConstants', () => {
     it('should handle storage path template edge cases', () => {
       // Arrange
       const incompleteVariables = {
-        userId: 'user-123'
+        userId: 'user-123',
         // Missing required variables
       };
 
       // Act
-      const pathWithMissing = generateStoragePath('USER_FILES', incompleteVariables);
+      const pathWithMissing = generateStoragePath(
+        'USER_FILES',
+        incompleteVariables,
+      );
 
       // Assert - Should still contain unreplaced placeholders
       expect(pathWithMissing).toContain('{year}');
@@ -614,28 +656,32 @@ describe('FileSystemConstants', () => {
         '<script>alert("xss")</script>',
         '../../../../etc/passwd',
         'file|pipe>redirect.exe',
-        'unicode\u0000null.pdf'
+        'unicode\u0000null.pdf',
       ];
 
       // Act & Assert - Patterns should reject malicious content
-      maliciousInputs.forEach(input => {
+      maliciousInputs.forEach((input) => {
         expect(isValidFilename(input)).toBe(false);
       });
     });
 
     it('should maintain consistency across related constants', () => {
       // Arrange & Act & Assert - Vérification cohérence inter-constantes
-      
+
       // Cache TTL vs Performance Targets
-      expect(CACHE_TTL.SHORT).toBeLessThan(PERFORMANCE_TARGETS.API_RESPONSE_TIME_PRESIGNED);
-      
+      expect(CACHE_TTL.SHORT).toBeLessThan(
+        PERFORMANCE_TARGETS.API_RESPONSE_TIME_PRESIGNED,
+      );
+
       // File sizes vs Performance limits
-      expect(FILE_SIZE_LIMITS.MULTIPART_THRESHOLD).toBeLessThan(FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT);
-      
+      expect(FILE_SIZE_LIMITS.MULTIPART_THRESHOLD).toBeLessThan(
+        FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT,
+      );
+
       // Image quality vs Processing
       expect(IMAGE_QUALITY.MIN).toBeGreaterThan(0);
       expect(IMAGE_QUALITY.MAX).toBeLessThanOrEqual(100);
-      
+
       // Alert thresholds vs Performance targets
       expect(ALERT_THRESHOLDS.MAX_ERROR_RATE).toBeLessThan(50);
     });

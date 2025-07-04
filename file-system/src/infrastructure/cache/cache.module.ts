@@ -1,9 +1,9 @@
 /**
  * Module de Gestion du Cache
- * 
+ *
  * Ce module configure et expose les services de cache utilisant Redis
  * pour optimiser les performances du système de fichiers.
- * 
+ *
  * @module CacheModule
  * @version 1.0
  * @author DevOps Lead
@@ -25,7 +25,7 @@ import { CacheService } from './cache.service';
         const redisPort = configService.get<number>('REDIS_PORT', 6379);
         const redisPassword = configService.get<string>('REDIS_PASSWORD');
         const redisDb = configService.get<number>('REDIS_CACHE_DB', 1);
-        
+
         return {
           store: redisStore as any,
           host: redisHost,

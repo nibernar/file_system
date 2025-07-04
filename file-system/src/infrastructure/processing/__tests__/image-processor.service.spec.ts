@@ -1,10 +1,10 @@
 /**
  * Tests unitaires pour ImageProcessorService - Traitement d'images avec Sharp
- * 
+ *
  * Ce fichier teste le service spécialisé de traitement d'images qui utilise Sharp
  * pour l'optimisation, le redimensionnement, la conversion de format et la génération
  * de thumbnails. Version corrigée avec les bonnes valeurs enum et mocks.
- * 
+ *
  * @author Backend Lead
  * @version 1.0
  * @conformsTo 04-06-file-system-tests Phase 3.1
@@ -13,11 +13,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import * as sharp from 'sharp';
-import { 
-  ImageProcessorService, 
+import {
+  ImageProcessorService,
   ImageOptimizationOptions,
   LocalOptimizedImage,
-  LocalConversionResult
+  LocalConversionResult,
 } from '../image-processor.service';
 import { GarageStorageService } from '../../garage/garage-storage.service';
 import { FILE_SYSTEM_CONFIG } from '../../../config/file-system.config';
@@ -27,20 +27,20 @@ import {
   VirusScanStatus,
   ProcessingStatus,
   DocumentType,
-  LocalThumbnailResult
+  LocalThumbnailResult,
 } from '../../../types/file-system.types';
 import {
   FileNotFoundException,
   OptimizationException,
   ThumbnailGenerationException,
-  FormatConversionException
+  FormatConversionException,
 } from '../../../exceptions/file-system.exceptions';
 import {
   createTestJPEGBuffer,
   createTestPNGBuffer,
   createTestFileBuffer,
   generateTestUUID,
-  delay
+  delay,
 } from '../../../__tests__/test-setup';
 
 // Mock de Sharp pour tests isolés
@@ -56,7 +56,9 @@ describe('ImageProcessorService', () => {
   /**
    * Helper pour créer un FileMetadata mock complet
    */
-  const createMockFileMetadata = (overrides: Partial<FileMetadata> = {}): FileMetadata => ({
+  const createMockFileMetadata = (
+    overrides: Partial<FileMetadata> = {},
+  ): FileMetadata => ({
     id: generateTestUUID(),
     userId: 'system',
     projectId: undefined,
@@ -74,7 +76,7 @@ describe('ImageProcessorService', () => {
     tags: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides
+    ...overrides,
   });
 
   beforeEach(async () => {
@@ -88,28 +90,28 @@ describe('ImageProcessorService', () => {
       png: jest.fn().mockReturnThis(),
       avif: jest.fn().mockReturnThis(),
       toFormat: jest.fn().mockReturnThis(),
-      toBuffer: jest.fn()
+      toBuffer: jest.fn(),
     };
 
     mockSharp.mockReturnValue(mockSharpInstance);
-    
+
     // Mock kernel pour Sharp
     (mockSharp as any).kernel = {
-      lanczos3: 'lanczos3'
+      lanczos3: 'lanczos3',
     };
 
     // Mock services dépendants
     const mockStorageService = {
       downloadObject: jest.fn(),
       uploadObject: jest.fn(),
-      getObjectInfo: jest.fn()
+      getObjectInfo: jest.fn(),
     };
 
     const mockLogger = {
       log: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn()
+      error: jest.fn(),
     };
 
     // Configuration module NestJS
@@ -123,14 +125,14 @@ describe('ImageProcessorService', () => {
           useValue: {
             processing: {
               imageOptimizationQuality: 85,
-              thumbnailSize: 200
+              thumbnailSize: 200,
             },
             cdn: {
-              baseUrl: 'https://cdn.test.coders.com'
-            }
-          }
-        }
-      ]
+              baseUrl: 'https://cdn.test.coders.com',
+            },
+          },
+        },
+      ],
     }).compile();
 
     // Récupération instances mockées
@@ -152,7 +154,7 @@ describe('ImageProcessorService', () => {
     it('should have Sharp available for image processing', () => {
       // Act - Création instance Sharp
       const sharpInstance = mockSharp(Buffer.from('test'));
-      
+
       // Assert - Sharp mockée fonctionnelle
       expect(sharpInstance).toBeDefined();
       expect(mockSharp).toHaveBeenCalled();
@@ -164,7 +166,7 @@ describe('ImageProcessorService', () => {
       const fileId = generateTestUUID();
       const sourceBuffer = createTestJPEGBuffer();
       const optimizedBuffer = Buffer.from('optimized-jpeg-content');
-      
+
       const options: ImageOptimizationOptions = {
         maxWidth: 1920,
         maxHeight: 1080,
@@ -172,7 +174,7 @@ describe('ImageProcessorService', () => {
         format: ImageFormat.JPEG,
         preserveExif: false,
         progressive: true,
-        optimizeForWeb: true
+        optimizeForWeb: true,
       };
 
       // Configuration mocks
@@ -182,16 +184,16 @@ describe('ImageProcessorService', () => {
           contentType: 'image/jpeg',
           contentLength: sourceBuffer.length,
           lastModified: new Date(),
-          etag: 'test-etag'
+          etag: 'test-etag',
         },
-        fromCache: false
+        fromCache: false,
       });
 
       mockSharpInstance.metadata.mockResolvedValue({
         width: 3840,
         height: 2160,
         format: 'jpeg',
-        size: sourceBuffer.length
+        size: sourceBuffer.length,
       });
 
       mockSharpInstance.toBuffer.mockResolvedValue({
@@ -200,14 +202,14 @@ describe('ImageProcessorService', () => {
           width: 1920,
           height: 1080,
           size: optimizedBuffer.length,
-          format: 'jpeg'
-        }
+          format: 'jpeg',
+        },
       });
 
       const mockFileMetadata = createMockFileMetadata({
         contentType: 'image/jpeg',
         size: optimizedBuffer.length,
-        storageKey: `${fileId}/optimized/jpeg/123456789`
+        storageKey: `${fileId}/optimized/jpeg/123456789`,
       });
 
       storageService.uploadObject.mockResolvedValue({
@@ -216,7 +218,7 @@ describe('ImageProcessorService', () => {
         etag: 'optimized-etag',
         location: 'https://test-storage.com/optimized.jpg',
         metadata: mockFileMetadata,
-        uploadDuration: 500
+        uploadDuration: 500,
       });
 
       const result = await service.optimizeImage(fileId, options);
@@ -226,22 +228,24 @@ describe('ImageProcessorService', () => {
       expect(result.format).toBe(ImageFormat.JPEG);
       expect(result.dimensions.width).toBe(1920);
       expect(result.dimensions.height).toBe(1080);
-      expect(result.compressionRatio).toBe(optimizedBuffer.length / sourceBuffer.length);
+      expect(result.compressionRatio).toBe(
+        optimizedBuffer.length / sourceBuffer.length,
+      );
 
       // Vérification pipeline Sharp JPEG
       expect(mockSharpInstance.resize).toHaveBeenCalledWith(1920, 1080, {
         fit: 'inside',
         withoutEnlargement: true,
-        kernel: 'lanczos3'
+        kernel: 'lanczos3',
       });
 
       expect(mockSharpInstance.withMetadata).toHaveBeenCalledWith({});
-      
+
       expect(mockSharpInstance.jpeg).toHaveBeenCalledWith({
         quality: 90,
         progressive: true,
         mozjpeg: true,
-        optimiseScans: true
+        optimiseScans: true,
       });
 
       // Vérification sauvegarde optimisée
@@ -250,8 +254,8 @@ describe('ImageProcessorService', () => {
         optimizedBuffer,
         expect.objectContaining({
           contentType: 'image/jpeg',
-          userId: 'system'
-        })
+          userId: 'system',
+        }),
       );
     });
 
@@ -266,7 +270,7 @@ describe('ImageProcessorService', () => {
         maxHeight: 800,
         quality: 85,
         format: ImageFormat.WEBP,
-        optimizeForWeb: true
+        optimizeForWeb: true,
       };
 
       // Configuration mocks PNG → WebP
@@ -276,9 +280,9 @@ describe('ImageProcessorService', () => {
           contentType: 'image/png',
           contentLength: sourceBuffer.length,
           lastModified: new Date(),
-          etag: 'png-etag'
+          etag: 'png-etag',
         },
-        fromCache: false
+        fromCache: false,
       });
 
       mockSharpInstance.metadata.mockResolvedValue({
@@ -286,7 +290,7 @@ describe('ImageProcessorService', () => {
         height: 1600,
         format: 'png',
         size: sourceBuffer.length,
-        hasAlpha: true
+        hasAlpha: true,
       });
 
       mockSharpInstance.toBuffer.mockResolvedValue({
@@ -295,13 +299,13 @@ describe('ImageProcessorService', () => {
           width: 1200,
           height: 800,
           size: webpBuffer.length,
-          format: 'webp'
-        }
+          format: 'webp',
+        },
       });
 
       const mockFileMetadata = createMockFileMetadata({
         contentType: 'image/webp',
-        size: webpBuffer.length
+        size: webpBuffer.length,
       });
 
       storageService.uploadObject.mockResolvedValue({
@@ -310,7 +314,7 @@ describe('ImageProcessorService', () => {
         etag: 'webp-etag',
         location: 'https://test-storage.com/optimized.webp',
         metadata: mockFileMetadata,
-        uploadDuration: 400
+        uploadDuration: 400,
       });
 
       // Act
@@ -327,14 +331,14 @@ describe('ImageProcessorService', () => {
         quality: 85,
         effort: 6,
         smartSubsample: true,
-        preset: 'photo'
+        preset: 'photo',
       });
 
       // Vérification redimensionnement approprié
       expect(mockSharpInstance.resize).toHaveBeenCalledWith(1200, 800, {
         fit: 'inside',
         withoutEnlargement: true,
-        kernel: 'lanczos3'
+        kernel: 'lanczos3',
       });
     });
 
@@ -350,18 +354,19 @@ describe('ImageProcessorService', () => {
           contentType: 'image/jpeg',
           contentLength: corruptedBuffer.length,
           lastModified: new Date(),
-          etag: 'corrupted-etag'
+          etag: 'corrupted-etag',
         },
-        fromCache: false
+        fromCache: false,
       });
 
       mockSharpInstance.metadata.mockRejectedValue(
-        new Error('Input buffer contains unsupported image format')
+        new Error('Input buffer contains unsupported image format'),
       );
 
       // Act & Assert
-      await expect(service.optimizeImage(fileId, {}))
-        .rejects.toThrow(OptimizationException);
+      await expect(service.optimizeImage(fileId, {})).rejects.toThrow(
+        OptimizationException,
+      );
     });
   });
 
@@ -384,9 +389,9 @@ describe('ImageProcessorService', () => {
           contentType: 'image/jpeg',
           contentLength: sourceBuffer.length,
           lastModified: new Date(),
-          etag: 'thumbnail-etag'
+          etag: 'thumbnail-etag',
         },
-        fromCache: false
+        fromCache: false,
       });
 
       // Mock pour WebP et JPEG thumbnails
@@ -396,12 +401,12 @@ describe('ImageProcessorService', () => {
 
       const webpMetadata = createMockFileMetadata({
         contentType: 'image/webp',
-        storageKey: `${fileId}/thumbnails/200/webp/123456789`
+        storageKey: `${fileId}/thumbnails/200/webp/123456789`,
       });
 
       const jpegMetadata = createMockFileMetadata({
         contentType: 'image/jpeg',
-        storageKey: `${fileId}/thumbnails/200/jpeg/123456789`
+        storageKey: `${fileId}/thumbnails/200/jpeg/123456789`,
       });
 
       storageService.uploadObject
@@ -411,7 +416,7 @@ describe('ImageProcessorService', () => {
           etag: 'webp-thumb-etag',
           location: 'https://test-storage.com/thumb.webp',
           metadata: webpMetadata,
-          uploadDuration: 100
+          uploadDuration: 100,
         })
         .mockResolvedValueOnce({
           uploadId: `${fileId}/thumbnails/200/jpeg/123456789`,
@@ -419,11 +424,15 @@ describe('ImageProcessorService', () => {
           etag: 'jpeg-thumb-etag',
           location: 'https://test-storage.com/thumb.jpg',
           metadata: jpegMetadata,
-          uploadDuration: 100
+          uploadDuration: 100,
         });
 
       // Act
-      const result = await service.generateThumbnail(fileId, thumbnailSize, formats);
+      const result = await service.generateThumbnail(
+        fileId,
+        thumbnailSize,
+        formats,
+      );
 
       // Assert
       expect(result.success).toBe(true);
@@ -437,8 +446,12 @@ describe('ImageProcessorService', () => {
       // Vérification formats générés
       expect(result.formats).toBeDefined();
       if (result.formats) {
-        const webpFormat = result.formats.find(f => f.format === ImageFormat.WEBP);
-        const jpegFormat = result.formats.find(f => f.format === ImageFormat.JPEG);
+        const webpFormat = result.formats.find(
+          (f) => f.format === ImageFormat.WEBP,
+        );
+        const jpegFormat = result.formats.find(
+          (f) => f.format === ImageFormat.JPEG,
+        );
 
         expect(webpFormat).toBeDefined();
         expect(webpFormat?.url).toContain('cdn.test.coders.com');
@@ -450,11 +463,15 @@ describe('ImageProcessorService', () => {
       }
 
       // Vérification pipeline redimensionnement thumbnail
-      expect(mockSharpInstance.resize).toHaveBeenCalledWith(thumbnailSize, thumbnailSize, {
-        fit: 'cover',
-        position: 'center',
-        kernel: 'lanczos3'
-      });
+      expect(mockSharpInstance.resize).toHaveBeenCalledWith(
+        thumbnailSize,
+        thumbnailSize,
+        {
+          fit: 'cover',
+          position: 'center',
+          kernel: 'lanczos3',
+        },
+      );
 
       // Vérification suppression métadonnées pour thumbnails
       expect(mockSharpInstance.withMetadata).toHaveBeenCalledWith({});
@@ -473,15 +490,16 @@ describe('ImageProcessorService', () => {
           contentType: 'image/jpeg',
           contentLength: sourceBuffer.length,
           lastModified: new Date(),
-          etag: 'test-etag'
+          etag: 'test-etag',
         },
-        fromCache: false
+        fromCache: false,
       });
 
       // Act & Assert - Le service devrait lancer une exception
       for (const size of invalidSizes) {
-        await expect(service.generateThumbnail(fileId, size))
-          .rejects.toThrow(ThumbnailGenerationException);
+        await expect(service.generateThumbnail(fileId, size)).rejects.toThrow(
+          ThumbnailGenerationException,
+        );
       }
     });
   });
@@ -491,7 +509,11 @@ describe('ImageProcessorService', () => {
       // Arrange
       const fileId = generateTestUUID();
       const sourceBuffer = createTestJPEGBuffer();
-      const targetFormats = [ImageFormat.WEBP, ImageFormat.AVIF, ImageFormat.JPEG];
+      const targetFormats = [
+        ImageFormat.WEBP,
+        ImageFormat.AVIF,
+        ImageFormat.JPEG,
+      ];
 
       // Buffers pour chaque format
       const webpBuffer = Buffer.from('webp-format-content');
@@ -505,57 +527,80 @@ describe('ImageProcessorService', () => {
           contentType: 'image/jpeg',
           contentLength: sourceBuffer.length,
           lastModified: new Date(),
-          etag: 'formats-etag'
+          etag: 'formats-etag',
         },
-        fromCache: false
+        fromCache: false,
       });
 
       mockSharpInstance.metadata.mockResolvedValue({
         width: 1920,
         height: 1080,
         format: 'jpeg',
-        size: sourceBuffer.length
+        size: sourceBuffer.length,
       });
 
       // Configuration conversions par format
       mockSharpInstance.toBuffer
-        .mockResolvedValueOnce(webpBuffer)  // WebP
-        .mockResolvedValueOnce(avifBuffer)  // AVIF
+        .mockResolvedValueOnce(webpBuffer) // WebP
+        .mockResolvedValueOnce(avifBuffer) // AVIF
         .mockResolvedValueOnce(jpegBuffer); // JPEG
 
-      const webpMetadata = createMockFileMetadata({ contentType: 'image/webp' });
-      const avifMetadata = createMockFileMetadata({ contentType: 'image/avif' });
-      const jpegMetadata = createMockFileMetadata({ contentType: 'image/jpeg' });
+      const webpMetadata = createMockFileMetadata({
+        contentType: 'image/webp',
+      });
+      const avifMetadata = createMockFileMetadata({
+        contentType: 'image/avif',
+      });
+      const jpegMetadata = createMockFileMetadata({
+        contentType: 'image/jpeg',
+      });
 
       storageService.uploadObject
-        .mockResolvedValueOnce({ 
-          uploadId: 'webp-upload', storageKey: 'webp-key', etag: 'webp-etag', 
-          location: 'webp-url', metadata: webpMetadata, uploadDuration: 100 
+        .mockResolvedValueOnce({
+          uploadId: 'webp-upload',
+          storageKey: 'webp-key',
+          etag: 'webp-etag',
+          location: 'webp-url',
+          metadata: webpMetadata,
+          uploadDuration: 100,
         })
-        .mockResolvedValueOnce({ 
-          uploadId: 'avif-upload', storageKey: 'avif-key', etag: 'avif-etag', 
-          location: 'avif-url', metadata: avifMetadata, uploadDuration: 100 
+        .mockResolvedValueOnce({
+          uploadId: 'avif-upload',
+          storageKey: 'avif-key',
+          etag: 'avif-etag',
+          location: 'avif-url',
+          metadata: avifMetadata,
+          uploadDuration: 100,
         })
-        .mockResolvedValueOnce({ 
-          uploadId: 'jpeg-upload', storageKey: 'jpeg-key', etag: 'jpeg-etag', 
-          location: 'jpeg-url', metadata: jpegMetadata, uploadDuration: 100 
+        .mockResolvedValueOnce({
+          uploadId: 'jpeg-upload',
+          storageKey: 'jpeg-key',
+          etag: 'jpeg-etag',
+          location: 'jpeg-url',
+          metadata: jpegMetadata,
+          uploadDuration: 100,
         });
 
       // Act
-      const results = await service.generateMultipleFormats(fileId, targetFormats);
+      const results = await service.generateMultipleFormats(
+        fileId,
+        targetFormats,
+      );
 
       // Assert
       expect(results).toHaveLength(3);
-      expect(results.every(r => r.success)).toBe(true);
+      expect(results.every((r) => r.success)).toBe(true);
 
       // Vérification chaque format
-      const webpResult = results.find(r => r.toFormat === ImageFormat.WEBP);
-      const avifResult = results.find(r => r.toFormat === ImageFormat.AVIF);
-      const jpegResult = results.find(r => r.toFormat === ImageFormat.JPEG);
+      const webpResult = results.find((r) => r.toFormat === ImageFormat.WEBP);
+      const avifResult = results.find((r) => r.toFormat === ImageFormat.AVIF);
+      const jpegResult = results.find((r) => r.toFormat === ImageFormat.JPEG);
 
       expect(webpResult).toBeDefined();
       expect(webpResult?.buffer).toEqual(webpBuffer);
-      expect(webpResult?.compressionRatio).toBe(webpBuffer.length / sourceBuffer.length);
+      expect(webpResult?.compressionRatio).toBe(
+        webpBuffer.length / sourceBuffer.length,
+      );
 
       expect(avifResult).toBeDefined();
       expect(avifResult?.buffer).toEqual(avifBuffer);
@@ -568,19 +613,20 @@ describe('ImageProcessorService', () => {
     });
   });
 
-  describe('Gestion d\'Erreurs et Robustesse', () => {
+  describe("Gestion d'Erreurs et Robustesse", () => {
     it('should handle missing image files gracefully', async () => {
       // Arrange
       const nonExistentFileId = generateTestUUID();
 
       // Configuration mock pour fichier inexistant
       storageService.downloadObject.mockRejectedValue(
-        new FileNotFoundException(nonExistentFileId)
+        new FileNotFoundException(nonExistentFileId),
       );
 
       // Act & Assert
-      await expect(service.optimizeImage(nonExistentFileId, {}))
-        .rejects.toThrow(OptimizationException);
+      await expect(
+        service.optimizeImage(nonExistentFileId, {}),
+      ).rejects.toThrow(OptimizationException);
 
       // Vérification aucun traitement Sharp tenté
       expect(mockSharp).not.toHaveBeenCalled();
@@ -598,19 +644,20 @@ describe('ImageProcessorService', () => {
           contentType: 'application/octet-stream',
           contentLength: unsupportedBuffer.length,
           lastModified: new Date(),
-          etag: 'unsupported-etag'
+          etag: 'unsupported-etag',
         },
-        fromCache: false
+        fromCache: false,
       });
 
       mockSharpInstance.metadata.mockResolvedValue({
         format: 'unknown', // Format non supporté
-        size: unsupportedBuffer.length
+        size: unsupportedBuffer.length,
       });
 
       // Act & Assert
-      await expect(service.optimizeImage(fileId, {}))
-        .rejects.toThrow(OptimizationException);
+      await expect(service.optimizeImage(fileId, {})).rejects.toThrow(
+        OptimizationException,
+      );
     });
 
     it('should recover from temporary component failures', async () => {
@@ -627,21 +674,22 @@ describe('ImageProcessorService', () => {
             contentType: 'image/jpeg',
             contentLength: sourceBuffer.length,
             lastModified: new Date(),
-            etag: 'recovery-etag'
+            etag: 'recovery-etag',
           },
-          fromCache: false
+          fromCache: false,
         });
 
       // Act - Premier échec
-      await expect(service.optimizeImage(fileId, {}))
-        .rejects.toThrow(OptimizationException);
+      await expect(service.optimizeImage(fileId, {})).rejects.toThrow(
+        OptimizationException,
+      );
 
       // Setup pour retry réussi
       mockSharpInstance.metadata.mockResolvedValue({
         width: 1920,
         height: 1080,
         format: 'jpeg',
-        size: sourceBuffer.length
+        size: sourceBuffer.length,
       });
 
       const optimizedBuffer = Buffer.from('recovered-optimization');
@@ -651,13 +699,13 @@ describe('ImageProcessorService', () => {
           width: 1920,
           height: 1080,
           size: optimizedBuffer.length,
-          format: 'webp'
-        }
+          format: 'webp',
+        },
       });
 
       const mockFileMetadata = createMockFileMetadata({
         contentType: 'image/webp',
-        size: optimizedBuffer.length
+        size: optimizedBuffer.length,
       });
 
       storageService.uploadObject.mockResolvedValue({
@@ -666,7 +714,7 @@ describe('ImageProcessorService', () => {
         etag: 'recovered-etag',
         location: 'recovered-url',
         metadata: mockFileMetadata,
-        uploadDuration: 300
+        uploadDuration: 300,
       });
 
       // Act - Second essai réussit

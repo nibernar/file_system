@@ -18,22 +18,22 @@ jest.mock('@aws-sdk/client-s3', () => ({
   UploadPartCommand: jest.fn(),
   CompleteMultipartUploadCommand: jest.fn(),
   AbortMultipartUploadCommand: jest.fn(),
-  CopyObjectCommand: jest.fn()
+  CopyObjectCommand: jest.fn(),
 }));
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
-  getSignedUrl: jest.fn()
+  getSignedUrl: jest.fn(),
 }));
 
 jest.mock('@aws-sdk/lib-storage', () => ({
-  Upload: jest.fn()
+  Upload: jest.fn(),
 }));
 
 // Import des classes mockées APRÈS les mocks
-import { 
-  S3Client, 
-  PutObjectCommand, 
-  GetObjectCommand, 
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
@@ -41,7 +41,7 @@ import {
   UploadPartCommand,
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
-  CopyObjectCommand
+  CopyObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
@@ -55,7 +55,7 @@ describe('GarageStorageService', () => {
   let configService: jest.Mocked<ConfigService>;
   let mockS3Client: any;
   let logger: jest.Mocked<Logger>;
-  
+
   // Configuration de test standard
   const mockConfig: any = {
     garage: {
@@ -66,9 +66,9 @@ describe('GarageStorageService', () => {
       buckets: {
         documents: 'test-documents',
         backups: 'test-backups',
-        temp: 'test-temp'
+        temp: 'test-temp',
       },
-      forcePathStyle: true
+      forcePathStyle: true,
     },
     cdn: {
       baseUrl: 'https://test-cdn.example.com',
@@ -76,7 +76,7 @@ describe('GarageStorageService', () => {
       invalidationToken: 'test-token',
       edgeLocations: ['eu-west-1'],
       defaultTtl: 3600,
-      maxTtl: 86400
+      maxTtl: 86400,
     },
     processing: {
       maxFileSize: 500 * 1024 * 1024, // 500MB pour permettre tous les tests
@@ -86,7 +86,7 @@ describe('GarageStorageService', () => {
       thumbnailSize: 200,
       pdfCompressionLevel: 6,
       maxWorkers: 4,
-      chunkSize: 1024 * 1024
+      chunkSize: 1024 * 1024,
     },
     security: {
       presignedUrlExpiry: 3600,
@@ -96,58 +96,91 @@ describe('GarageStorageService', () => {
       rateLimitUploadsPerMinute: 20,
       abuseBlockDuration: 60,
       deviceFingerprintingEnabled: false,
-      securityTokenSecret: 'test-secret-token'
-    }
+      securityTokenSecret: 'test-secret-token',
+    },
   };
 
   beforeEach(async () => {
     // Reset tous les mocks
     jest.clearAllMocks();
-    
+
     // ✅ Configuration des mocks AWS SDK DANS beforeEach
     mockS3Client = {
       send: jest.fn(),
       config: {
         endpoint: mockConfig.garage.endpoint,
-        region: mockConfig.garage.region
+        region: mockConfig.garage.region,
       },
-      destroy: jest.fn()
+      destroy: jest.fn(),
     };
 
     // Configuration du constructor S3Client
-    (S3Client as jest.MockedClass<typeof S3Client>).mockImplementation(() => mockS3Client);
-
-    // Configuration des commandes pour retourner l'input
-    (PutObjectCommand as jest.MockedClass<typeof PutObjectCommand>).mockImplementation((input) => ({ input } as any));
-    (GetObjectCommand as jest.MockedClass<typeof GetObjectCommand>).mockImplementation((input) => ({ input } as any));
-    (DeleteObjectCommand as jest.MockedClass<typeof DeleteObjectCommand>).mockImplementation((input) => ({ input } as any));
-    (HeadObjectCommand as jest.MockedClass<typeof HeadObjectCommand>).mockImplementation((input) => ({ input } as any));
-    (ListObjectsV2Command as jest.MockedClass<typeof ListObjectsV2Command>).mockImplementation((input) => ({ input } as any));
-    (CreateMultipartUploadCommand as jest.MockedClass<typeof CreateMultipartUploadCommand>).mockImplementation((input) => ({ input } as any));
-    (UploadPartCommand as jest.MockedClass<typeof UploadPartCommand>).mockImplementation((input) => ({ input } as any));
-    (CompleteMultipartUploadCommand as jest.MockedClass<typeof CompleteMultipartUploadCommand>).mockImplementation((input) => ({ input } as any));
-    (AbortMultipartUploadCommand as jest.MockedClass<typeof AbortMultipartUploadCommand>).mockImplementation((input) => ({ input } as any));
-    (CopyObjectCommand as jest.MockedClass<typeof CopyObjectCommand>).mockImplementation((input) => ({ input } as any));
-
-    // Configuration des utilitaires
-    (getSignedUrl as jest.MockedFunction<typeof getSignedUrl>).mockResolvedValue(
-      'https://test-garage.example.com/test-bucket/mock-object?X-Amz-Algorithm=AWS4-HMAC-SHA256'
+    (S3Client as jest.MockedClass<typeof S3Client>).mockImplementation(
+      () => mockS3Client,
     );
 
-    (Upload as jest.MockedClass<typeof Upload>).mockImplementation(() => ({
-      done: jest.fn().mockResolvedValue({
-        ETag: '"mock-multipart-etag"',
-        Location: 'https://test-garage.example.com/test-documents/mock-key',
-        Key: 'mock-key'
-      })
-    } as any));
+    // Configuration des commandes pour retourner l'input
+    (
+      PutObjectCommand as jest.MockedClass<typeof PutObjectCommand>
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      GetObjectCommand as jest.MockedClass<typeof GetObjectCommand>
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      DeleteObjectCommand as jest.MockedClass<typeof DeleteObjectCommand>
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      HeadObjectCommand as jest.MockedClass<typeof HeadObjectCommand>
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      ListObjectsV2Command as jest.MockedClass<typeof ListObjectsV2Command>
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      CreateMultipartUploadCommand as jest.MockedClass<
+        typeof CreateMultipartUploadCommand
+      >
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      UploadPartCommand as jest.MockedClass<typeof UploadPartCommand>
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      CompleteMultipartUploadCommand as jest.MockedClass<
+        typeof CompleteMultipartUploadCommand
+      >
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      AbortMultipartUploadCommand as jest.MockedClass<
+        typeof AbortMultipartUploadCommand
+      >
+    ).mockImplementation((input) => ({ input }) as any);
+    (
+      CopyObjectCommand as jest.MockedClass<typeof CopyObjectCommand>
+    ).mockImplementation((input) => ({ input }) as any);
+
+    // Configuration des utilitaires
+    (
+      getSignedUrl as jest.MockedFunction<typeof getSignedUrl>
+    ).mockResolvedValue(
+      'https://test-garage.example.com/test-bucket/mock-object?X-Amz-Algorithm=AWS4-HMAC-SHA256',
+    );
+
+    (Upload as jest.MockedClass<typeof Upload>).mockImplementation(
+      () =>
+        ({
+          done: jest.fn().mockResolvedValue({
+            ETag: '"mock-multipart-etag"',
+            Location: 'https://test-garage.example.com/test-documents/mock-key',
+            Key: 'mock-key',
+          }),
+        }) as any,
+    );
 
     // ✅ CORRIGÉ : Créer le mock logger avant le module
     logger = {
       log: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
-      debug: jest.fn()
+      debug: jest.fn(),
     } as any;
 
     // Configuration du module de test avec Logger mocké
@@ -157,14 +190,14 @@ describe('GarageStorageService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockReturnValue(mockConfig)
-          }
+            get: jest.fn().mockReturnValue(mockConfig),
+          },
         },
         {
           provide: Logger,
-          useValue: logger  // ✅ Utiliser directement notre mock
-        }
-      ]
+          useValue: logger, // ✅ Utiliser directement notre mock
+        },
+      ],
     }).compile();
 
     service = module.get<GarageStorageService>(GarageStorageService);
@@ -186,10 +219,10 @@ describe('GarageStorageService', () => {
         region: mockConfig.garage.region,
         credentials: {
           accessKeyId: mockConfig.garage.accessKey,
-          secretAccessKey: mockConfig.garage.secretKey
+          secretAccessKey: mockConfig.garage.secretKey,
         },
         forcePathStyle: mockConfig.garage.forcePathStyle,
-        maxAttempts: 3
+        maxAttempts: 3,
       });
 
       // ✅ SOLUTION FINALE : Vérifier que le service est correctement initialisé
@@ -198,17 +231,19 @@ describe('GarageStorageService', () => {
       expect(service.uploadObject).toBeDefined();
       expect(service.downloadObject).toBeDefined();
       expect(service.generatePresignedUrl).toBeDefined();
-      
+
       // Vérifier que la configuration est accessible
-      expect((service as any).defaultBucket).toBe(mockConfig.garage.buckets.documents);
+      expect((service as any).defaultBucket).toBe(
+        mockConfig.garage.buckets.documents,
+      );
       expect((service as any).s3Client).toBeDefined();
-      
+
       // Note: Le logger est testé dans tous les autres tests quand il est mocké correctement
     });
 
     it('should throw error if file system configuration not found', async () => {
       const badConfigService = {
-        get: jest.fn().mockReturnValue(null)
+        get: jest.fn().mockReturnValue(null),
       };
 
       expect(() => {
@@ -229,12 +264,13 @@ describe('GarageStorageService', () => {
         contentType: 'text/plain',
         userId: 'user-123',
         projectId: 'project-456',
-        customMetadata: { testId: 'unit-test' }
+        customMetadata: { testId: 'unit-test' },
       };
 
       const mockS3Response = {
         ETag: '"abc123def456"',
-        Location: 'https://test-garage.example.com/test-documents/test-files/small-file.txt'
+        Location:
+          'https://test-garage.example.com/test-documents/test-files/small-file.txt',
       };
 
       mockS3Client.send.mockResolvedValue(mockS3Response);
@@ -262,13 +298,13 @@ describe('GarageStorageService', () => {
           ContentLength: testBuffer.length,
           Metadata: expect.objectContaining({
             'user-id': metadata.userId,
-            'project-id': metadata.projectId
-          })
-        })
+            'project-id': metadata.projectId,
+          }),
+        }),
       });
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Object uploaded successfully')
+        expect.stringContaining('Object uploaded successfully'),
       );
     });
 
@@ -278,19 +314,22 @@ describe('GarageStorageService', () => {
       const key = 'test-files/large-file.bin';
       const metadata: any = {
         contentType: 'application/octet-stream',
-        userId: 'user-123'
+        userId: 'user-123',
       };
 
       const mockUploadResult = {
         ETag: '"large-file-etag"',
-        Location: 'https://test-garage.example.com/test-documents/test-files/large-file.bin',
-        Key: key
+        Location:
+          'https://test-garage.example.com/test-documents/test-files/large-file.bin',
+        Key: key,
       };
 
       const mockUpload = {
-        done: jest.fn().mockResolvedValue(mockUploadResult)
+        done: jest.fn().mockResolvedValue(mockUploadResult),
       };
-      (Upload as jest.MockedClass<typeof Upload>).mockImplementation(() => mockUpload as any);
+      (Upload as jest.MockedClass<typeof Upload>).mockImplementation(
+        () => mockUpload as any,
+      );
 
       // Act
       const result = await service.uploadObject(key, largeBuffer, metadata);
@@ -302,10 +341,10 @@ describe('GarageStorageService', () => {
           Bucket: mockConfig.garage.buckets.documents,
           Key: key,
           Body: largeBuffer,
-          ContentType: metadata.contentType
+          ContentType: metadata.contentType,
         }),
         partSize: 50 * 1024 * 1024,
-        queueSize: 4
+        queueSize: 4,
       });
 
       expect(mockUpload.done).toHaveBeenCalled();
@@ -313,7 +352,7 @@ describe('GarageStorageService', () => {
       expect(result.metadata.size).toBe(largeBuffer.length);
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Large object uploaded successfully')
+        expect.stringContaining('Large object uploaded successfully'),
       );
     });
 
@@ -322,33 +361,39 @@ describe('GarageStorageService', () => {
       const oversizedBuffer = Buffer.alloc(600 * 1024 * 1024, 'x');
       const metadata: any = {
         contentType: 'text/plain',
-        userId: 'user-123'
+        userId: 'user-123',
       };
 
       await expect(
-        service.uploadObject('test/oversized.txt', oversizedBuffer, metadata)
+        service.uploadObject('test/oversized.txt', oversizedBuffer, metadata),
       ).rejects.toThrow('File too large');
 
       // Test 2 : Clé invalide
       const validBuffer = Buffer.from('test content');
-      
+
       await expect(
-        service.uploadObject('', validBuffer, metadata)
+        service.uploadObject('', validBuffer, metadata),
       ).rejects.toThrow('Invalid key: must be a non-empty string');
 
       // Test 3 : Buffer invalide
       await expect(
-        service.uploadObject('test/empty.txt', Buffer.alloc(0), metadata)
+        service.uploadObject('test/empty.txt', Buffer.alloc(0), metadata),
       ).rejects.toThrow('Invalid buffer: must be a non-empty Buffer');
 
       // Test 4 : Métadonnées manquantes
       const incompleteMetadata = {
-        contentType: 'text/plain'
+        contentType: 'text/plain',
       } as any;
 
       await expect(
-        service.uploadObject('test/incomplete.txt', validBuffer, incompleteMetadata)
-      ).rejects.toThrow('Invalid metadata: contentType and userId are required');
+        service.uploadObject(
+          'test/incomplete.txt',
+          validBuffer,
+          incompleteMetadata,
+        ),
+      ).rejects.toThrow(
+        'Invalid metadata: contentType and userId are required',
+      );
     });
   });
 
@@ -360,7 +405,7 @@ describe('GarageStorageService', () => {
       // Arrange
       const key = 'test-files/download-test.txt';
       const expectedContent = Buffer.from('Downloaded content');
-      
+
       const mockStream = {
         on: jest.fn((event, callback) => {
           if (event === 'data') {
@@ -370,7 +415,7 @@ describe('GarageStorageService', () => {
           }
           return mockStream;
         }),
-        pipe: jest.fn()
+        pipe: jest.fn(),
       };
 
       const mockS3Response = {
@@ -378,7 +423,7 @@ describe('GarageStorageService', () => {
         ContentType: 'text/plain',
         ContentLength: expectedContent.length,
         LastModified: new Date('2023-01-01'),
-        ETag: '"download-etag"'
+        ETag: '"download-etag"',
       };
 
       mockS3Client.send.mockResolvedValue(mockS3Response);
@@ -397,8 +442,8 @@ describe('GarageStorageService', () => {
       expect(mockS3Client.send).toHaveBeenCalledWith({
         input: expect.objectContaining({
           Bucket: mockConfig.garage.buckets.documents,
-          Key: key
-        })
+          Key: key,
+        }),
       });
     });
 
@@ -412,8 +457,8 @@ describe('GarageStorageService', () => {
         LastModified: new Date('2023-01-01'),
         Metadata: {
           'user-id': 'user-123',
-          'project-id': 'project-456'
-        }
+          'project-id': 'project-456',
+        },
       };
 
       mockS3Client.send.mockResolvedValue(mockHeadResponse);
@@ -430,14 +475,14 @@ describe('GarageStorageService', () => {
       expect(result.lastModified).toEqual(new Date('2023-01-01'));
       expect(result.customMetadata).toEqual({
         'user-id': 'user-123',
-        'project-id': 'project-456'
+        'project-id': 'project-456',
       });
 
       expect(mockS3Client.send).toHaveBeenCalledWith({
         input: expect.objectContaining({
           Bucket: mockConfig.garage.buckets.documents,
-          Key: key
-        })
+          Key: key,
+        }),
       });
     });
   });
@@ -453,12 +498,15 @@ describe('GarageStorageService', () => {
         operation: 'GET',
         expiresIn: 3600,
         ipRestriction: ['192.168.1.100'],
-        userAgent: 'TestAgent/1.0'
+        userAgent: 'TestAgent/1.0',
       };
 
-      const mockPresignedUrl = 'https://test-garage.example.com/test-documents/test-files/presigned-test.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256';
+      const mockPresignedUrl =
+        'https://test-garage.example.com/test-documents/test-files/presigned-test.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256';
 
-      (getSignedUrl as jest.MockedFunction<typeof getSignedUrl>).mockResolvedValue(mockPresignedUrl);
+      (
+        getSignedUrl as jest.MockedFunction<typeof getSignedUrl>
+      ).mockResolvedValue(mockPresignedUrl);
 
       // Act
       const result = await service.generatePresignedUrl(options);
@@ -474,22 +522,22 @@ describe('GarageStorageService', () => {
       expect(getSignedUrl).toHaveBeenCalledWith(
         mockS3Client,
         { input: expect.objectContaining({ Key: options.key }) },
-        expect.objectContaining({ expiresIn: 3600 })
+        expect.objectContaining({ expiresIn: 3600 }),
       );
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Presigned URL generated')
+        expect.stringContaining('Presigned URL generated'),
       );
     });
 
     it('should throw error for missing key in options', async () => {
       const invalidOptions = {
         operation: 'GET',
-        expiresIn: 3600
+        expiresIn: 3600,
       } as any;
 
       await expect(
-        service.generatePresignedUrl(invalidOptions)
+        service.generatePresignedUrl(invalidOptions),
       ).rejects.toThrow('Key is required in PresignedUrlOptions');
     });
   });
@@ -507,17 +555,17 @@ describe('GarageStorageService', () => {
       const testBuffer = Buffer.from('Test content');
       const metadata: any = {
         contentType: 'text/plain',
-        userId: 'user-123'
+        userId: 'user-123',
       };
 
       // Act & Assert
       await expect(
-        service.uploadObject('test/connection-fail.txt', testBuffer, metadata)
+        service.uploadObject('test/connection-fail.txt', testBuffer, metadata),
       ).rejects.toThrow('Failed to upload object: Network timeout');
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Upload failed'),
-        networkError
+        networkError,
       );
     });
 
@@ -535,19 +583,23 @@ describe('GarageStorageService', () => {
       const testBuffer = Buffer.from('Retry test');
       const metadata: any = {
         contentType: 'text/plain',
-        userId: 'user-123'
+        userId: 'user-123',
       };
 
       // Act
-      const result = await service.uploadObject('test/retry-test.txt', testBuffer, metadata);
+      const result = await service.uploadObject(
+        'test/retry-test.txt',
+        testBuffer,
+        metadata,
+      );
 
       // Assert
       expect(result).toBeDefined();
       expect(result.etag).toBe('retry-success');
       expect(attemptCount).toBe(3);
-      
+
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Operation failed (attempt')
+        expect.stringContaining('Operation failed (attempt'),
       );
     });
 
@@ -557,11 +609,13 @@ describe('GarageStorageService', () => {
 
       const healthyResult = await service.checkConnection();
       expect(healthyResult).toBe(true);
-      expect(logger.log).toHaveBeenCalledWith('Garage S3 connection check successful');
+      expect(logger.log).toHaveBeenCalledWith(
+        'Garage S3 connection check successful',
+      );
 
       // Reset pour le second test
       jest.clearAllMocks();
-      
+
       // Test 2 : Connexion échouée
       mockS3Client.send.mockRejectedValue(new Error('Connection failed'));
 
@@ -569,7 +623,7 @@ describe('GarageStorageService', () => {
       expect(unhealthyResult).toBe(false);
       expect(logger.error).toHaveBeenCalledWith(
         'Garage S3 connection check failed',
-        expect.any(Error)
+        expect.any(Error),
       );
     });
   });
@@ -584,13 +638,13 @@ describe('GarageStorageService', () => {
       const metadata: any = {
         contentType: 'application/octet-stream',
         userId: 'user-123',
-        projectId: 'project-456'
+        projectId: 'project-456',
       };
 
       const mockMultipartResponse = {
         UploadId: 'test-upload-id-123',
         Bucket: mockConfig.garage.buckets.documents,
-        Key: key
+        Key: key,
       };
 
       mockS3Client.send.mockResolvedValue(mockMultipartResponse);
@@ -611,9 +665,9 @@ describe('GarageStorageService', () => {
           ContentType: metadata.contentType,
           Metadata: expect.objectContaining({
             'user-id': metadata.userId,
-            'project-id': metadata.projectId
-          })
-        })
+            'project-id': metadata.projectId,
+          }),
+        }),
       });
     });
 
@@ -624,7 +678,7 @@ describe('GarageStorageService', () => {
       const partBuffer = Buffer.alloc(5 * 1024 * 1024, 'part');
 
       const mockPartResponse = {
-        ETag: '"part-1-etag"'
+        ETag: '"part-1-etag"',
       };
 
       mockS3Client.send.mockResolvedValue(mockPartResponse);
@@ -643,8 +697,8 @@ describe('GarageStorageService', () => {
           Bucket: mockConfig.garage.buckets.documents,
           UploadId: uploadId,
           PartNumber: partNumber,
-          Body: partBuffer
-        })
+          Body: partBuffer,
+        }),
       });
     });
 
@@ -653,13 +707,14 @@ describe('GarageStorageService', () => {
       const uploadId = 'test-upload-id-123';
       const parts: any[] = [
         { partNumber: 1, etag: 'part-1-etag', size: 5 * 1024 * 1024 },
-        { partNumber: 2, etag: 'part-2-etag', size: 3 * 1024 * 1024 }
+        { partNumber: 2, etag: 'part-2-etag', size: 3 * 1024 * 1024 },
       ];
 
       const mockCompleteResponse = {
         ETag: '"complete-etag"',
-        Location: 'https://test-garage.example.com/test-documents/test-upload-id-123',
-        Key: uploadId
+        Location:
+          'https://test-garage.example.com/test-documents/test-upload-id-123',
+        Key: uploadId,
       };
 
       mockS3Client.send.mockResolvedValue(mockCompleteResponse);
@@ -680,10 +735,10 @@ describe('GarageStorageService', () => {
           MultipartUpload: {
             Parts: [
               { ETag: 'part-1-etag', PartNumber: 1 },
-              { ETag: 'part-2-etag', PartNumber: 2 }
-            ]
-          }
-        })
+              { ETag: 'part-2-etag', PartNumber: 2 },
+            ],
+          },
+        }),
       });
     });
   });

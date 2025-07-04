@@ -3,39 +3,44 @@ import { Injectable, Logger, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { 
+import {
   IFileMetadataRepository,
   CreateFileMetadataDto,
   UpdateFileMetadataDto,
   FindOptions,
-  StorageUsage
+  StorageUsage,
 } from '../../domain/repositories/file-metadata.repository';
-import { FileMetadata, ProcessingStatus, VirusScanStatus, DocumentType } from '../../types/file-system.types';
+import {
+  FileMetadata,
+  ProcessingStatus,
+  VirusScanStatus,
+  DocumentType,
+} from '../../types/file-system.types';
 import { FILE_SYSTEM_CONSTANTS } from '../../constants/file-system.constants';
 
 /**
  * Implémentation concrète du repository de métadonnées de fichiers
- * 
+ *
  * Cette classe implémente l'interface IFileMetadataRepository en utilisant
  * Prisma comme ORM et Redis comme cache. Elle inclut des optimisations
  * de performance et une gestion d'erreurs robuste.
- * 
+ *
  * @class FileMetadataRepositoryImpl
  * @implements {IFileMetadataRepository}
  */
 @Injectable()
 export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   private readonly logger = new Logger(FileMetadataRepositoryImpl.name);
-  
+
   /**
    * Constructeur du repository
-   * 
+   *
    * @param prisma - Service Prisma pour l'accès à la base de données
    * @param cacheManager - Gestionnaire de cache Redis pour l'optimisation des performances
    */
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   /**
@@ -43,19 +48,21 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
    */
   async create(metadata: CreateFileMetadataDto): Promise<FileMetadata> {
     this.logger.log(`Creating file metadata for user ${metadata.userId}`);
-    
+
     try {
       // Transaction pour garantir l'intégrité des données
       const fileData = await this.prisma.$transaction(async (tx) => {
         // Vérification de l'unicité de la clé de stockage
         const existing = await tx.files.findUnique({
-          where: { storage_key: metadata.storageKey }
+          where: { storage_key: metadata.storageKey },
         });
-        
+
         if (existing) {
-          throw new Error(`File with storage key ${metadata.storageKey} already exists`);
+          throw new Error(
+            `File with storage key ${metadata.storageKey} already exists`,
+          );
         }
-        
+
         // Création de l'entrée principale avec les bons noms de colonnes
         const file = await tx.files.create({
           data: {
@@ -75,23 +82,25 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
             tags: metadata.tags || [],
             version_count: 1,
             metadata: metadata.metadata || {},
-          }
+          },
         });
-        
+
         return file;
       });
-      
+
       // Invalidation du cache utilisateur
       await this.invalidateUserCache(metadata.userId);
       if (metadata.projectId) {
         await this.invalidateProjectCache(metadata.projectId);
       }
-      
+
       // Conversion vers le type FileMetadata
       return this.mapToFileMetadata(fileData);
-      
     } catch (error) {
-      this.logger.error(`Failed to create file metadata: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create file metadata: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -102,33 +111,35 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   async findById(id: string): Promise<FileMetadata | null> {
     const cacheKey = `file:metadata:${id}`;
     const cached = await this.cacheManager.get<FileMetadata>(cacheKey);
-    
+
     if (cached) {
       this.logger.debug(`Cache hit for file ${id}`);
       return cached;
     }
-    
+
     this.logger.debug(`Cache miss for file ${id}, fetching from database`);
-    
+
     try {
       const file = await this.prisma.files.findUnique({
-        where: { id }
+        where: { id },
       });
-      
+
       if (!file) {
         return null;
       }
-      
+
       const metadata = this.mapToFileMetadata(file);
-      
+
       // Mise en cache
       const ttl = FILE_SYSTEM_CONSTANTS.CACHE_TTL.DEFAULT;
       await this.cacheManager.set(cacheKey, metadata, ttl);
-      
+
       return metadata;
-      
     } catch (error) {
-      this.logger.error(`Failed to find file by id ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find file by id ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -136,7 +147,10 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   /**
    * Recherche tous les fichiers d'un utilisateur
    */
-  async findByUserId(userId: string, options: FindOptions = {}): Promise<FileMetadata[]> {
+  async findByUserId(
+    userId: string,
+    options: FindOptions = {},
+  ): Promise<FileMetadata[]> {
     const {
       limit = 20,
       offset = 0,
@@ -146,13 +160,13 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
       contentType,
       processingStatus,
       documentType,
-      tags
+      tags,
     } = options;
-    
+
     try {
       // Mapping des noms de champs pour le tri
       const sortField = this.mapSortField(sortBy);
-      
+
       // Construction des conditions de requête avec noms de colonnes corrects
       const where: any = {
         user_id: userId,
@@ -161,24 +175,27 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
         ...(processingStatus && { processing_status: processingStatus }),
         ...(documentType && { document_type: documentType }),
         // Tags filtering si fourni
-        ...(tags && tags.length > 0 && {
-          tags: {
-            hasEvery: tags // PostgreSQL array operator
-          }
-        })
+        ...(tags &&
+          tags.length > 0 && {
+            tags: {
+              hasEvery: tags, // PostgreSQL array operator
+            },
+          }),
       };
-      
+
       const files = await this.prisma.files.findMany({
         where,
         orderBy: { [sortField]: sortOrder },
         take: limit,
-        skip: offset
+        skip: offset,
       });
-      
-      return files.map(file => this.mapToFileMetadata(file));
-      
+
+      return files.map((file) => this.mapToFileMetadata(file));
     } catch (error) {
-      this.logger.error(`Failed to find files for user ${userId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find files for user ${userId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -186,7 +203,10 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   /**
    * Recherche tous les fichiers d'un projet
    */
-  async findByProjectId(projectId: string, options: FindOptions = {}): Promise<FileMetadata[]> {
+  async findByProjectId(
+    projectId: string,
+    options: FindOptions = {},
+  ): Promise<FileMetadata[]> {
     const {
       limit = 20,
       offset = 0,
@@ -196,36 +216,39 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
       contentType,
       processingStatus,
       documentType,
-      tags
+      tags,
     } = options;
-    
+
     try {
       const sortField = this.mapSortField(sortBy);
-      
+
       const where: any = {
         project_id: projectId,
         ...(includeDeleted ? {} : { deleted_at: null }),
         ...(contentType && { content_type: contentType }),
         ...(processingStatus && { processing_status: processingStatus }),
         ...(documentType && { document_type: documentType }),
-        ...(tags && tags.length > 0 && {
-          tags: {
-            hasEvery: tags
-          }
-        })
+        ...(tags &&
+          tags.length > 0 && {
+            tags: {
+              hasEvery: tags,
+            },
+          }),
       };
-      
+
       const files = await this.prisma.files.findMany({
         where,
         orderBy: { [sortField]: sortOrder },
         take: limit,
-        skip: offset
+        skip: offset,
       });
-      
-      return files.map(file => this.mapToFileMetadata(file));
-      
+
+      return files.map((file) => this.mapToFileMetadata(file));
     } catch (error) {
-      this.logger.error(`Failed to find files for project ${projectId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find files for project ${projectId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -233,9 +256,12 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   /**
    * Met à jour les métadonnées d'un fichier
    */
-  async update(id: string, updates: UpdateFileMetadataDto): Promise<FileMetadata> {
+  async update(
+    id: string,
+    updates: UpdateFileMetadataDto,
+  ): Promise<FileMetadata> {
     this.logger.log(`Updating file metadata for ${id}`);
-    
+
     try {
       const updatedFile = await this.prisma.$transaction(async (tx) => {
         // Vérification de l'existence
@@ -243,44 +269,51 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
         if (!existing) {
           throw new Error(`File ${id} not found`);
         }
-        
+
         // Préparation des données de mise à jour avec les bons noms de colonnes
         const updateData: any = {};
         if (updates.filename) updateData.filename = updates.filename;
         if (updates.cdnUrl !== undefined) updateData.cdn_url = updates.cdnUrl;
-        if (updates.virusScanStatus) updateData.virus_scan_status = updates.virusScanStatus;
-        if (updates.processingStatus) updateData.processing_status = updates.processingStatus;
-        if (updates.documentType) updateData.document_type = updates.documentType;
+        if (updates.virusScanStatus)
+          updateData.virus_scan_status = updates.virusScanStatus;
+        if (updates.processingStatus)
+          updateData.processing_status = updates.processingStatus;
+        if (updates.documentType)
+          updateData.document_type = updates.documentType;
         if (updates.tags) updateData.tags = updates.tags;
-        if (updates.deletedAt !== undefined) updateData.deleted_at = updates.deletedAt;
-        if (updates.versionCount !== undefined) updateData.version_count = updates.versionCount;
-        
+        if (updates.deletedAt !== undefined)
+          updateData.deleted_at = updates.deletedAt;
+        if (updates.versionCount !== undefined)
+          updateData.version_count = updates.versionCount;
+
         // Gestion metadata merge
         if (updates.metadata && existing.metadata) {
-          updateData.metadata = { 
-            ...(existing.metadata as Record<string, any>), 
-            ...updates.metadata 
+          updateData.metadata = {
+            ...(existing.metadata as Record<string, any>),
+            ...updates.metadata,
           };
         } else if (updates.metadata) {
           updateData.metadata = updates.metadata;
         }
-        
+
         // Mise à jour
         const file = await tx.files.update({
           where: { id },
-          data: updateData
+          data: updateData,
         });
-        
+
         return file;
       });
-      
+
       // Invalidation du cache
       await this.invalidateFileCache(id);
-      
+
       return this.mapToFileMetadata(updatedFile);
-      
     } catch (error) {
-      this.logger.error(`Failed to update file ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update file ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -290,15 +323,17 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
    */
   async delete(id: string): Promise<void> {
     this.logger.warn(`Hard deleting file ${id}`);
-    
+
     try {
       await this.prisma.files.delete({ where: { id } });
-      
+
       // Invalidation du cache
       await this.invalidateFileCache(id);
-      
     } catch (error) {
-      this.logger.error(`Failed to delete file ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to delete file ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -309,13 +344,15 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   async findByStorageKey(storageKey: string): Promise<FileMetadata | null> {
     try {
       const file = await this.prisma.files.findUnique({
-        where: { storage_key: storageKey }
+        where: { storage_key: storageKey },
       });
-      
+
       return file ? this.mapToFileMetadata(file) : null;
-      
     } catch (error) {
-      this.logger.error(`Failed to find file by storage key ${storageKey}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find file by storage key ${storageKey}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -327,18 +364,17 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
     try {
       const files = await this.prisma.files.findMany({
         where: {
-          OR: [
-            { checksum_md5: checksum },
-            { checksum_sha256: checksum }
-          ],
-          deleted_at: null
-        }
+          OR: [{ checksum_md5: checksum }, { checksum_sha256: checksum }],
+          deleted_at: null,
+        },
       });
-      
-      return files.map(file => this.mapToFileMetadata(file));
-      
+
+      return files.map((file) => this.mapToFileMetadata(file));
     } catch (error) {
-      this.logger.error(`Failed to find files by checksum ${checksum}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find files by checksum ${checksum}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -346,22 +382,27 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   /**
    * Recherche des fichiers par tags
    */
-  async findByTags(tags: string[], matchAll: boolean = false): Promise<FileMetadata[]> {
+  async findByTags(
+    tags: string[],
+    matchAll: boolean = false,
+  ): Promise<FileMetadata[]> {
     try {
       const files = await this.prisma.files.findMany({
         where: {
-          tags: matchAll 
-            ? { hasEvery: tags }  // Tous les tags doivent être présents
-            : { hasSome: tags },  // Au moins un tag doit être présent
-          deleted_at: null
+          tags: matchAll
+            ? { hasEvery: tags } // Tous les tags doivent être présents
+            : { hasSome: tags }, // Au moins un tag doit être présent
+          deleted_at: null,
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
       });
-      
-      return files.map(file => this.mapToFileMetadata(file));
-      
+
+      return files.map((file) => this.mapToFileMetadata(file));
     } catch (error) {
-      this.logger.error(`Failed to find files by tags ${tags.join(', ')}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find files by tags ${tags.join(', ')}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -374,16 +415,18 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
       const files = await this.prisma.files.findMany({
         where: {
           processing_status: ProcessingStatus.PENDING,
-          deleted_at: null
+          deleted_at: null,
         },
         orderBy: { created_at: 'asc' },
-        take: 100
+        take: 100,
       });
-      
-      return files.map(file => this.mapToFileMetadata(file));
-      
+
+      return files.map((file) => this.mapToFileMetadata(file));
     } catch (error) {
-      this.logger.error(`Failed to find pending processing files: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find pending processing files: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -396,15 +439,17 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
       const files = await this.prisma.files.findMany({
         where: {
           created_at: { lt: olderThan },
-          deleted_at: null
+          deleted_at: null,
         },
-        orderBy: { created_at: 'asc' }
+        orderBy: { created_at: 'asc' },
       });
-      
-      return files.map(file => this.mapToFileMetadata(file));
-      
+
+      return files.map((file) => this.mapToFileMetadata(file));
     } catch (error) {
-      this.logger.error(`Failed to find expired files: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to find expired files: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -416,46 +461,47 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   async getUserStorageUsage(userId: string): Promise<StorageUsage> {
     const cacheKey = `user:storage:${userId}`;
     const cached = await this.cacheManager.get<StorageUsage>(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
-    
+
     try {
       // Requête agrégée complète avec les bons noms de colonnes
-      const [totalStats, byContentType, byStatus, byDocType, tagStats] = await Promise.all([
-        // Statistiques totales
-        this.prisma.files.aggregate({
-          where: { user_id: userId, deleted_at: null },
-          _sum: { size: true },
-          _count: true
-        }),
-        
-        // Répartition par type de contenu
-        this.prisma.files.groupBy({
-          by: ['content_type'],
-          where: { user_id: userId, deleted_at: null },
-          _sum: { size: true },
-          _count: true
-        }),
-        
-        // Répartition par statut
-        this.prisma.files.groupBy({
-          by: ['processing_status'],
-          where: { user_id: userId, deleted_at: null },
-          _count: true
-        }),
-        
-        // ✅ NOUVEAU: Répartition par type de document
-        this.prisma.files.groupBy({
-          by: ['document_type'],
-          where: { user_id: userId, deleted_at: null },
-          _sum: { size: true },
-          _count: true
-        }),
-        
-        // ✅ NOUVEAU: Statistiques des tags (requête raw pour PostgreSQL)
-        this.prisma.$queryRaw<Array<{ tag: string; count: bigint }>>`
+      const [totalStats, byContentType, byStatus, byDocType, tagStats] =
+        await Promise.all([
+          // Statistiques totales
+          this.prisma.files.aggregate({
+            where: { user_id: userId, deleted_at: null },
+            _sum: { size: true },
+            _count: true,
+          }),
+
+          // Répartition par type de contenu
+          this.prisma.files.groupBy({
+            by: ['content_type'],
+            where: { user_id: userId, deleted_at: null },
+            _sum: { size: true },
+            _count: true,
+          }),
+
+          // Répartition par statut
+          this.prisma.files.groupBy({
+            by: ['processing_status'],
+            where: { user_id: userId, deleted_at: null },
+            _count: true,
+          }),
+
+          // ✅ NOUVEAU: Répartition par type de document
+          this.prisma.files.groupBy({
+            by: ['document_type'],
+            where: { user_id: userId, deleted_at: null },
+            _sum: { size: true },
+            _count: true,
+          }),
+
+          // ✅ NOUVEAU: Statistiques des tags (requête raw pour PostgreSQL)
+          this.prisma.$queryRaw<Array<{ tag: string; count: bigint }>>`
           SELECT unnest(tags) as tag, COUNT(*) as count
           FROM files 
           WHERE user_id = ${userId} 
@@ -464,42 +510,48 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
           GROUP BY unnest(tags)
           ORDER BY count DESC
           LIMIT 10
-        `
-      ]);
-      
+        `,
+        ]);
+
       const usage: StorageUsage = {
         totalSize: Number(totalStats._sum.size || 0), // Conversion BigInt vers Number
         fileCount: totalStats._count,
-        byContentType: byContentType.map(item => ({
+        byContentType: byContentType.map((item) => ({
           contentType: item.content_type,
           size: Number(item._sum.size || 0),
-          count: item._count
+          count: item._count,
         })),
         // ✅ NOUVEAU: Ajout byDocumentType
-        byDocumentType: byDocType.map(item => ({
+        byDocumentType: byDocType.map((item) => ({
           documentType: item.document_type || 'unknown',
           size: Number(item._sum.size || 0),
-          count: item._count
+          count: item._count,
         })),
-        byProcessingStatus: byStatus.map(item => ({
+        byProcessingStatus: byStatus.map((item) => ({
           status: item.processing_status || 'unknown',
-          count: item._count
+          count: item._count,
         })),
         // ✅ NOUVEAU: Ajout topTags
-        topTags: tagStats.map(item => ({
+        topTags: tagStats.map((item) => ({
           tag: item.tag,
-          count: Number(item.count)
+          count: Number(item.count),
         })),
-        calculatedAt: new Date()
+        calculatedAt: new Date(),
       };
-      
+
       // Cache pour 5 minutes
-      await this.cacheManager.set(cacheKey, usage, FILE_SYSTEM_CONSTANTS.CACHE_TTL.DEFAULT);
-      
+      await this.cacheManager.set(
+        cacheKey,
+        usage,
+        FILE_SYSTEM_CONSTANTS.CACHE_TTL.DEFAULT,
+      );
+
       return usage;
-      
     } catch (error) {
-      this.logger.error(`Failed to calculate user storage usage: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to calculate user storage usage: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -511,42 +563,43 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
   async getProjectStorageUsage(projectId: string): Promise<StorageUsage> {
     const cacheKey = `project:storage:${projectId}`;
     const cached = await this.cacheManager.get<StorageUsage>(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
-    
+
     try {
-      const [totalStats, byContentType, byStatus, byDocType, tagStats] = await Promise.all([
-        this.prisma.files.aggregate({
-          where: { project_id: projectId, deleted_at: null },
-          _sum: { size: true },
-          _count: true
-        }),
-        
-        this.prisma.files.groupBy({
-          by: ['content_type'],
-          where: { project_id: projectId, deleted_at: null },
-          _sum: { size: true },
-          _count: true
-        }),
-        
-        this.prisma.files.groupBy({
-          by: ['processing_status'],
-          where: { project_id: projectId, deleted_at: null },
-          _count: true
-        }),
-        
-        // ✅ NOUVEAU: Répartition par type de document
-        this.prisma.files.groupBy({
-          by: ['document_type'],
-          where: { project_id: projectId, deleted_at: null },
-          _sum: { size: true },
-          _count: true
-        }),
-        
-        // ✅ NOUVEAU: Tags pour le projet
-        this.prisma.$queryRaw<Array<{ tag: string; count: bigint }>>`
+      const [totalStats, byContentType, byStatus, byDocType, tagStats] =
+        await Promise.all([
+          this.prisma.files.aggregate({
+            where: { project_id: projectId, deleted_at: null },
+            _sum: { size: true },
+            _count: true,
+          }),
+
+          this.prisma.files.groupBy({
+            by: ['content_type'],
+            where: { project_id: projectId, deleted_at: null },
+            _sum: { size: true },
+            _count: true,
+          }),
+
+          this.prisma.files.groupBy({
+            by: ['processing_status'],
+            where: { project_id: projectId, deleted_at: null },
+            _count: true,
+          }),
+
+          // ✅ NOUVEAU: Répartition par type de document
+          this.prisma.files.groupBy({
+            by: ['document_type'],
+            where: { project_id: projectId, deleted_at: null },
+            _sum: { size: true },
+            _count: true,
+          }),
+
+          // ✅ NOUVEAU: Tags pour le projet
+          this.prisma.$queryRaw<Array<{ tag: string; count: bigint }>>`
           SELECT unnest(tags) as tag, COUNT(*) as count
           FROM files 
           WHERE project_id = ${projectId} 
@@ -555,41 +608,47 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
           GROUP BY unnest(tags)
           ORDER BY count DESC
           LIMIT 10
-        `
-      ]);
-      
+        `,
+        ]);
+
       const usage: StorageUsage = {
         totalSize: Number(totalStats._sum.size || 0),
         fileCount: totalStats._count,
-        byContentType: byContentType.map(item => ({
+        byContentType: byContentType.map((item) => ({
           contentType: item.content_type,
           size: Number(item._sum.size || 0),
-          count: item._count
+          count: item._count,
         })),
         // ✅ NOUVEAU: Ajout byDocumentType
-        byDocumentType: byDocType.map(item => ({
+        byDocumentType: byDocType.map((item) => ({
           documentType: item.document_type || 'unknown',
           size: Number(item._sum.size || 0),
-          count: item._count
+          count: item._count,
         })),
-        byProcessingStatus: byStatus.map(item => ({
+        byProcessingStatus: byStatus.map((item) => ({
           status: item.processing_status || 'unknown',
-          count: item._count
+          count: item._count,
         })),
         // ✅ NOUVEAU: Ajout topTags
-        topTags: tagStats.map(item => ({
+        topTags: tagStats.map((item) => ({
           tag: item.tag,
-          count: Number(item.count)
+          count: Number(item.count),
         })),
-        calculatedAt: new Date()
+        calculatedAt: new Date(),
       };
-      
-      await this.cacheManager.set(cacheKey, usage, FILE_SYSTEM_CONSTANTS.CACHE_TTL.DEFAULT);
-      
+
+      await this.cacheManager.set(
+        cacheKey,
+        usage,
+        FILE_SYSTEM_CONSTANTS.CACHE_TTL.DEFAULT,
+      );
+
       return usage;
-      
     } catch (error) {
-      this.logger.error(`Failed to calculate project storage usage: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to calculate project storage usage: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -599,12 +658,12 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
    */
   private mapSortField(sortBy: string): string {
     const fieldMapping: Record<string, string> = {
-      'createdAt': 'created_at',
-      'updatedAt': 'updated_at',
-      'size': 'size',
-      'filename': 'filename'
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      size: 'size',
+      filename: 'filename',
     };
-    
+
     return fieldMapping[sortBy] || 'created_at';
   }
 
@@ -631,7 +690,7 @@ export class FileMetadataRepositoryImpl implements IFileMetadataRepository {
       versionCount: file.version_count || 1,
       createdAt: file.created_at,
       updatedAt: file.updated_at,
-      deletedAt: file.deleted_at
+      deletedAt: file.deleted_at,
     };
   }
 

@@ -10,9 +10,9 @@ export class FileSystemException extends HttpException {
         message,
         error: 'File System Error',
         details,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.INTERNAL_SERVER_ERROR
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -28,9 +28,9 @@ export class FileSecurityException extends HttpException {
         error: 'File Security Violation',
         threats,
         details,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     );
   }
 }
@@ -46,9 +46,9 @@ export class FileTooLargeException extends HttpException {
         error: 'File Too Large',
         size,
         maxSize,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.PAYLOAD_TOO_LARGE
+      HttpStatus.PAYLOAD_TOO_LARGE,
     );
   }
 }
@@ -64,9 +64,9 @@ export class UnsupportedFileTypeException extends HttpException {
         error: 'Unsupported File Type',
         contentType,
         allowedTypes,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     );
   }
 }
@@ -82,9 +82,9 @@ export class InvalidFilenameException extends HttpException {
         error: 'Invalid Filename',
         filename,
         reason,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     );
   }
 }
@@ -101,9 +101,9 @@ export class RateLimitExceededException extends HttpException {
         userId,
         limit,
         resetTime,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.TOO_MANY_REQUESTS
+      HttpStatus.TOO_MANY_REQUESTS,
     );
   }
 }
@@ -120,9 +120,9 @@ export class UnauthorizedFileAccessException extends HttpException {
         fileId,
         userId,
         operation,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.FORBIDDEN
+      HttpStatus.FORBIDDEN,
     );
   }
 }
@@ -135,11 +135,14 @@ export class FileNotFoundException extends Error {
   public readonly reason?: string;
   public readonly originalError?: string;
 
-  constructor(fileId: string, options?: { reason?: string; originalError?: string }) {
-    const message = options?.reason 
+  constructor(
+    fileId: string,
+    options?: { reason?: string; originalError?: string },
+  ) {
+    const message = options?.reason
       ? `Fichier non trouvé: ${fileId} - ${options.reason}`
       : `Fichier non trouvé: ${fileId}`;
-    
+
     super(message);
     this.name = 'FileNotFoundException';
     this.fileId = fileId;
@@ -158,9 +161,9 @@ export class VirusScanException extends HttpException {
         message,
         error: 'Virus Scan Error',
         details,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.INTERNAL_SERVER_ERROR
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -176,9 +179,9 @@ export class VirusScanTimeoutException extends HttpException {
         error: 'Virus Scan Timeout',
         fileHash,
         timeoutMs,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.REQUEST_TIMEOUT
+      HttpStatus.REQUEST_TIMEOUT,
     );
   }
 }
@@ -194,9 +197,9 @@ export class QuarantineException extends HttpException {
         error: 'Quarantine Error',
         fileId,
         reason,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.INTERNAL_SERVER_ERROR
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -212,9 +215,9 @@ export class FormatValidationException extends HttpException {
         error: 'Format Validation Error',
         filename,
         validationErrors: errors,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     );
   }
 }
@@ -230,9 +233,9 @@ export class ContentValidationException extends HttpException {
         error: 'Content Validation Error',
         filename,
         threats,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.BAD_REQUEST
+      HttpStatus.BAD_REQUEST,
     );
   }
 }
@@ -286,9 +289,9 @@ export class ProcessingTimeoutException extends HttpException {
         fileId,
         operation,
         timeoutMs,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.REQUEST_TIMEOUT
+      HttpStatus.REQUEST_TIMEOUT,
     );
   }
 }
@@ -305,9 +308,9 @@ export class StorageException extends HttpException {
         operation,
         reason,
         details,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.INTERNAL_SERVER_ERROR
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
 }
@@ -322,9 +325,9 @@ export class StorageServiceException extends HttpException {
         message,
         error: 'Storage Service Error',
         details,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.SERVICE_UNAVAILABLE
+      HttpStatus.SERVICE_UNAVAILABLE,
     );
   }
 }
@@ -333,7 +336,10 @@ export class StorageServiceException extends HttpException {
  * Exception de réseau
  */
 export class NetworkError extends Error {
-  constructor(message: string, public readonly details?: any) {
+  constructor(
+    message: string,
+    public readonly details?: any,
+  ) {
     super(message);
     this.name = 'NetworkError';
   }
@@ -343,7 +349,10 @@ export class NetworkError extends Error {
  * Exception d'authentification
  */
 export class AuthenticationError extends Error {
-  constructor(message: string, public readonly details?: any) {
+  constructor(
+    message: string,
+    public readonly details?: any,
+  ) {
     super(message);
     this.name = 'AuthenticationError';
   }
@@ -360,9 +369,9 @@ export class InvalidProcessingStateException extends HttpException {
         error: 'Invalid Processing State',
         fileId,
         currentState,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.CONFLICT
+      HttpStatus.CONFLICT,
     );
   }
 }
@@ -377,9 +386,9 @@ export class FileNotDistributedException extends HttpException {
         message: `File ${fileId} is not distributed to CDN`,
         error: 'File Not Distributed',
         fileId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.NOT_FOUND
+      HttpStatus.NOT_FOUND,
     );
   }
 }
@@ -395,9 +404,9 @@ export class CDNDistributionException extends HttpException {
         error: 'CDN Distribution Error',
         fileId,
         reason,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      HttpStatus.BAD_GATEWAY
+      HttpStatus.BAD_GATEWAY,
     );
   }
 }
@@ -412,10 +421,10 @@ export class OptimizationException extends Error {
   public readonly originalError?: Error;
 
   constructor(
-    fileId: string, 
-    operation: string, 
-    reason: string, 
-    originalError?: Error
+    fileId: string,
+    operation: string,
+    reason: string,
+    originalError?: Error,
   ) {
     super(`Optimisation échouée pour ${fileId} (${operation}): ${reason}`);
     this.name = 'OptimizationException';
@@ -436,12 +445,14 @@ export class ThumbnailGenerationException extends Error {
   public readonly originalError?: Error;
 
   constructor(
-    fileId: string, 
-    operation: string, 
-    reason: string, 
-    originalError?: Error
+    fileId: string,
+    operation: string,
+    reason: string,
+    originalError?: Error,
   ) {
-    super(`Génération miniature échouée pour ${fileId} (${operation}): ${reason}`);
+    super(
+      `Génération miniature échouée pour ${fileId} (${operation}): ${reason}`,
+    );
     this.name = 'ThumbnailGenerationException';
     this.fileId = fileId;
     this.operation = operation;
@@ -462,14 +473,16 @@ export class FormatConversionException extends Error {
   public readonly originalError?: Error;
 
   constructor(
-    fileId: string, 
-    operation: string, 
+    fileId: string,
+    operation: string,
     reason: string,
     fromFormat: string,
     toFormat: string,
-    originalError?: Error
+    originalError?: Error,
   ) {
-    super(`Conversion format échouée pour ${fileId} (${fromFormat} → ${toFormat}): ${reason}`);
+    super(
+      `Conversion format échouée pour ${fileId} (${fromFormat} → ${toFormat}): ${reason}`,
+    );
     this.name = 'FormatConversionException';
     this.fileId = fileId;
     this.operation = operation;

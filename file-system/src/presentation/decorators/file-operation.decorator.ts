@@ -9,12 +9,12 @@ export const FILE_OPERATION_KEY = 'fileOperation';
 
 /**
  * Décorateur pour spécifier l'opération requise sur un fichier
- * 
+ *
  * Utilise SetMetadata de NestJS pour attacher l'opération requise
  * aux métadonnées du handler de route.
- * 
+ *
  * @param operation - Type d'opération FileOperation
- * 
+ *
  * @example
  * ```typescript
  * @Get(':fileId')
@@ -24,5 +24,5 @@ export const FILE_OPERATION_KEY = 'fileOperation';
  * }
  * ```
  */
-export const RequireFileOperation = (operation: FileOperation) => 
+export const RequireFileOperation = (operation: FileOperation) =>
   SetMetadata(FILE_OPERATION_KEY, operation);

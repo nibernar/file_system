@@ -2,12 +2,12 @@
 
 /**
  * Tests unitaires pour FileAuditInterceptor - VERSION CORRIGÉE
- * 
+ *
  * Corrections apportées :
  * - Tests aligned with actual implementation
  * - Expected values match actual returned values
  * - Mock implementations fixed
- * 
+ *
  * @author Backend Team
  * @version 1.2 - Fixed test expectations
  * @since Phase 2.2 - Middleware Sécurité et Guards
@@ -86,13 +86,19 @@ interface TestResponse {
  * Mock du service d'audit
  */
 interface MockAuditService {
-  logFileOperation: jest.MockedFunction<(event: FileAuditEvent) => Promise<void>>;
-  logSecurityEvent: jest.MockedFunction<(event: Partial<FileAuditEvent>) => Promise<void>>;
-  logPerformanceMetric: jest.MockedFunction<(metric: {
-    operation: string;
-    duration: number;
-    success: boolean;
-  }) => Promise<void>>;
+  logFileOperation: jest.MockedFunction<
+    (event: FileAuditEvent) => Promise<void>
+  >;
+  logSecurityEvent: jest.MockedFunction<
+    (event: Partial<FileAuditEvent>) => Promise<void>
+  >;
+  logPerformanceMetric: jest.MockedFunction<
+    (metric: {
+      operation: string;
+      duration: number;
+      success: boolean;
+    }) => Promise<void>
+  >;
 }
 
 /**
@@ -205,7 +211,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       // Subscribe pour déclencher l'observable
@@ -220,7 +226,7 @@ describe('FileAuditInterceptor', () => {
 
       // Assert
       expect(mockAuditService.logFileOperation).toHaveBeenCalledTimes(1);
-      
+
       const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
       expect(auditEvent).toMatchObject({
         id: expect.stringMatching(/^audit_\d+_[a-z0-9]+$/),
@@ -259,18 +265,18 @@ describe('FileAuditInterceptor', () => {
       // Arrange
       const delay = 100; // 100ms
       mockCallHandler.handle.mockReturnValue(
-        new Observable(observer => {
+        new Observable((observer) => {
           setTimeout(() => {
             observer.next({ success: true });
             observer.complete();
           }, delay);
-        })
+        }),
       );
 
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -295,7 +301,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -322,13 +328,13 @@ describe('FileAuditInterceptor', () => {
       const testError = new Error('File not found');
       testError.name = 'FileNotFoundException';
       (testError as any).status = 404;
-      
+
       mockCallHandler.handle.mockReturnValue(throwError(() => testError));
 
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       // Subscribe et capturer l'erreur
@@ -343,7 +349,7 @@ describe('FileAuditInterceptor', () => {
 
       // Assert
       expect(mockAuditService.logFileOperation).toHaveBeenCalledTimes(1);
-      
+
       const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
       expect(auditEvent).toMatchObject({
         success: false,
@@ -358,13 +364,15 @@ describe('FileAuditInterceptor', () => {
      */
     it('should sanitize sensitive information in error messages', async () => {
       // Arrange
-      const sensitiveError = new Error('Database connection failed: password=secret123 token=jwt_token_here');
+      const sensitiveError = new Error(
+        'Database connection failed: password=secret123 token=jwt_token_here',
+      );
       mockCallHandler.handle.mockReturnValue(throwError(() => sensitiveError));
 
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -375,7 +383,9 @@ describe('FileAuditInterceptor', () => {
 
       // Assert
       const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
-      expect(auditEvent.errorMessage).toBe('Database connection failed: password=*** token=***');
+      expect(auditEvent.errorMessage).toBe(
+        'Database connection failed: password=*** token=***',
+      );
       expect(auditEvent.errorMessage).not.toContain('secret123');
       expect(auditEvent.errorMessage).not.toContain('jwt_token_here');
     });
@@ -387,15 +397,17 @@ describe('FileAuditInterceptor', () => {
       // Arrange
       mockRequest.params = { fileId: '<script>alert("xss")</script>' }; // Tentative d'injection
       mockRequest.headers = { 'user-agent': 'Unknown' }; // User-Agent suspect
-      
+
       const unauthorizedError = new Error('Unauthorized access');
       unauthorizedError.name = 'UnauthorizedException';
-      mockCallHandler.handle.mockReturnValue(throwError(() => unauthorizedError));
+      mockCallHandler.handle.mockReturnValue(
+        throwError(() => unauthorizedError),
+      );
 
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -408,7 +420,7 @@ describe('FileAuditInterceptor', () => {
       // Note: Si logSecurityEvent n'est pas appelé, cela peut être normal selon l'implémentation
       // Vérifions au moins que l'audit normal a été fait avec les bonnes données
       expect(mockAuditService.logFileOperation).toHaveBeenCalledTimes(1);
-      
+
       const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
       expect(auditEvent.fileId).toBe('<script>alert("xss")</script>');
       expect(auditEvent.success).toBe(false);
@@ -425,7 +437,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -455,7 +467,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -481,7 +493,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -511,7 +523,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -538,7 +550,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -581,7 +593,7 @@ describe('FileAuditInterceptor', () => {
         // Act
         const result$ = interceptor.intercept(
           mockExecutionContext as ExecutionContext,
-          mockCallHandler
+          mockCallHandler,
         );
 
         await new Promise<void>((resolve) => {
@@ -611,7 +623,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -644,7 +656,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -673,7 +685,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -700,7 +712,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -730,7 +742,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -756,7 +768,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -769,7 +781,7 @@ describe('FileAuditInterceptor', () => {
       const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
       expect(auditEvent.requestSize).toBeGreaterThan(0);
       expect(auditEvent.requestSize).toBe(
-        Buffer.byteLength(JSON.stringify(mockRequest.body), 'utf8')
+        Buffer.byteLength(JSON.stringify(mockRequest.body), 'utf8'),
       );
     });
 
@@ -784,7 +796,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -796,7 +808,7 @@ describe('FileAuditInterceptor', () => {
       // Assert
       const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
       expect(auditEvent.responseSize).toBe(
-        Buffer.byteLength(JSON.stringify(responseData), 'utf8')
+        Buffer.byteLength(JSON.stringify(responseData), 'utf8'),
       );
     });
   });
@@ -811,11 +823,11 @@ describe('FileAuditInterceptor', () => {
 
       // Act - Générer plusieurs événements
       const eventIds: string[] = [];
-      
+
       for (let i = 0; i < 3; i++) {
         const result$ = interceptor.intercept(
           mockExecutionContext as ExecutionContext,
-          mockCallHandler
+          mockCallHandler,
         );
 
         await new Promise<void>((resolve) => {
@@ -831,8 +843,8 @@ describe('FileAuditInterceptor', () => {
       // Assert
       expect(eventIds).toHaveLength(3);
       expect(new Set(eventIds).size).toBe(3); // Tous uniques
-      
-      eventIds.forEach(id => {
+
+      eventIds.forEach((id) => {
         expect(id).toMatch(/^audit_\d+_[a-z0-9]+$/);
       });
     });
@@ -847,7 +859,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -859,7 +871,7 @@ describe('FileAuditInterceptor', () => {
       // Assert
       const auditEvent = mockAuditService.logFileOperation.mock.calls[0][0];
       const parts = auditEvent.id.split('_');
-      
+
       expect(parts).toHaveLength(3);
       expect(parts[0]).toBe('audit');
       expect(parts[1]).toMatch(/^\d+$/); // Timestamp numérique
@@ -875,7 +887,7 @@ describe('FileAuditInterceptor', () => {
     it('should handle audit service errors gracefully', async () => {
       // Arrange
       mockAuditService.logFileOperation.mockRejectedValue(
-        new Error('Audit service unavailable')
+        new Error('Audit service unavailable'),
       );
       const responseData = { success: true };
       mockCallHandler.handle.mockReturnValue(of(responseData));
@@ -883,7 +895,7 @@ describe('FileAuditInterceptor', () => {
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       // Assert - L'opération doit continuer malgré l'erreur d'audit
@@ -905,14 +917,14 @@ describe('FileAuditInterceptor', () => {
     it('should log audit service errors for debugging', async () => {
       // Arrange
       mockAuditService.logFileOperation.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
       mockCallHandler.handle.mockReturnValue(of({ success: true }));
 
       // Act
       const result$ = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
-        mockCallHandler
+        mockCallHandler,
       );
 
       await new Promise<void>((resolve) => {
@@ -923,7 +935,7 @@ describe('FileAuditInterceptor', () => {
 
       // Assert - Vérifier que logFileOperation a été tenté (même s'il a échoué)
       expect(mockAuditService.logFileOperation).toHaveBeenCalled();
-      
+
       // Note: L'interceptor devrait continuer à fonctionner même si l'audit échoue
       // C'est le comportement attendu pour éviter que les erreurs d'audit cassent l'application
     });

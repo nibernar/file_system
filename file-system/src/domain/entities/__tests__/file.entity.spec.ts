@@ -1,7 +1,12 @@
 // src/domain/entities/__tests__/file.entity.spec.ts
 
 import { File, VersionChangeType, FileOperation } from '../file.entity';
-import { FileMetadata, ProcessingStatus, VirusScanStatus, DocumentType } from '../../../types/file-system.types';
+import {
+  FileMetadata,
+  ProcessingStatus,
+  VirusScanStatus,
+  DocumentType,
+} from '../../../types/file-system.types';
 
 describe('File Entity', () => {
   let file: File;
@@ -27,7 +32,7 @@ describe('File Entity', () => {
       versionCount: 1,
       createdAt: new Date('2024-01-01T10:00:00Z'),
       updatedAt: new Date('2024-01-01T11:00:00Z'),
-      deletedAt: undefined
+      deletedAt: undefined,
     };
 
     file = new File('file-123', 'user-456', mockMetadata);
@@ -44,7 +49,7 @@ describe('File Entity', () => {
     // Test validation
     expect(() => new File('', 'user-456', mockMetadata)).toThrow();
     expect(() => new File('file-123', '', mockMetadata)).toThrow();
-    
+
     const invalidMetadata = { ...mockMetadata, size: -100 };
     expect(() => new File('file-123', 'user-456', invalidMetadata)).toThrow();
   });
@@ -55,7 +60,11 @@ describe('File Entity', () => {
     const changedBy = 'user-789';
 
     // Act
-    const newVersion = file.createVersion(description, changedBy, VersionChangeType.MANUAL_EDIT);
+    const newVersion = file.createVersion(
+      description,
+      changedBy,
+      VersionChangeType.MANUAL_EDIT,
+    );
 
     // Assert
     expect(newVersion).toBeDefined();
@@ -72,14 +81,14 @@ describe('File Entity', () => {
     // Test business rules - can't create version while processing
     file.metadata.processingStatus = ProcessingStatus.PROCESSING;
     expect(() => file.createVersion('Test', 'user-789')).toThrow(
-      'Cannot create version while file is being processed'
+      'Cannot create version while file is being processed',
     );
 
     // Test business rules - can't create version for deleted files
     file.metadata.processingStatus = ProcessingStatus.COMPLETED;
     file.metadata.deletedAt = new Date();
     expect(() => file.createVersion('Test', 'user-789')).toThrow(
-      'Cannot create version for deleted file'
+      'Cannot create version for deleted file',
     );
   });
 
@@ -136,7 +145,7 @@ describe('File Entity', () => {
     file.updateProcessingStatus(ProcessingStatus.COMPLETED);
     const newEvents = file.getAndClearDomainEvents();
     const event = newEvents[0];
-    
+
     expect(event.aggregateId).toBe(file.id);
     expect(event.timestamp).toBeInstanceOf(Date);
     expect(event.payload).toBeDefined();

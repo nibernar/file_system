@@ -9,17 +9,17 @@ import {
   UploadFileDto,
   FileOperation,
   PresignedUrlOptions,
-  RateLimitResult
+  RateLimitResult,
 } from '../../../types/file-system.types';
 import {
   FileSecurityException,
   RateLimitExceededException,
-  UnauthorizedFileAccessException
+  UnauthorizedFileAccessException,
 } from '../../../exceptions/file-system.exceptions';
 import {
   createTestFileBuffer,
   createTestPDFBuffer,
-  generateTestUUID
+  generateTestUUID,
 } from '../../../__tests__/test-setup';
 
 // Import DocumentType enum
@@ -116,7 +116,8 @@ describe('FileSecurityService', () => {
             rateLimitUploadsPerMinute: 20, // RATE_LIMIT_UPLOADS_PER_MINUTE=20
             abuseBlockDuration: 60, // ABUSE_BLOCK_DURATION=60
             deviceFingerprintingEnabled: false, // DEVICE_FINGERPRINTING_ENABLED=false
-            securityTokenSecret: 'test_security_token_secret_with_minimum_32_characters_length',
+            securityTokenSecret:
+              'test_security_token_secret_with_minimum_32_characters_length',
           },
           processing: {
             maxFileSize: 10485760, // MAX_FILE_SIZE=10485760 (10MB)
@@ -127,10 +128,10 @@ describe('FileSecurityService', () => {
       }
       // Accès direct aux variables d'env pour compatibilité
       const envMap: Record<string, any> = {
-        'SCAN_VIRUS_ENABLED': false,
-        'MAX_FILE_SIZE': 10485760,
-        'PRESIGNED_URL_EXPIRY': 1800,
-        'RATE_LIMIT_UPLOADS_PER_MINUTE': 20,
+        SCAN_VIRUS_ENABLED: false,
+        MAX_FILE_SIZE: 10485760,
+        PRESIGNED_URL_EXPIRY: 1800,
+        RATE_LIMIT_UPLOADS_PER_MINUTE: 20,
       };
       return envMap[key];
     });
@@ -183,8 +184,14 @@ describe('FileSecurityService', () => {
       expect(result.threats).toHaveLength(0);
       expect(result.scanId).toBeDefined();
       expect(result.confidenceScore).toBe(100);
-      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(userId, result);
-      expect(rateLimitService.incrementCounter).toHaveBeenCalledWith(userId, 'upload');
+      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(
+        userId,
+        result,
+      );
+      expect(rateLimitService.incrementCounter).toHaveBeenCalledWith(
+        userId,
+        'upload',
+      );
       // Pas de scan virus car SCAN_VIRUS_ENABLED=false
       expect(virusScanner.scanFile).not.toHaveBeenCalled();
     });
@@ -202,7 +209,8 @@ describe('FileSecurityService', () => {
               rateLimitUploadsPerMinute: 20,
               abuseBlockDuration: 60,
               deviceFingerprintingEnabled: false,
-              securityTokenSecret: 'test_security_token_secret_with_minimum_32_characters_length',
+              securityTokenSecret:
+                'test_security_token_secret_with_minimum_32_characters_length',
             },
             processing: {
               maxFileSize: 10485760,
@@ -268,9 +276,12 @@ describe('FileSecurityService', () => {
       expect(result.mitigations).toContain('QUARANTINE');
       expect(storageService.moveToQuarantine).toHaveBeenCalledWith(
         file.filename,
-        expect.stringContaining('Malware detected')
+        expect.stringContaining('Malware detected'),
       );
-      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(userId, result);
+      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(
+        userId,
+        result,
+      );
     });
 
     it('should enforce rate limiting per user', async () => {
@@ -310,10 +321,14 @@ describe('FileSecurityService', () => {
       });
 
       // Act & Assert
-      await expect(service.validateFileUpload(file, userId))
-        .rejects.toThrow(RateLimitExceededException);
-      
-      expect(rateLimitService.checkLimit).toHaveBeenCalledWith(userId, 'upload');
+      await expect(service.validateFileUpload(file, userId)).rejects.toThrow(
+        RateLimitExceededException,
+      );
+
+      expect(rateLimitService.checkLimit).toHaveBeenCalledWith(
+        userId,
+        'upload',
+      );
       expect(rateLimitService.incrementCounter).not.toHaveBeenCalled();
     });
 
@@ -359,7 +374,10 @@ describe('FileSecurityService', () => {
       expect(result.passed).toBe(false);
       expect(result.threats).toContain(SecurityThreat.INVALID_FORMAT);
       expect(result.mitigations).toContain('FORMAT_REJECTION');
-      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(userId, result);
+      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(
+        userId,
+        result,
+      );
     });
 
     it('should handle virus scanner failures gracefully', async () => {
@@ -375,7 +393,8 @@ describe('FileSecurityService', () => {
               rateLimitUploadsPerMinute: 20,
               abuseBlockDuration: 60,
               deviceFingerprintingEnabled: false,
-              securityTokenSecret: 'test_security_token_secret_with_minimum_32_characters_length',
+              securityTokenSecret:
+                'test_security_token_secret_with_minimum_32_characters_length',
             },
             processing: {
               maxFileSize: 10485760,
@@ -413,7 +432,9 @@ describe('FileSecurityService', () => {
         analysis: {},
       });
 
-      virusScanner.scanFile.mockRejectedValue(new Error('Scanner service unavailable'));
+      virusScanner.scanFile.mockRejectedValue(
+        new Error('Scanner service unavailable'),
+      );
 
       rateLimitService.checkLimit.mockResolvedValue({
         allowed: true,
@@ -423,8 +444,9 @@ describe('FileSecurityService', () => {
       });
 
       // Act & Assert
-      await expect(service.validateFileUpload(file, userId))
-        .rejects.toThrow(FileSecurityException);
+      await expect(service.validateFileUpload(file, userId)).rejects.toThrow(
+        FileSecurityException,
+      );
 
       const auditCall = auditService.logSecurityValidation.mock.calls[0];
       expect(auditCall[0]).toBe(userId);
@@ -515,11 +537,14 @@ describe('FileSecurityService', () => {
       const result = await service.validateFileUpload(file, userId);
 
       // Assert
-      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(userId, expect.objectContaining({
-        passed: false,
-        threats: expect.arrayContaining([SecurityThreat.INVALID_FORMAT]),
-        scanId: expect.any(String),
-      }));
+      expect(auditService.logSecurityValidation).toHaveBeenCalledWith(
+        userId,
+        expect.objectContaining({
+          passed: false,
+          threats: expect.arrayContaining([SecurityThreat.INVALID_FORMAT]),
+          scanId: expect.any(String),
+        }),
+      );
     });
   });
 
@@ -549,7 +574,7 @@ describe('FileSecurityService', () => {
         fileId,
         operation,
         'SUCCESS',
-        { reason: 'OWNER_ACCESS' }
+        { reason: 'OWNER_ACCESS' },
       );
     });
 
@@ -570,7 +595,11 @@ describe('FileSecurityService', () => {
       });
 
       // Act - Tenter l'accès avec unauthorizedUserId
-      const result = await service.checkFileAccess(fileId, unauthorizedUserId, operation);
+      const result = await service.checkFileAccess(
+        fileId,
+        unauthorizedUserId,
+        operation,
+      );
 
       // Assert
       expect(result).toBe(false);
@@ -579,7 +608,7 @@ describe('FileSecurityService', () => {
         fileId,
         operation,
         'FAILURE',
-        { reason: 'INSUFFICIENT_PERMISSIONS' }
+        { reason: 'INSUFFICIENT_PERMISSIONS' },
       );
     });
 
@@ -601,7 +630,7 @@ describe('FileSecurityService', () => {
         fileId,
         operation,
         'FAILURE',
-        { reason: 'FILE_NOT_FOUND' }
+        { reason: 'FILE_NOT_FOUND' },
       );
     });
   });
@@ -636,7 +665,11 @@ describe('FileSecurityService', () => {
 
       // Act
       // On passe l'objet `options` complet car c'est ce que la signature de la méthode semble exiger.
-      const result = await service.generateSecurePresignedUrl(fileId, userId, options);
+      const result = await service.generateSecurePresignedUrl(
+        fileId,
+        userId,
+        options,
+      );
 
       // Assert
       expect(result.url).toContain('https://');
@@ -645,10 +678,13 @@ describe('FileSecurityService', () => {
       expect(result.restrictions.ipAddress).toEqual(['192.168.1.100']);
       expect(result.restrictions.userAgent).toBe('Mozilla/5.0');
       expect(result.securityToken).toBeDefined();
-      expect(auditService.logUrlGeneration).toHaveBeenCalledWith(fileId, userId, expect.any(Object));
+      expect(auditService.logUrlGeneration).toHaveBeenCalledWith(
+        fileId,
+        userId,
+        expect.any(Object),
+      );
     });
 
-    
     it('should reject unauthorized presigned URL generation', async () => {
       // Arrange - Utilisons des UUIDs explicites et différents
       const fileId = '44444444-4444-4444-4444-444444444444';
@@ -672,13 +708,11 @@ describe('FileSecurityService', () => {
 
       // Act & Assert
       await expect(
-        service.generateSecurePresignedUrl(fileId, unauthorizedUserId, options)
+        service.generateSecurePresignedUrl(fileId, unauthorizedUserId, options),
       ).rejects.toThrow(UnauthorizedFileAccessException);
-      
+
       expect(storageService.generatePresignedUrl).not.toHaveBeenCalled();
     });
-
-
 
     it('should respect maximum expiry time configuration', async () => {
       // Arrange
@@ -712,7 +746,7 @@ describe('FileSecurityService', () => {
       expect(storageService.generatePresignedUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           expiresIn: 1800, // Limité à PRESIGNED_URL_EXPIRY
-        })
+        }),
       );
     });
   });
@@ -771,7 +805,10 @@ describe('FileSecurityService', () => {
 
       // Assert
       expect(result.safe).toBe(false);
-      expect(result.threatsFound).toEqual(['Trojan.Win32.Generic', 'Malware.Suspicious']);
+      expect(result.threatsFound).toEqual([
+        'Trojan.Win32.Generic',
+        'Malware.Suspicious',
+      ]);
       expect(result.scanDetails).toBeDefined();
       expect(result.scanDetails?.status).toBe('INFECTED');
     });

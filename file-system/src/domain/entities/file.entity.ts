@@ -1,9 +1,14 @@
-import { FileMetadata, ProcessingStatus, VirusScanStatus, FileOperation } from '../../types/file-system.types';
+import {
+  FileMetadata,
+  ProcessingStatus,
+  VirusScanStatus,
+  FileOperation,
+} from '../../types/file-system.types';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Représente une version d'un fichier dans le système
- * 
+ *
  * @interface FileVersion
  */
 export interface FileVersion {
@@ -35,7 +40,7 @@ export interface FileVersion {
 
 /**
  * Types de changements possibles pour une version
- * 
+ *
  * @enum VersionChangeType
  */
 export enum VersionChangeType {
@@ -48,12 +53,12 @@ export enum VersionChangeType {
   /** Restauration depuis une version antérieure */
   RESTORE = 'RESTORE',
   /** Remplacement complet du fichier */
-  REPLACEMENT = 'REPLACEMENT'
+  REPLACEMENT = 'REPLACEMENT',
 }
 
 /**
  * Représente un accès au fichier pour l'audit trail
- * 
+ *
  * @interface FileAccess
  */
 export interface FileAccess {
@@ -79,7 +84,7 @@ export interface FileAccess {
 
 /**
  * Détails du traitement d'un fichier
- * 
+ *
  * @interface ProcessingDetails
  */
 export interface ProcessingDetails {
@@ -99,7 +104,7 @@ export interface ProcessingDetails {
 
 /**
  * Événement domaine pour le système d'événements
- * 
+ *
  * @interface DomainEvent
  */
 export interface DomainEvent {
@@ -115,11 +120,11 @@ export interface DomainEvent {
 
 /**
  * Entité domaine File représentant un fichier dans le système
- * 
+ *
  * Cette classe encapsule la logique métier liée aux fichiers,
  * incluant la gestion des versions, les contrôles d'accès,
  * et les transitions d'état.
- * 
+ *
  * @class File
  */
 export class File {
@@ -128,7 +133,7 @@ export class File {
 
   /**
    * Constructeur de l'entité File
-   * 
+   *
    * @param id - Identifiant unique du fichier
    * @param userId - ID de l'utilisateur propriétaire
    * @param metadata - Métadonnées complètes du fichier
@@ -140,7 +145,7 @@ export class File {
     public readonly userId: string,
     public metadata: FileMetadata,
     public versions: FileVersion[] = [],
-    public accessLogs: FileAccess[] = []
+    public accessLogs: FileAccess[] = [],
   ) {
     // Validation de l'état initial
     this.validateInitialState();
@@ -148,16 +153,16 @@ export class File {
 
   /**
    * Crée une nouvelle version du fichier
-   * 
+   *
    * Cette méthode applique les règles métier pour la création
    * de versions et émet les événements domaine appropriés.
-   * 
+   *
    * @param description - Description des changements
    * @param changedBy - ID de l'utilisateur effectuant le changement
    * @param changeType - Type de changement (par défaut MANUAL_EDIT)
    * @returns La nouvelle version créée
    * @throws {Error} Si le fichier est en cours de traitement
-   * 
+   *
    * @example
    * ```typescript
    * const newVersion = file.createVersion(
@@ -170,7 +175,7 @@ export class File {
   createVersion(
     description: string,
     changedBy: string,
-    changeType: VersionChangeType = VersionChangeType.MANUAL_EDIT
+    changeType: VersionChangeType = VersionChangeType.MANUAL_EDIT,
   ): FileVersion {
     // Validation des règles métier
     if (this.metadata.processingStatus === ProcessingStatus.PROCESSING) {
@@ -200,7 +205,7 @@ export class File {
       checksumMd5: this.metadata.checksumMd5,
       checksumSha256: this.metadata.checksumSha256,
       storageKey: `${this.id}/versions/${Date.now()}`,
-      isActive: true
+      isActive: true,
     };
 
     // Ajouter la version
@@ -217,8 +222,8 @@ export class File {
         versionNumber: newVersion.versionNumber,
         changedBy,
         changeType,
-        description
-      }
+        description,
+      },
     });
 
     return newVersion;
@@ -226,14 +231,14 @@ export class File {
 
   /**
    * Vérifie si un utilisateur peut accéder au fichier
-   * 
+   *
    * Applique les règles métier de contrôle d'accès basées sur
    * la propriété, les permissions et l'état du fichier.
-   * 
+   *
    * @param userId - ID de l'utilisateur demandant l'accès
    * @param operation - Type d'opération demandée
    * @returns true si l'accès est autorisé, false sinon
-   * 
+   *
    * @example
    * ```typescript
    * if (file.canBeAccessedBy('user-123', FileOperation.READ)) {
@@ -268,14 +273,14 @@ export class File {
 
   /**
    * Met à jour le statut de traitement du fichier
-   * 
+   *
    * Gère les transitions d'état valides et émet les événements
    * appropriés pour le monitoring et l'audit.
-   * 
+   *
    * @param status - Nouveau statut de traitement
    * @param details - Détails optionnels du traitement
    * @throws {Error} Si la transition d'état est invalide
-   * 
+   *
    * @example
    * ```typescript
    * file.updateProcessingStatus(ProcessingStatus.COMPLETED, {
@@ -286,13 +291,16 @@ export class File {
    * });
    * ```
    */
-  updateProcessingStatus(status: ProcessingStatus, details?: ProcessingDetails): void {
+  updateProcessingStatus(
+    status: ProcessingStatus,
+    details?: ProcessingDetails,
+  ): void {
     const currentStatus = this.metadata.processingStatus;
 
     // Validation des transitions d'état
     if (!this.isValidStatusTransition(currentStatus, status)) {
       throw new Error(
-        `Invalid status transition from ${currentStatus} to ${status}`
+        `Invalid status transition from ${currentStatus} to ${status}`,
       );
     }
 
@@ -308,8 +316,8 @@ export class File {
       payload: {
         previousStatus,
         newStatus: status,
-        details
-      }
+        details,
+      },
     });
 
     // Actions spécifiques selon le nouveau statut
@@ -320,7 +328,7 @@ export class File {
 
   /**
    * Met à jour le statut de scan antivirus
-   * 
+   *
    * @param status - Nouveau statut de scan
    * @param threatDetails - Détails des menaces détectées (si infecté)
    */
@@ -335,8 +343,8 @@ export class File {
       payload: {
         previousStatus,
         newStatus: status,
-        threatDetails
-      }
+        threatDetails,
+      },
     });
 
     // Si infecté, marquer pour quarantaine
@@ -347,7 +355,7 @@ export class File {
 
   /**
    * Enregistre un accès au fichier
-   * 
+   *
    * @param userId - ID de l'utilisateur accédant au fichier
    * @param operation - Type d'opération effectuée
    * @param result - Résultat de l'opération
@@ -357,7 +365,7 @@ export class File {
     userId: string,
     operation: FileOperation,
     result: 'SUCCESS' | 'FAILURE',
-    context?: { ipAddress?: string; userAgent?: string; errorMessage?: string }
+    context?: { ipAddress?: string; userAgent?: string; errorMessage?: string },
   ): void {
     const access: FileAccess = {
       id: uuidv4(),
@@ -366,7 +374,7 @@ export class File {
       operation,
       accessedAt: new Date(),
       result,
-      ...context
+      ...context,
     };
 
     this.accessLogs.push(access);
@@ -381,13 +389,13 @@ export class File {
       type: 'FileAccessed',
       aggregateId: this.id,
       timestamp: new Date(),
-      payload: access
+      payload: access,
     });
   }
 
   /**
    * Marque le fichier comme supprimé (soft delete)
-   * 
+   *
    * @param deletedBy - ID de l'utilisateur effectuant la suppression
    * @param reason - Raison de la suppression
    */
@@ -405,14 +413,14 @@ export class File {
       payload: {
         deletedBy,
         reason,
-        deletedAt: this.metadata.deletedAt
-      }
+        deletedAt: this.metadata.deletedAt,
+      },
     });
   }
 
   /**
    * Restaure un fichier supprimé
-   * 
+   *
    * @param restoredBy - ID de l'utilisateur restaurant le fichier
    */
   restore(restoredBy: string): void {
@@ -429,33 +437,33 @@ export class File {
       timestamp: new Date(),
       payload: {
         restoredBy,
-        previousDeletedAt
-      }
+        previousDeletedAt,
+      },
     });
   }
 
   /**
    * Obtient la version active actuelle
-   * 
+   *
    * @returns La version active ou undefined
    */
   getCurrentVersion(): FileVersion | undefined {
-    return this.versions.find(v => v.isActive);
+    return this.versions.find((v) => v.isActive);
   }
 
   /**
    * Obtient une version spécifique par numéro
-   * 
+   *
    * @param versionNumber - Numéro de version à récupérer
    * @returns La version ou undefined
    */
   getVersion(versionNumber: number): FileVersion | undefined {
-    return this.versions.find(v => v.versionNumber === versionNumber);
+    return this.versions.find((v) => v.versionNumber === versionNumber);
   }
 
   /**
    * Calcule la taille totale utilisée par toutes les versions
-   * 
+   *
    * @returns La taille totale en octets
    */
   getTotalVersionsSize(): number {
@@ -464,7 +472,7 @@ export class File {
 
   /**
    * Obtient les événements domaine et les vide
-   * 
+   *
    * @returns Les événements domaine accumulés
    */
   getAndClearDomainEvents(): DomainEvent[] {
@@ -475,7 +483,7 @@ export class File {
 
   /**
    * Valide l'état initial de l'entité
-   * 
+   *
    * @throws {Error} Si l'état est invalide
    */
   private validateInitialState(): void {
@@ -494,31 +502,34 @@ export class File {
 
   /**
    * Vérifie si une transition d'état est valide
-   * 
+   *
    * @param from - État actuel
    * @param to - État cible
    * @returns true si la transition est valide
    */
-  private isValidStatusTransition(from: ProcessingStatus, to: ProcessingStatus): boolean {
+  private isValidStatusTransition(
+    from: ProcessingStatus,
+    to: ProcessingStatus,
+  ): boolean {
     const validTransitions: Record<ProcessingStatus, ProcessingStatus[]> = {
       [ProcessingStatus.PENDING]: [
         ProcessingStatus.PROCESSING,
         ProcessingStatus.FAILED,
-        ProcessingStatus.SKIPPED
+        ProcessingStatus.SKIPPED,
       ],
       [ProcessingStatus.PROCESSING]: [
         ProcessingStatus.COMPLETED,
-        ProcessingStatus.FAILED
+        ProcessingStatus.FAILED,
       ],
       [ProcessingStatus.COMPLETED]: [
-        ProcessingStatus.PROCESSING // Retraitement possible
+        ProcessingStatus.PROCESSING, // Retraitement possible
       ],
       [ProcessingStatus.FAILED]: [
-        ProcessingStatus.PROCESSING // Retry possible
+        ProcessingStatus.PROCESSING, // Retry possible
       ],
       [ProcessingStatus.SKIPPED]: [
-        ProcessingStatus.PROCESSING // Traitement manuel possible
-      ]
+        ProcessingStatus.PROCESSING, // Traitement manuel possible
+      ],
     };
 
     return validTransitions[from]?.includes(to) ?? false;
@@ -526,7 +537,7 @@ export class File {
 
   /**
    * Marque le fichier pour quarantaine
-   * 
+   *
    * @param threatDetails - Détails de la menace détectée
    */
   private markForQuarantine(threatDetails?: string): void {
@@ -536,14 +547,14 @@ export class File {
       timestamp: new Date(),
       payload: {
         reason: 'VIRUS_DETECTED',
-        threatDetails
-      }
+        threatDetails,
+      },
     });
   }
 
   /**
    * Enregistre une erreur de traitement
-   * 
+   *
    * @param errorMessage - Message d'erreur
    */
   private logProcessingError(errorMessage: string): void {
@@ -553,14 +564,14 @@ export class File {
       timestamp: new Date(),
       payload: {
         errorMessage,
-        processingStatus: this.metadata.processingStatus
-      }
+        processingStatus: this.metadata.processingStatus,
+      },
     });
   }
 
   /**
    * Ajoute un événement domaine
-   * 
+   *
    * @param event - L'événement à ajouter
    */
   private addDomainEvent(event: DomainEvent): void {
@@ -568,5 +579,9 @@ export class File {
   }
 }
 
-export { FileOperation, VirusScanStatus, ProcessingStatus } from '../../types/file-system.types';
+export {
+  FileOperation,
+  VirusScanStatus,
+  ProcessingStatus,
+} from '../../types/file-system.types';
 export type { FileMetadata } from '../../types/file-system.types';
