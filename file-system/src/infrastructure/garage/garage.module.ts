@@ -36,7 +36,7 @@ export class GarageModule {
         GarageStorageService,
       ],
       exports: [GARAGE_STORAGE_SERVICE, GarageStorageService],
-      global: false,
+      global: true,
     };
   }
 

@@ -5,7 +5,6 @@ import { FileSecurityService } from './services/file-security.service';
 import { FileMetadataService } from './services/file-metadata.service';
 import { FileVersioningService } from './services/file-versioning.service';
 import { PersistenceModule } from '../infrastructure/persistence/persistence.module';
-import { GarageModule } from '../infrastructure/garage/garage.module';
 import { SecurityModule } from '../infrastructure/security/security.module';
 import { MonitoringModule } from '../infrastructure/monitoring/monitoring.module';
 import { QueueModule } from '../infrastructure/queue/queue.module';
@@ -20,7 +19,6 @@ import { RateLimitService } from '../infrastructure/security/rate-limit.service'
   imports: [
     ConfigModule,
     PersistenceModule,
-    GarageModule.forRoot(),
     SecurityModule,
     MonitoringModule,
     forwardRef(() => QueueModule),

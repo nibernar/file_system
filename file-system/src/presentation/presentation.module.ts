@@ -4,6 +4,11 @@ import { TestFilesController } from './controllers/test-files.controller';
 import { FileSecurityService } from '../domain/services/file-security.service';
 import { VirusScannerService } from '../infrastructure/security/virus-scanner.service';
 import { FileValidatorService } from '../infrastructure/security/file-validator.service';
+import { SecurityModule } from '../infrastructure/security/security.module';
+import { FileUploadController } from './controllers/file-upload.controller';
+import { ApplicationModule } from '../application/application.module';
+import { PersistenceModule } from '../infrastructure/persistence/persistence.module';
+import { GarageModule } from '../infrastructure/garage/garage.module';
 
 /**
  * Providers temporaires pour les tests - remplacer par les vrais services plus tard
@@ -65,7 +70,13 @@ const mockStorageService = {
  * définie dans vos spécifications 03-06.
  */
 @Module({
-  controllers: [TestFilesController],
+  imports: [
+    ApplicationModule,
+    PersistenceModule,
+    GarageModule.forRoot(),
+    SecurityModule,
+  ],
+  controllers: [TestFilesController, FileUploadController],
   providers: [
     FileAccessGuard,
     FileSecurityService,

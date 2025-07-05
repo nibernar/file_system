@@ -65,18 +65,32 @@ export class FileValidatorService {
       'MAX_FILE_SIZE',
       FILE_SIZE_LIMITS.MAX_FILE_SIZE_DEFAULT,
     );
-    this.allowedMimeTypes = this.configService.get<string[]>(
-      'ALLOWED_MIME_TYPES',
-      [
+
+    const mimeTypesFromEnv = this.configService.get('ALLOWED_MIME_TYPES');
+
+    if (typeof mimeTypesFromEnv === 'string') {
+      this.allowedMimeTypes = mimeTypesFromEnv
+        .split(',')
+        .map((type) => type.trim());
+    } else if (Array.isArray(mimeTypesFromEnv)) {
+      this.allowedMimeTypes = mimeTypesFromEnv;
+    } else {
+      this.allowedMimeTypes = [
         ...SUPPORTED_MIME_TYPES.IMAGES,
         ...SUPPORTED_MIME_TYPES.DOCUMENTS,
         ...SUPPORTED_MIME_TYPES.TEXT,
         ...SUPPORTED_MIME_TYPES.CODE,
-      ],
-    );
+      ];
+    }
+
     this.strictValidation = this.configService.get<boolean>(
       'STRICT_FILE_VALIDATION',
       true,
+    );
+
+    this.logger.log(
+      `FileValidatorService initialized with ${this.allowedMimeTypes.length} allowed MIME types:`,
+      this.allowedMimeTypes,
     );
   }
 
