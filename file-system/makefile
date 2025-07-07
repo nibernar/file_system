@@ -45,3 +45,7 @@ garage-info:
 	@docker exec garage-dev /garage bucket list
 	@echo "\n🔑 Keys:"
 	@docker exec garage-dev /garage key list
+
+prisma:
+	@echo "prisma studio"
+	npx prisma studio --schema=src/infrastructure/prisma/schema.prisma

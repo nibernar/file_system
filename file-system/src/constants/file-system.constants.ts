@@ -410,7 +410,6 @@ export const FILE_EVENTS = {
   PROCESSING_SLOW: 'performance.processing_slow',
   STORAGE_FULL: 'performance.storage_full',
   CDN_ERROR: 'performance.cdn_error',
-  /** Événements de versioning */
   VERSION_CREATED: 'version.created',
   VERSION_RESTORED: 'version.restored',
 } as const;

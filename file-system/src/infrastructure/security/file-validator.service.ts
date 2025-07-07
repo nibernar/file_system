@@ -232,12 +232,19 @@ export class FileValidatorService {
   }
 
   /**
-   * Validation nom de fichier sécurisé
+   * Validation nom de fichier sécurisé avec normalisation UTF-8
    */
   private validateFilename(
     filename: string,
     validation: FormatValidation,
   ): boolean {
+    const normalizedFilename = filename.normalize('NFC');
+    
+    this.logger.debug(`Filename normalization:`, {
+      original: filename,
+      normalized: normalizedFilename,
+    });
+
     const dangerousPatterns = [
       /\.\./,
       /[<>:"|?*]/,
@@ -247,7 +254,7 @@ export class FileValidatorService {
     ];
 
     for (const pattern of dangerousPatterns) {
-      if (pattern.test(filename)) {
+      if (pattern.test(normalizedFilename)) {
         validation.valid = false;
         validation.errors.push(
           `Filename contains dangerous pattern: ${pattern.source}`,
@@ -256,18 +263,25 @@ export class FileValidatorService {
       }
     }
 
-    if (filename.length > 255) {
+    // Validation longueur (inchangé)
+    if (normalizedFilename.length > 255) {
       validation.valid = false;
       validation.errors.push('Filename too long (max 255 characters)');
       return false;
     }
 
-    if (/[\x00-\x1F\x7F-\x9F]/.test(filename)) {
+    // CORRECTION : Regex plus permissive pour les accents français
+    // Ancienne regex : /[\x00-\x1F\x7F-\x9F]/
+    // Nouvelle regex : exclut les vrais caractères de contrôle dangereux
+    const controlCharPattern = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
+    
+    if (controlCharPattern.test(normalizedFilename)) {
       validation.valid = false;
-      validation.errors.push('Filename contains control characters');
+      validation.errors.push('Filename contains dangerous control characters');
       return false;
     }
 
+    this.logger.debug(`Filename validation passed for: ${normalizedFilename}`);
     return true;
   }
 

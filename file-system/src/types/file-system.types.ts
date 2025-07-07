@@ -291,8 +291,6 @@ export enum SecurityThreat {
   SUSPICIOUS_CONTENT = 'suspicious_content',
   FILE_TOO_LARGE = 'file_too_large',
   RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
-  CODE_INJECTION_ATTEMPT = 'code_injection_attempt',
-  SUSPICIOUS_METADATA = 'suspicious_metadata',
 }
 
 /**
@@ -347,7 +345,7 @@ export interface PresignedUrlOptions {
   expiresIn: number;
   ipRestriction?: string[];
   userAgent?: string;
-  customPermissions?: Permission[];
+  // customPermissions?: Permission[];
   forceDownload?: boolean;
 }
 
@@ -363,17 +361,6 @@ export interface PresignedUrl {
     operations: string[];
   };
   securityToken?: string;
-}
-
-/**
- * Résultat de distribution CDN
- */
-export interface DistributionResult {
-  cdnUrl: string;
-  edgeLocations: string[];
-  cacheControl: string;
-  estimatedPropagationTime: number;
-  distributionId: string;
 }
 
 /**
@@ -450,13 +437,6 @@ export interface CopyResult {
   lastModified: Date;
 }
 
-/**
- * Alias pour la compatibilité avec PresignedUrl existant
- */
-export interface PresignedUrlResult extends PresignedUrl {
-  operation: string;
-}
-
 // ============================================================================
 // TYPES UTILITAIRES - DTOs et Helpers
 // ============================================================================
@@ -531,16 +511,6 @@ export interface StorageUsage {
 }
 
 /**
- * Options pour la suppression de fichier
- */
-export interface DeleteFileOptions {
-  hardDelete?: boolean;
-  reason?: string;
-  retentionDays?: number;
-  notifyUser?: boolean;
-}
-
-/**
  * Résultat d'une conversion de format
  */
 export interface FormatConversionResult {
@@ -552,41 +522,6 @@ export interface FormatConversionResult {
   conversionTime: number;
   success: boolean;
   errorMessage?: string;
-}
-
-/**
- * Permission granulaire pour le contrôle d'accès
- */
-export interface Permission {
-  operation: FileOperation;
-  conditions?: {
-    timeRange?: {
-      start: Date;
-      end: Date;
-    };
-    ipRange?: string[];
-    userRoles?: string[];
-  };
-  granted: boolean;
-}
-
-// ============================================================================
-// TYPES DE CONFIGURATION - Extension pour runtime
-// ============================================================================
-
-/**
- * Configuration runtime pour une instance de service
- */
-export interface ServiceRuntimeConfig {
-  logLevel: 'debug' | 'info' | 'warn' | 'error';
-  metricsEnabled: boolean;
-  developmentMode: boolean;
-  operationTimeout: number;
-  retryPolicy: {
-    maxAttempts: number;
-    backoffMs: number;
-    exponentialBackoff: boolean;
-  };
 }
 
 /**
@@ -711,16 +646,6 @@ export interface FormatValidation {
   fileSignature: string | null;
 }
 
-/**
- * Validation du type MIME
- */
-export interface MimeTypeValidation {
-  valid: boolean;
-  declaredType: string;
-  detectedType: string | null;
-  mismatch: boolean;
-  supportedType: boolean;
-}
 
 /**
  * Validation du contenu de fichier
@@ -853,7 +778,7 @@ export interface ProcessingJobData extends ProcessingJob {
     buffer: Buffer;
     metadata: FileMetadata;
   };
-  runtimeConfig?: ServiceRuntimeConfig;
+  // runtimeConfig?: ServiceRuntimeConfig;
   executionContext?: {
     workerId: string;
     nodeId: string;
@@ -937,7 +862,7 @@ export interface LocalThumbnailResult {
   error?: string;
 }
 
-export interface ConversionResult extends FormatConversionResult {}
+// export interface ConversionResult extends FormatConversionResult {}
 
 export interface ThumbnailResult {
   url: string;

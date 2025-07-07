@@ -16,7 +16,6 @@ import { BullModule, BullModuleOptions } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue, QueueOptions, JobOptions } from 'bull';
-import { ProcessingJobType } from '../../types/file-system.types';
 
 /**
  * Nom de la queue principale de traitement de fichiers
@@ -356,11 +355,11 @@ export class FileProcessingQueueConfigFactory {
 
       defaultJobOptions: {
         removeOnComplete: {
-          age: 24 * 3600, // 24h par défaut
+          age: 24 * 3600,
           count: 1000,
         },
         removeOnFail: {
-          age: 7 * 24 * 3600, // 7 jours par défaut
+          age: 7 * 24 * 3600,
           count: 5000,
         },
         attempts: 3,
@@ -370,16 +369,14 @@ export class FileProcessingQueueConfigFactory {
         },
       },
 
-      // Rate limiter pour éviter la surcharge
       rateLimiter: {
-        max: 100, // Max 100 jobs
-        duration: 60000, // Par minute
+        max: 100,
+        duration: 60000,
         bounceBack: false,
       },
 
-      // Configuration des métriques
       metrics: {
-        collectInterval: 5000, // 5 secondes
+        collectInterval: 5000,
         maxDataPoints: 1000,
       },
     };
@@ -397,8 +394,8 @@ export class FileProcessingQueueConfigFactory {
       redis: config.redis,
       defaultJobOptions: config.defaultJobOptions,
       settings: {
-        stalledInterval: 30000, // Vérifier les jobs bloqués toutes les 30s
-        maxStalledCount: 3, // Max 3 fois bloqué avant échec
+        stalledInterval: 30000,
+        maxStalledCount: 3,
       },
     };
   }
@@ -433,8 +430,6 @@ export class QueueUtils {
     basePriority: number,
     queueSize: number,
   ): number {
-    // Si la queue est chargée, augmenter légèrement la priorité
-    // des jobs vraiment prioritaires
     if (queueSize > 100 && basePriority >= 7) {
       return Math.min(10, basePriority + 1);
     }
@@ -450,16 +445,15 @@ export class QueueUtils {
    * @returns Délai en millisecondes (0 si pas de délai)
    */
   static getDelayForLoad(jobType: string, currentLoad: number): number {
-    // Jobs de maintenance peuvent être retardés si charge élevée
     if (jobType === JOB_TYPES.CLEANUP_ARCHIVE && currentLoad > 0.8) {
-      return 300000; // Retarder de 5 minutes
+      return 300000;
     }
 
     if (jobType === JOB_TYPES.EXTRACT_METADATA && currentLoad > 0.9) {
-      return 60000; // Retarder de 1 minute
+      return 60000;
     }
 
-    return 0; // Pas de délai
+    return 0;
   }
 
   /**
@@ -480,7 +474,6 @@ export class QueueUtils {
     return {
       ...defaults,
       ...options,
-      // S'assurer que certaines valeurs restent dans des limites raisonnables
       priority: Math.max(
         0,
         Math.min(10, options.priority || defaults.priority || 5),
@@ -509,13 +502,9 @@ export interface QueueStatistics {
   failed: number;
   delayed: number;
   paused: boolean;
-
-  // Métriques de performance
   avgProcessingTime: number;
   avgWaitTime: number;
   successRate: number;
-
-  // Par type de job
   jobTypeStats: Record<
     string,
     {
