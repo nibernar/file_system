@@ -1,4 +1,160 @@
 # backlog de developpement - file systeme
+## TreeView - File System Microservice
+
+```
+file-system/
+├── 📄 .env                                                 # Variables d'environnement
+├── 📄 package.json                                         # Dépendances npm
+├── 📄 tsconfig.json                                        # Configuration TypeScript
+├── 📄 jest.config.js                                       # Configuration Jest
+├── 📄 docker-compose.yml                                   # Services locaux (Redis, Garage)
+├── 📄 Dockerfile                                           # Image Docker
+├── 📄 README.md                                            # Documentation projet
+├── 📄 TreeView.md                                          # Ce fichier - Vue d'ensemble
+│
+└── 📁 src/                                                 # Code source principal
+    ├── 📄 main.ts                                          # 🚀 Point d'entrée Bootstrap
+    ├── 📄 app.module.ts                                    # 🏗️ Module racine NestJS
+    ├── 📄 app.controller.ts                                # 🎮 Controller principal (tests)
+    ├── 📄 app.service.ts                                   # 🔧 Service principal basique
+    ├── 📄 app.controller.spec.ts                           # ✅ Tests controller principal
+    │
+    ├── 📁 config/                                          # ⚙️ Configuration centralisée
+    │   ├── 📄 file-system.config.ts                        # Configuration principale validée
+    │   └── 📁 __tests__/                                   # Tests configuration
+    │       └── 📄 file-system.config.spec.ts               # Tests validation config
+    │
+    ├── 📁 types/                                           # 📐 Types et interfaces TypeScript
+    │   ├── 📄 file-system.types.ts                         # Types complets du système
+    │   └── 📁 __tests__/                                   # Tests types
+    │       └── 📄 file-system.types.spec.ts                # Tests type guards
+    │
+    ├── 📁 constants/                                       # 🔧 Constantes et limitations
+    │   ├── 📄 file-system.constants.ts                     # Constantes techniques
+    │   └── 📁 __tests__/                                   # Tests constantes
+    │       └── 📄 file-system.constants.spec.ts            # Tests helpers constantes
+    │
+    ├── 📁 exceptions/                                      # ⚠️ Exceptions métier
+    │   └── 📄 file-system.exceptions.ts                    # Exceptions spécialisées
+    │
+    ├── 📁 infrastructure/                                  # 🏗️ Couche infrastructure
+    │   ├── 📁 config/                                      # Configuration infrastructure
+    │   │   └── 📄 infrastructure.config.ts                 # Config services externes
+    │   │
+    │   ├── 📁 garage/                                      # 🗄️ Service storage Garage S3
+    │   │   ├── 📄 garage-storage.service.ts                # Service principal Garage S3
+    │   │   ├── 📄 garage-storage.interface.ts              # Interface storage operations
+    │   │   ├── 📄 garage.module.ts                         # Module Garage avec config
+    │   │   └── 📁 __tests__/                               # Tests Garage
+    │   │       ├── 📄 garage-storage.service.spec.ts       # Tests unitaires
+    │   │       └── 📄 garage-storage.integration.spec.ts   # Tests intégration
+    │   │
+    │   ├── 📁 cdn/                                         # 🌐 Service CDN distribution
+    │   │   ├── 📄 cdn.service.ts                           # Service distribution CDN
+    │   │   ├── 📄 cache-manager.service.ts                 # Gestionnaire cache intelligent
+    │   │   └── 📄 cdn.module.ts                            # Module CDN
+    │   │
+    │   ├── 📁 processing/                                  # 🔄 Traitement de fichiers
+    │   │   ├── 📄 processing.module.ts                     # Module traitement
+    │   │   ├── 📄 image-processor.service.ts               # Traitement images (Sharp)
+    │   │   ├── 📄 pdf-processor.service.ts                 # Traitement PDF (Puppeteer)
+    │   │   ├── 📄 document-processor.service.ts            # Traitement documents
+    │   │   └── 📁 __tests__/                               # Tests processing
+    │   │       ├── 📄 image-processor.service.spec.ts      # Tests images
+    │   │       ├── 📄 pdf-processor.service.spec.ts        # Tests PDF
+    │   │       └── 📄 document-processor.service.spec.ts   # Tests documents
+    │   │
+    │   ├── 📁 security/                                    # 🛡️ Sécurité et validation
+    │   │   ├── 📄 security.module.ts                       # Module sécurité
+    │   │   ├── 📄 virus-scanner.service.ts                 # Scanner antivirus (ClamAV)
+    │   │   ├── 📄 file-validator.service.ts                # Validation format/contenu
+    │   │   ├── 📄 ip-intelligence.service.ts               # Intelligence IP/géolocation
+    │   │   ├── 📄 rate-limit.service.ts                    # Service rate limiting
+    │   │   └── 📁 __tests__/                               # Tests sécurité
+    │   │       └── 📄 virus-scanner.service.spec.ts        # Tests antivirus
+    │   │
+    │   ├── 📁 queue/                                       # 📋 Queue Bull/Redis
+    │   │   ├── 📄 queue.module.ts                          # Module queue avec config
+    │   │   ├── 📄 file-processing.queue.ts                 # Définition queue processing
+    │   │   ├── 📄 file-processing.processor.ts             # Worker traitement async
+    │   │   ├── 📄 bull-board.service.ts                    # Service monitoring queue
+    │   │   └── 📁 __tests__/                               # Tests queue
+    │   │       └── 📄 file-processing.processor.spec.ts    # Tests worker
+    │   │
+    │   ├── 📁 cache/                                       # 🚀 Cache Redis
+    │   │   ├── 📄 cache.module.ts                          # Module cache global
+    │   │   └── 📄 cache.service.ts                         # Service cache spécialisé
+    │   │
+    │   ├── 📁 monitoring/                                  # 📊 Métriques et monitoring
+    │   │   ├── 📄 monitoring.module.ts                     # Module monitoring
+    │   │   ├── 📄 metrics.service.ts                       # Service métriques Prometheus
+    │   │   ├── 📄 audit.service.ts                         # Service audit trail
+    │   │   └── 📄 health-check.service.ts                  # Service health checks
+    │   │
+    │   ├── 📁 persistence/                                 # 💾 Persistence et repositories
+    │   │   ├── 📄 persistence.module.ts                    # Module persistence
+    │   │   └── 📄 file-metadata.repository.impl.ts         # Implémentation repository
+    │   │
+    │   └── 📁 prisma/                                      # 🗃️ ORM Prisma
+    │       ├── 📄 prisma.module.ts                         # Module Prisma
+    │       └── 📄 prisma.service.ts                        # Service Prisma avec config
+    │
+    ├── 📁 domain/                                          # 🎯 Couche domaine (business logic)
+    │   ├── 📄 domain.module.ts                             # Module domaine principal
+    │   │
+    │   ├── 📁 entities/                                    # 🏛️ Entités métier
+    │   │   ├── 📄 file.entity.ts                           # Entité File principale
+    │   │   └── 📁 __tests__/                               # Tests entités
+    │   │       └── 📄 file.entity.spec.ts                  # Tests entité File
+    │   │
+    │   ├── 📁 services/                                    # ⚙️ Services domaine
+    │   │   ├── 📄 file-security.service.ts                 # Service sécurité métier
+    │   │   ├── 📄 file-processing.service.ts               # Service traitement métier
+    │   │   ├── 📄 file-metadata.service.ts                 # Service métadonnées
+    │   │   └── 📁 __tests__/                               # Tests services domaine
+    │   │       ├── 📄 file-security.service.spec.ts        # Tests sécurité
+    │   │       └── 📄 file-processing.service.spec.ts      # Tests processing
+    │   │
+    │   └── 📁 repositories/                                # 📚 Interfaces repositories
+    │       └── 📄 file-metadata.repository.ts              # Interface repository métadonnées
+    │
+    ├── 📁 application/                                     # 🚀 Couche application
+    │   ├── 📄 application.module.ts                        # Module application
+    │   └── 📁 use-cases/                                   # 🎯 Cas d'usage métier
+    │       ├── 📄 process-file-async.use-case.ts           # Use case traitement async
+    │       └── 📁 __tests__/                               # Tests use cases
+    │           └── 📄 process-file-async.use-case.spec.ts  # Tests async processing
+    │
+    ├── 📁 presentation/                                    # 🌐 Couche présentation (API)
+    │   ├── 📄 presentation.module.ts                       # Module présentation
+    │   │
+    │   ├── 📁 controllers/                                 # 🎮 Controllers REST
+    │   │   ├── 📄 file-upload.controller.ts                # Controller upload fichiers
+    │   │   └── 📄 test-files.controller.ts                 # Controller tests développement
+    │   │
+    │   ├── 📁 middleware/                                  # 🔒 Middleware HTTP
+    │   │   ├── 📄 file-security.middleware.ts              # Middleware sécurité requests
+    │   │   └── 📁 __tests__/                               # Tests middleware
+    │   │       └── 📄 file-security.middleware.spec.ts     # Tests sécurité middleware
+    │   │
+    │   ├── 📁 guards/                                      # 🛡️ Guards NestJS
+    │   │   ├── 📄 file-access.guard.ts                     # Guard autorisation fichiers
+    │   │   └── 📁 __tests__/                               # Tests guards
+    │   │       └── 📄 file-access.guard.spec.ts            # Tests autorisation
+    │   │
+    │   ├── 📁 interceptors/                                # 📡 Interceptors
+    │   │   ├── 📄 file-audit.interceptor.ts                # Interceptor audit trail
+    │   │   └── 📁 __tests__/                               # Tests interceptors
+    │   │       └── 📄 file-audit.interceptor.spec.ts       # Tests audit
+    │   │
+    │   └── 📁 decorators/                                  # 🏷️ Decorators custom
+    │       └── 📄 file-operation.decorator.ts              # Decorator opérations fichiers
+    │
+    └── 📁 __tests__/                                       # 🧪 Tests globaux
+        └── 📄 test-setup.ts                                # Configuration tests globale
+```
+
+---
 
 ## 🚀 Initialisation du projet
   Création du projet NestJS
@@ -15,10 +171,10 @@
  ` npm install --save-dev jest @types/jest ts-jest`
   `npm install --save-dev @nestjs/testing`
 
-# Validation et transformation des données
+### Validation et transformation des données
   `npm install class-validator class-transformer`
 
-# Configuration centralisée
+### Configuration centralisée
   `npm install @nestjs/config`
   Packages installés :
 
@@ -31,12 +187,12 @@
   ```
 
 
-# 🗄️ Storage Garage S3
+### 🗄️ Storage Garage S3
   Objectif : Interface avec Garage S3 pour stockage d'objets autonome
   bash# SDK AWS pour compatibilité S3
   `npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner @aws-sdk/lib-storage`
 
-# Génération d'UUID pour identifiants uniques
+### Génération d'UUID pour identifiants uniques
   `npm install uuid`
   `npm install --save-dev @types/uuid`
   Packages installés :
@@ -49,12 +205,12 @@
   ```
 
 
-# 💾 Base de données et cache
+### 💾 Base de données et cache
   Objectif : Persistence des métadonnées et cache haute performance
   bash# ORM Prisma pour PostgreSQL
   `npm install @prisma/client prisma`
 
-# Cache Redis intégré à NestJS
+### Cache Redis intégré à NestJS
   `npm install @nestjs/cache-manager cache-manager`
   `npm install cache-manager-redis-store`
   `npm install --save-dev @types/cache-manager`
@@ -66,13 +222,13 @@
   `@types/cache-manager` **Info :**- Types TypeScript cache
 
 
-# 📋 Queue et traitement asynchrone
+### 📋 Queue et traitement asynchrone
   Objectif : Traitement asynchrone des fichiers avec Bull/Redis
   bash# Queue Bull pour Redis
   `npm install @nestjs/bull bull`
   `npm install --save-dev @types/bull`
 
-# Interface de monitoring des queues
+### Interface de monitoring des queues
 npm install @bull-board/express @bull-board/api
 Packages installés :
 
@@ -81,12 +237,12 @@ Packages installés :
 `@bull-board/express, @bull-board/api` **Info :** - Interface web monitoring
 
 
-# 🌐 APIs et communication
+### 🌐 APIs et communication
   Objectif : Client HTTP pour services externes et documentation API
   bash# Client HTTP pour CDN et services externes
   `npm install @nestjs/axios axios`
 
-# Documentation Swagger automatique
+### Documentation Swagger automatique
  `npm install @nestjs/swagger swagger-ui-express`
   Packages installés :
 
@@ -95,12 +251,12 @@ Packages installés :
   `swagger-ui-express` **Info :** - Interface Swagger UI
 
 
-# 🖼️ Traitement de fichiers
+### 🖼️ Traitement de fichiers
   Objectif : Traitement, optimisation et conversion de fichiers
   bash# Traitement d'images haute performance
   `npm install sharp`
 
-# Détection d'encodage et conversion de texte
+### Détection d'encodage et conversion de texte
   `npm install iconv-lite chardet`
   `npm install --save-dev @types/iconv-lite` **Info :** _ (deprecated - types inclus)
   Packages installés :
@@ -110,7 +266,7 @@ Packages installés :
   `chardet` **Info :** - Détection automatique d'encodage
 
 
-# 🗃️ ORM et base de données (optionnel)
+### 🗃️ ORM et base de données (optionnel)
   Objectif : Alternative ORM pour relations complexes
   bash# TypeORM pour relations avancées (si besoin)
   `npm install @nestjs/typeorm typeorm`
@@ -119,7 +275,7 @@ Packages installés :
   `@nestjs/typeorm, typeorm` **Info :** - ORM alternatif pour cas complexes
 
 
-# 📤 Upload de fichiers
+### 📤 Upload de fichiers
   Objectif : Gestion native des uploads multipart
   bash# Support upload fichiers Express
   `npm install @nestjs/platform-express multer`
@@ -128,163 +284,6 @@ Packages installés :
 
   `@nestjs/platform-express`**Info :** - Plateforme Express pour NestJS
   `multer + @types/multer`**Info :** - Middleware upload fichiers
-
-# TreeView - File System Microservice
-
-```
-file-system/
-├── 📄 .env                                    # Variables d'environnement
-├── 📄 package.json                            # Dépendances npm
-├── 📄 tsconfig.json                           # Configuration TypeScript
-├── 📄 jest.config.js                          # Configuration Jest
-├── 📄 docker-compose.yml                      # Services locaux (Redis, Garage)
-├── 📄 Dockerfile                              # Image Docker
-├── 📄 README.md                               # Documentation projet
-├── 📄 TreeView.md                             # Ce fichier - Vue d'ensemble
-│
-└── 📁 src/                                    # Code source principal
-    ├── 📄 main.ts                             # 🚀 Point d'entrée Bootstrap
-    ├── 📄 app.module.ts                       # 🏗️ Module racine NestJS
-    ├── 📄 app.controller.ts                   # 🎮 Controller principal (tests)
-    ├── 📄 app.service.ts                      # 🔧 Service principal basique
-    ├── 📄 app.controller.spec.ts              # ✅ Tests controller principal
-    │
-    ├── 📁 config/                             # ⚙️ Configuration centralisée
-    │   ├── 📄 file-system.config.ts           # Configuration principale validée
-    │   └── 📁 __tests__/                      # Tests configuration
-    │       └── 📄 file-system.config.spec.ts  # Tests validation config
-    │
-    ├── 📁 types/                              # 📐 Types et interfaces TypeScript
-    │   ├── 📄 file-system.types.ts            # Types complets du système
-    │   └── 📁 __tests__/                      # Tests types
-    │       └── 📄 file-system.types.spec.ts   # Tests type guards
-    │
-    ├── 📁 constants/                          # 🔧 Constantes et limitations
-    │   ├── 📄 file-system.constants.ts        # Constantes techniques
-    │   └── 📁 __tests__/                      # Tests constantes
-    │       └── 📄 file-system.constants.spec.ts # Tests helpers constantes
-    │
-    ├── 📁 exceptions/                         # ⚠️ Exceptions métier
-    │   └── 📄 file-system.exceptions.ts       # Exceptions spécialisées
-    │
-    ├── 📁 infrastructure/                     # 🏗️ Couche infrastructure
-    │   ├── 📁 config/                         # Configuration infrastructure
-    │   │   └── 📄 infrastructure.config.ts    # Config services externes
-    │   │
-    │   ├── 📁 garage/                         # 🗄️ Service storage Garage S3
-    │   │   ├── 📄 garage-storage.service.ts   # Service principal Garage S3
-    │   │   ├── 📄 garage-storage.interface.ts # Interface storage operations
-    │   │   ├── 📄 garage.module.ts            # Module Garage avec config
-    │   │   └── 📁 __tests__/                  # Tests Garage
-    │   │       ├── 📄 garage-storage.service.spec.ts      # Tests unitaires
-    │   │       └── 📄 garage-storage.integration.spec.ts  # Tests intégration
-    │   │
-    │   ├── 📁 cdn/                            # 🌐 Service CDN distribution
-    │   │   ├── 📄 cdn.service.ts              # Service distribution CDN
-    │   │   ├── 📄 cache-manager.service.ts    # Gestionnaire cache intelligent
-    │   │   └── 📄 cdn.module.ts               # Module CDN
-    │   │
-    │   ├── 📁 processing/                     # 🔄 Traitement de fichiers
-    │   │   ├── 📄 processing.module.ts        # Module traitement
-    │   │   ├── 📄 image-processor.service.ts  # Traitement images (Sharp)
-    │   │   ├── 📄 pdf-processor.service.ts    # Traitement PDF (Puppeteer)
-    │   │   ├── 📄 document-processor.service.ts # Traitement documents
-    │   │   └── 📁 __tests__/                  # Tests processing
-    │   │       ├── 📄 image-processor.service.spec.ts     # Tests images
-    │   │       ├── 📄 pdf-processor.service.spec.ts       # Tests PDF
-    │   │       └── 📄 document-processor.service.spec.ts  # Tests documents
-    │   │
-    │   ├── 📁 security/                       # 🛡️ Sécurité et validation
-    │   │   ├── 📄 security.module.ts          # Module sécurité
-    │   │   ├── 📄 virus-scanner.service.ts    # Scanner antivirus (ClamAV)
-    │   │   ├── 📄 file-validator.service.ts   # Validation format/contenu
-    │   │   ├── 📄 ip-intelligence.service.ts  # Intelligence IP/géolocation
-    │   │   ├── 📄 rate-limit.service.ts       # Service rate limiting
-    │   │   └── 📁 __tests__/                  # Tests sécurité
-    │   │       └── 📄 virus-scanner.service.spec.ts       # Tests antivirus
-    │   │
-    │   ├── 📁 queue/                          # 📋 Queue Bull/Redis
-    │   │   ├── 📄 queue.module.ts             # Module queue avec config
-    │   │   ├── 📄 file-processing.queue.ts    # Définition queue processing
-    │   │   ├── 📄 file-processing.processor.ts # Worker traitement async
-    │   │   ├── 📄 bull-board.service.ts       # Service monitoring queue
-    │   │   └── 📁 __tests__/                  # Tests queue
-    │   │       └── 📄 file-processing.processor.spec.ts   # Tests worker
-    │   │
-    │   ├── 📁 cache/                          # 🚀 Cache Redis
-    │   │   ├── 📄 cache.module.ts             # Module cache global
-    │   │   └── 📄 cache.service.ts            # Service cache spécialisé
-    │   │
-    │   ├── 📁 monitoring/                     # 📊 Métriques et monitoring
-    │   │   ├── 📄 monitoring.module.ts        # Module monitoring
-    │   │   ├── 📄 metrics.service.ts          # Service métriques Prometheus
-    │   │   ├── 📄 audit.service.ts            # Service audit trail
-    │   │   └── 📄 health-check.service.ts     # Service health checks
-    │   │
-    │   ├── 📁 persistence/                    # 💾 Persistence et repositories
-    │   │   ├── 📄 persistence.module.ts       # Module persistence
-    │   │   └── 📄 file-metadata.repository.impl.ts # Implémentation repository
-    │   │
-    │   └── 📁 prisma/                         # 🗃️ ORM Prisma
-    │       ├── 📄 prisma.module.ts            # Module Prisma
-    │       └── 📄 prisma.service.ts           # Service Prisma avec config
-    │
-    ├── 📁 domain/                             # 🎯 Couche domaine (business logic)
-    │   ├── 📄 domain.module.ts                # Module domaine principal
-    │   │
-    │   ├── 📁 entities/                       # 🏛️ Entités métier
-    │   │   ├── 📄 file.entity.ts              # Entité File principale
-    │   │   └── 📁 __tests__/                  # Tests entités
-    │   │       └── 📄 file.entity.spec.ts     # Tests entité File
-    │   │
-    │   ├── 📁 services/                       # ⚙️ Services domaine
-    │   │   ├── 📄 file-security.service.ts    # Service sécurité métier
-    │   │   ├── 📄 file-processing.service.ts  # Service traitement métier
-    │   │   ├── 📄 file-metadata.service.ts    # Service métadonnées
-    │   │   └── 📁 __tests__/                  # Tests services domaine
-    │   │       ├── 📄 file-security.service.spec.ts       # Tests sécurité
-    │   │       └── 📄 file-processing.service.spec.ts     # Tests processing
-    │   │
-    │   └── 📁 repositories/                   # 📚 Interfaces repositories
-    │       └── 📄 file-metadata.repository.ts # Interface repository métadonnées
-    │
-    ├── 📁 application/                        # 🚀 Couche application
-    │   ├── 📄 application.module.ts           # Module application
-    │   └── 📁 use-cases/                      # 🎯 Cas d'usage métier
-    │       ├── 📄 process-file-async.use-case.ts # Use case traitement async
-    │       └── 📁 __tests__/                  # Tests use cases
-    │           └── 📄 process-file-async.use-case.spec.ts # Tests async processing
-    │
-    ├── 📁 presentation/                       # 🌐 Couche présentation (API)
-    │   ├── 📄 presentation.module.ts          # Module présentation
-    │   │
-    │   ├── 📁 controllers/                    # 🎮 Controllers REST
-    │   │   ├── 📄 file-upload.controller.ts   # Controller upload fichiers
-    │   │   └── 📄 test-files.controller.ts    # Controller tests développement
-    │   │
-    │   ├── 📁 middleware/                     # 🔒 Middleware HTTP
-    │   │   ├── 📄 file-security.middleware.ts # Middleware sécurité requests
-    │   │   └── 📁 __tests__/                  # Tests middleware
-    │   │       └── 📄 file-security.middleware.spec.ts    # Tests sécurité middleware
-    │   │
-    │   ├── 📁 guards/                         # 🛡️ Guards NestJS
-    │   │   ├── 📄 file-access.guard.ts        # Guard autorisation fichiers
-    │   │   └── 📁 __tests__/                  # Tests guards
-    │   │       └── 📄 file-access.guard.spec.ts           # Tests autorisation
-    │   │
-    │   ├── 📁 interceptors/                   # 📡 Interceptors
-    │   │   ├── 📄 file-audit.interceptor.ts   # Interceptor audit trail
-    │   │   └── 📁 __tests__/                  # Tests interceptors
-    │   │       └── 📄 file-audit.interceptor.spec.ts      # Tests audit
-    │   │
-    │   └── 📁 decorators/                     # 🏷️ Decorators custom
-    │       └── 📄 file-operation.decorator.ts # Decorator opérations fichiers
-    │
-    └── 📁 __tests__/                          # 🧪 Tests globaux
-        └── 📄 test-setup.ts                   # Configuration tests globale
-```
-
----
 
 ## 📄 Fichiers racine et configuration
 
